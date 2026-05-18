@@ -430,6 +430,27 @@ a { color: inherit; text-decoration: none; }
 
     </div>
 
+    <!-- TABEL DISTRIBUSI SKU PER CHANNEL -->
+    <div class="card" style="margin-top:12px">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Detail Penjualan per Produk / Channel</div>
+          <div class="card-sub">Qty & nominal per SKU berdasarkan channel — sesuai filter aktif</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--text2)">Urutkan:</span>
+          <select class="filter-select" id="skuSortBy" onchange="renderTabelSKUChannel(getFilteredData())" style="padding:5px 24px 5px 8px">
+            <option value="qty">Qty Tertinggi</option>
+            <option value="nominal">Nominal Tertinggi</option>
+            <option value="nama">Nama SKU (A-Z)</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="tabelSKUChannel" style="width:100%;border-collapse:collapse;font-size:12px"></table>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -579,6 +600,7 @@ function renderAll() {
   renderSalesList(data, 'retail', activeDepo.retail);
   renderSalesList(data, 'ws', activeDepo.ws);
   renderChartDepoHarian(data);
+  renderTabelSKUChannel(data);
 }
 
 function renderTopProduk(data) {
@@ -758,6 +780,121 @@ function renderChartDepoHarian(data) {
       }
     }
   });
+}
+
+function renderTabelSKUChannel(data) {
+  const channels = ['RETAIL','GROSIR','AGEN'];
+  const chColors = { RETAIL:'var(--green)', GROSIR:'var(--accent)', AGEN:'var(--purple)' };
+  const chBg = { RETAIL:'rgba(22,163,74,.08)', GROSIR:'rgba(37,99,235,.08)', AGEN:'rgba(147,51,234,.08)' };
+
+  // Build pivot SKU -> channel -> {qty, nominal}
+  const pivot = {};
+  data.forEach(r => {
+    if (!pivot[r.namaBarang]) pivot[r.namaBarang] = {};
+    if (!pivot[r.namaBarang][r.channel]) pivot[r.namaBarang][r.channel] = { qty:0, nominal:0 };
+    pivot[r.namaBarang][r.channel].qty += r.qtyJual;
+    pivot[r.namaBarang][r.channel].nominal += r.total;
+  });
+
+  // Total per SKU
+  const skuList = Object.keys(pivot).map(sku => {
+    const totalQty = channels.reduce((s,ch) => s+(pivot[sku][ch]?.qty||0), 0);
+    const totalNominal = channels.reduce((s,ch) => s+(pivot[sku][ch]?.nominal||0), 0);
+    return { sku, totalQty, totalNominal };
+  });
+
+  // Sort
+  const sortBy = document.getElementById('skuSortBy').value;
+  skuList.sort((a,b) => {
+    if (sortBy==='qty') return b.totalQty - a.totalQty;
+    if (sortBy==='nominal') return b.totalNominal - a.totalNominal;
+    return a.sku.localeCompare(b.sku);
+  });
+
+  // Grand total per channel
+  const chTotal = {};
+  channels.forEach(ch => { chTotal[ch] = { qty:0, nominal:0 }; });
+  data.forEach(r => {
+    if (chTotal[r.channel]) {
+      chTotal[r.channel].qty += r.qtyJual;
+      chTotal[r.channel].nominal += r.total;
+    }
+  });
+  const grandQty = channels.reduce((s,ch) => s+chTotal[ch].qty, 0);
+  const grandNominal = channels.reduce((s,ch) => s+chTotal[ch].nominal, 0);
+
+  // Render
+  const thBase = `background:var(--surface2);color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:9px 12px;border:1px solid var(--border);white-space:nowrap;text-align:center;`;
+  const thLeft = thBase + `text-align:left;position:sticky;left:0;z-index:2;min-width:160px;`;
+
+  let html = `<thead>
+    <tr>
+      <th style="${thLeft}">SKU</th>
+      ${channels.map(ch => `
+        <th colspan="2" style="${thBase}background:${chBg[ch]};color:${chColors[ch]}">${ch}</th>
+      `).join('')}
+      <th colspan="2" style="${thBase}background:var(--surface3);color:var(--text)">TOTAL</th>
+    </tr>
+    <tr>
+      <th style="${thLeft}"></th>
+      ${channels.map(() => `
+        <th style="${thBase}">QTY</th>
+        <th style="${thBase}">NOMINAL</th>
+      `).join('')}
+      <th style="${thBase}">QTY</th>
+      <th style="${thBase}">NOMINAL</th>
+    </tr>
+  </thead><tbody>`;
+
+  const tdBase = `padding:8px 12px;border:1px solid var(--border);text-align:center;font-size:12px;white-space:nowrap;`;
+  const tdLeft = tdBase + `text-align:left;font-weight:600;position:sticky;left:0;background:var(--surface);z-index:1;`;
+
+  skuList.forEach(({ sku, totalQty, totalNominal }) => {
+    html += `<tr onmouseenter="this.querySelectorAll('td').forEach(td=>td.style.background=td.dataset.hov||'#f4f6fb')" onmouseleave="this.querySelectorAll('td').forEach(td=>td.style.background=td.dataset.bg||'')" >
+      <td style="${tdLeft}">${sku}</td>
+      ${channels.map(ch => {
+        const q = pivot[sku][ch]?.qty || 0;
+        const n = pivot[sku][ch]?.nominal || 0;
+        const hasVal = q > 0;
+        return `
+          <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-weight:${hasVal?'600':'400'};color:${hasVal?'var(--text)':'var(--text3)'}">
+            ${hasVal ? q.toLocaleString('id-ID') : '—'}
+          </td>
+          <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-size:11px;color:${hasVal?chColors[ch]:'var(--text3)'};font-weight:${hasVal?'500':'400'}">
+            ${hasVal ? fmtShort(n) : '—'}
+          </td>
+        `;
+      }).join('')}
+      <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text)">
+        ${totalQty.toLocaleString('id-ID')}
+      </td>
+      <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent)">
+        ${fmtShort(totalNominal)}
+      </td>
+    </tr>`;
+  });
+
+  // Row total
+  html += `<tr style="background:var(--surface2)">
+    <td style="${tdLeft}background:var(--surface2)!important;color:var(--accent)">TOTAL</td>
+    ${channels.map(ch => `
+      <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-weight:700;color:${chColors[ch]};border-top:2px solid var(--border2)">
+        ${chTotal[ch].qty.toLocaleString('id-ID')}
+      </td>
+      <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${chColors[ch]};border-top:2px solid var(--border2)">
+        ${fmtShort(chTotal[ch].nominal)}
+      </td>
+    `).join('')}
+    <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);border-top:2px solid var(--border2)">
+      ${grandQty.toLocaleString('id-ID')}
+    </td>
+    <td style="${tdBase}font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);border-top:2px solid var(--border2)">
+      ${fmtShort(grandNominal)}
+    </td>
+  </tr>`;
+
+  html += '</tbody>';
+  document.getElementById('tabelSKUChannel').innerHTML = html;
 }
 
 ['filterFrom','filterTo','filterDepo','filterChannel','filterSalesman'].forEach(id => {
