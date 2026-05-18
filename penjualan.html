@@ -566,6 +566,8 @@ async function loadData() {
         hargaPabrik: parseNum(row[k[8]] || row['HARGA PABRIK']),
         qtyJual: parseNum(row[k[11]] || row['QTY JUAL']),
         total: parseNum(row[k[12]] || row['TOTAL']),
+        total: parseNum(colTotal),
+        totalCalculated: hargaJual * qtyJual,
         margin: parseNum(row[k[13]] || row['MARGIN']),
         keterangan: (row[k[14]] || row['KETERANGAN'] || '').toString().trim().toUpperCase(),
         depo: (row[k[15]] || row['DEPO'] || '').toString().trim().toUpperCase(),
