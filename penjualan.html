@@ -518,7 +518,13 @@ function fmtShort(n) {
   return "Rp " + Math.round(n).toLocaleString('id-ID');
 }
 
-function parseNum(s) { return parseFloat((s||'').toString().replace(/[^0-9.-]/g,'')) || 0; }
+function parseNum(s) {
+  if (!s || s === '') return 0;
+  // Hapus semua koma (pemisah ribuan) lalu konversi ke angka
+  let cleaned = s.toString().replace(/,/g, '');
+  let result = parseFloat(cleaned);
+  return isNaN(result) ? 0 : result;
+}
 
 function parseDate(s) {
   if (!s) return null;
