@@ -152,7 +152,7 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
 /* MODAL */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease; }
 .modal-overlay.active { display: flex; opacity: 1; }
-.modal-container { background: var(--surface); border-radius: 14px; width: 90%; max-width: 800px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; overflow: hidden; }
+.modal-container { background: var(--surface); border-radius: 14px; width: 90%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; overflow: hidden; }
 .modal-overlay.active .modal-container { transform: scale(1); }
 .modal-header { padding: 16px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
 .modal-header h2 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0; }
@@ -499,33 +499,55 @@ function openModal(type) {
   else if (type === 'qty') {
     title.innerHTML = '📦 Detail Produk Terjual';
     const byProduk = {};
-    dataPenjualan.forEach(r => { byProduk[r.namaBarang] = (byProduk[r.namaBarang] || 0) + r.qtyJual; });
-    const sorted = Object.entries(byProduk).sort((a,b) => b[1] - a[1]);
-    const totalQty = sorted.reduce((s, [_,q]) => s + q, 0);
+    dataPenjualan.forEach(r => { 
+      if (!byProduk[r.namaBarang]) byProduk[r.namaBarang] = { qty: 0, total: 0 };
+      byProduk[r.namaBarang].qty += r.qtyJual;
+      byProduk[r.namaBarang].total += r.total;
+    });
+    const sorted = Object.entries(byProduk).sort((a,b) => b[1].qty - a[1].qty);
+    const totalQty = sorted.reduce((s, [_, v]) => s + v.qty, 0);
+    const totalNominal = sorted.reduce((s, [_, v]) => s + v.total, 0);
     
-    summaryDiv.innerHTML = `<div class="modal-summary-item"><span class="label">Total Qty Terjual</span><span class="value">${totalQty.toLocaleString('id-ID')}</span><span class="unit">pcs</span></div>`;
+    summaryDiv.innerHTML = `
+      <div class="modal-summary-item"><span class="label">Total Qty Terjual</span><span class="value">${totalQty.toLocaleString('id-ID')}</span><span class="unit">pcs</span></div>
+      <div class="modal-summary-item"><span class="label">Total Penjualan</span><span class="value">${fmtFull(totalNominal)}</span></div>
+    `;
     contentDiv.innerHTML = `
       <table>
-        <thead><tr><th>#</th><th>Nama Barang</th><th>Qty Terjual</th><th>%</th></tr></thead>
+        <thead><tr><th>#</th><th>Nama Barang</th><th>Qty Terjual</th><th>Total Penjualan</th><th>% Qty</th></tr></thead>
         <tbody>
-          ${sorted.map(([nama, qty], i) => `<tr><td>${i+1}</td><td>${nama}</td><td>${qty.toLocaleString('id-ID')}</td><td>${(qty/totalQty*100).toFixed(1)}%</td></tr>`).join('')}
+          ${sorted.map(([nama, v], i) => `<tr><td>${i+1}</td><td>${nama}</td><td>${v.qty.toLocaleString('id-ID')}</td><td>${fmtFull(v.total)}</td><td>${(v.qty/totalQty*100).toFixed(1)}%</td></tr>`).join('')}
         </tbody>
       </table>`;
     infoDiv.innerHTML = `📊 Menampilkan ${sorted.length} produk`;
   }
   else if (type === 'outlet') {
-    title.innerHTML = '🏪 Daftar Outlet Aktif';
-    const outlets = [...new Set(dataPenjualan.map(r => r.namaOutlet).filter(Boolean))].sort();
+    title.innerHTML = '🏪 Detail Outlet Aktif';
+    const byOutlet = {};
+    dataPenjualan.forEach(r => {
+      if (!r.namaOutlet) return;
+      if (!byOutlet[r.namaOutlet]) byOutlet[r.namaOutlet] = { qty: 0, total: 0 };
+      byOutlet[r.namaOutlet].qty += r.qtyJual;
+      byOutlet[r.namaOutlet].total += r.total;
+    });
+    const sorted = Object.entries(byOutlet).sort((a,b) => b[1].total - a[1].total);
+    const totalOutlet = sorted.length;
+    const totalQtyOutlet = sorted.reduce((s, [_, v]) => s + v.qty, 0);
+    const totalNominalOutlet = sorted.reduce((s, [_, v]) => s + v.total, 0);
     
-    summaryDiv.innerHTML = `<div class="modal-summary-item"><span class="label">Total Outlet</span><span class="value">${outlets.length}</span></div>`;
+    summaryDiv.innerHTML = `
+      <div class="modal-summary-item"><span class="label">Total Outlet</span><span class="value">${totalOutlet}</span></div>
+      <div class="modal-summary-item"><span class="label">Total Qty</span><span class="value">${totalQtyOutlet.toLocaleString('id-ID')}</span><span class="unit">pcs</span></div>
+      <div class="modal-summary-item"><span class="label">Total Penjualan</span><span class="value">${fmtFull(totalNominalOutlet)}</span></div>
+    `;
     contentDiv.innerHTML = `
       <table>
-        <thead><tr><th>#</th><th>Nama Outlet</th><th>Kode Outlet</th></tr></thead>
+        <thead><tr><th>#</th><th>Nama Outlet</th><th>Qty Terjual</th><th>Total Penjualan</th></tr></thead>
         <tbody>
-          ${outlets.map((outlet, i) => `<tr><td>${i+1}</td><td>${outlet}</td><td>-</td></tr>`).join('')}
+          ${sorted.map(([nama, v], i) => `<tr><td>${i+1}</td><td>${nama}</td><td>${v.qty.toLocaleString('id-ID')}</td><td>${fmtFull(v.total)}</td></tr>`).join('')}
         </tbody>
       </table>`;
-    infoDiv.innerHTML = `📊 Menampilkan ${outlets.length} outlet unik`;
+    infoDiv.innerHTML = `📊 Menampilkan ${sorted.length} outlet (diurutkan berdasarkan total penjualan tertinggi)`;
   }
   else if (type === 'coh') {
     title.innerHTML = '💰 Detail Cash On Hand (COH) per Channel';
@@ -613,7 +635,6 @@ async function loadData() {
     const res = await fetch(CSV_URL + '&t=' + Date.now());
     let text = await res.text();
     
-    // Bersihkan BOM
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
     text = text.replace(/^[, ]+/, '');
     
@@ -696,7 +717,6 @@ function renderDashboard() {
   const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP');
   const dataCOH = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TAGIHAN');
   
-  // Handle data kosong
   const dates = dataPenjualan.length ? dataPenjualan.map(r => r.tanggal).filter(Boolean) : [];
   if (dates.length) {
     const minD = new Date(Math.min(...dates));
@@ -706,7 +726,6 @@ function renderDashboard() {
     document.getElementById('subtitlePeriod').textContent = 'Tidak ada data untuk periode ini';
   }
 
-  // Perhitungan
   const totalPenjualan = dataPenjualan.reduce((s,r) => s + r.total, 0);
   const totalMargin = dataPenjualan.reduce((s,r) => s + r.margin, 0);
   const totalQty = dataPenjualan.reduce((s,r) => s + r.qtyJual, 0);
@@ -720,13 +739,11 @@ function renderDashboard() {
   const topPct = bayarTotal > 0 ? (topTotal/bayarTotal*100).toFixed(1) : 0;
   const tagihanPct = bayarTotal > 0 ? (tagihanTotal/bayarTotal*100).toFixed(1) : 0;
 
-  // COH
   const cohRetail = dataCOH.filter(r => r.channel === 'RETAIL').reduce((s,r) => s + r.total, 0);
   const cohGrosir = dataCOH.filter(r => r.channel === 'GROSIR').reduce((s,r) => s + r.total, 0);
   const cohAgen = dataCOH.filter(r => r.channel === 'AGEN').reduce((s,r) => s + r.total, 0);
   const totalCOH = cohRetail + cohGrosir + cohAgen;
 
-  // RENDER KPI dengan onclick
   document.getElementById('kpiGrid').innerHTML = `
     <div class="kpi-card" style="--accent-color:var(--accent)" onclick="openModal('penjualan')">
       <div class="kpi-icon" style="background:rgba(59,130,246,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
