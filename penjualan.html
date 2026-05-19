@@ -550,29 +550,80 @@ async function loadData() {
   document.getElementById('loadingOverlay').classList.remove('hidden');
   try {
     const res = await fetch(CSV_URL + '&t=' + Date.now());
-    const text = await res.text();
-    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+    let text = await res.text();
+    
+    // PERBAIKAN: Hapus BOM (Byte Order Mark) jika ada
+    if (text.charCodeAt(0) === 0xFEFF) {
+      text = text.slice(1);
+    }
+    
+    // PERBAIKAN: Hapus karakter aneh di awal baris pertama
+    text = text.replace(/^[, ]+/, '');
+    
+    const parsed = Papa.parse(text, { 
+      header: true, 
+      skipEmptyLines: true,
+      transformHeader: h => {
+        // Bersihkan header dari karakter aneh
+        let clean = h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase();
+        return clean;
+      }
+    });
+    
     allData = parsed.data.map(row => {
-      const k = Object.keys(row);
-      return {
-        tanggal: parseDate(row[k[0]] || row['TANGGAL'] || ''),
-        channel: (row[k[1]] || row['CHANNEL'] || '').toString().toUpperCase().trim(),
-        salesman: (row[k[2]] || row['SALESMAN'] || '').toString().trim(),
-        jobtitle: (row[k[3]] || row['JOBTITTLE'] || '').toString().trim().toUpperCase(),
-        kodeOutlet: (row[k[4]] || row['KODE OUTLET'] || '').toString().trim(),
-        namaOutlet: (row[k[5]] || row['NAMA OUTLET'] || '').toString().trim(),
-        namaBarang: (row[k[6]] || row['NAMA BARANG'] || '').toString().trim(),
-        hargaJual: parseNum(row[k[7]] || row['HARGA JUAL']),
-        hargaPabrik: parseNum(row[k[8]] || row['HARGA PABRIK']),
-        qtyJual: parseNum(row[k[11]] || row['QTY JUAL']),
-        total: parseNum(row[k[12]] || row['TOTAL']),
-        margin: parseNum(row[k[13]] || row['MARGIN']),
-        keterangan: (row[k[14]] || row['KETERANGAN'] || '').toString().trim().toUpperCase(),
-        depo: (row[k[15]] || row['DEPO'] || '').toString().trim().toUpperCase(),
+      // PERBAIKAN: parseNum yang mendukung nilai minus
+      const parseNum = (val) => {
+        if (!val || val === '') return 0;
+        let cleaned = val.toString().trim().replace(/,/g, '').replace(/[^\d.-]/g, '');
+        let result = parseFloat(cleaned);
+        return isNaN(result) ? 0 : result;
       };
-    }).filter(r => r.tanggal && r.namaBarang && r.qtyJual > 0);
-
+      
+      const parseDate = (s) => {
+        if (!s) return null;
+        const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
+        const parts = s.trim().split(/[\s\-\/]+/);
+        if (parts.length === 3) {
+          let d, m, y;
+          if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
+          else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
+          else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
+          if (!isNaN(d) && m!==undefined && !isNaN(y)) return new Date(y,m,d);
+        }
+        const dt = new Date(s); 
+        return isNaN(dt) ? null : dt;
+      };
+      
+      return {
+        tanggal: parseDate(row['TANGGAL']),
+        channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
+        salesman: (row['SALESMAN'] || '').toString().trim(),
+        jobtitle: (row['JOBTITLE'] || '').toString().trim().toUpperCase(),
+        kodeOutlet: (row['KODE OUTLET'] || '').toString().trim(),
+        namaOutlet: (row['NAMA OUTLET'] || '').toString().trim(),
+        namaBarang: (row['NAMA BARANG'] || '').toString().trim(),
+        hargaJual: parseNum(row['HARGA JUAL']),
+        hargaPabrik: parseNum(row['HARGA PABRIK']),
+        qtyJual: parseNum(row['QTY JUAL']),
+        total: parseNum(row['TOTAL']),
+        margin: parseNum(row['MARGIN']),
+        keterangan: (row['KETERANGAN'] || '').toString().trim().toUpperCase(),
+        depo: (row['DEPO'] || '').toString().trim().toUpperCase(),
+      };
+    }).filter(r => r.tanggal && r.namaBarang);
+    
     console.log('Data loaded:', allData.length, 'records');
+    console.log('Sample first record:', allData[0]);
+    
+    // Cek data dengan nilai minus
+    const minusData = allData.filter(r => r.total < 0);
+    console.log('Jumlah data dengan total minus:', minusData.length);
+    if (minusData.length > 0) {
+      minusData.forEach(r => {
+        console.log(dateKey(r.tanggal), r.channel, r.namaBarang, r.total);
+      });
+    }
+    
     populateFilters();
     setDefaultDates();
     renderAll();
