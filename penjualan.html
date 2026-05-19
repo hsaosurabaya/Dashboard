@@ -690,14 +690,6 @@ function renderAll() {
     document.getElementById('subtitlePeriod').textContent = 'Tidak ada data';
   }
 
-  // Jika data kosong, biarkan reduce menghasilkan 0
-  const totalPenjualan = dataPenjualan.reduce((s, r) => s + r.total, 0);
-  const totalQty = dataPenjualan.reduce((s, r) => s + r.qtyJual, 0);
-  const totalOutlet = new Set(dataPenjualan.map(r => r.kodeOutlet).filter(Boolean)).size;
-  
-  // ... sisanya sama, semua reduce akan 0 jika data kosong
-}
-
   // ==================== PENJUALAN (CASH + TOP) ====================
   const totalPenjualan = dataPenjualan.reduce((s, r) => s + r.total, 0);
   const totalQty = dataPenjualan.reduce((s, r) => s + r.qtyJual, 0);
@@ -746,6 +738,7 @@ function renderAll() {
   renderSalesList(dataPenjualan, 'ws', activeDepo.ws);
   renderChartDepoHarian(dataPenjualan);
   renderTabelSKUChannel(dataPenjualan);
+}
 
 function renderTopProduk(data) {
   const limit = parseInt(document.getElementById('topProdukLimit').value) || 13;
