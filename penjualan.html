@@ -634,14 +634,15 @@ async function loadData() {
   btn.classList.remove('loading');
   document.getElementById('loadingOverlay').classList.add('hidden');
 }
-
+  
 function setDefaultDates() {
   if (!allData.length) return;
   const dates = allData.map(r => r.tanggal).filter(Boolean);
-  const minD = new Date(Math.min(...dates));
   const maxD = new Date(Math.max(...dates));
-  document.getElementById('filterFrom').value = dateKey(minD);
-  document.getElementById('filterTo').value = dateKey(maxD);
+  // Set from dan to ke tanggal yang sama (tanggal terakhir)
+  const lastDate = dateKey(maxD);
+  document.getElementById('filterFrom').value = lastDate;
+  document.getElementById('filterTo').value = lastDate;
 }
 
 function populateFilters() {
