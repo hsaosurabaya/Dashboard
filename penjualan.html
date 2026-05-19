@@ -680,17 +680,23 @@ function renderAll() {
   const dataPenjualan = getFilteredData('penjualan');
   const dataCOH = getFilteredData('coh');
   
-  if (!dataPenjualan.length && !dataCOH.length) {
-    console.warn('No data after filtering');
-    return;
-  }
-
-  const dates = dataPenjualan.length ? dataPenjualan.map(r => r.tanggal).filter(Boolean) : dataCOH.map(r => r.tanggal).filter(Boolean);
+  // AMAN: cek panjang array sebelum pakai Math.min/max
+  const dates = dataPenjualan.length ? dataPenjualan.map(r => r.tanggal).filter(Boolean) : [];
   if (dates.length) {
     const minD = new Date(Math.min(...dates));
     const maxD = new Date(Math.max(...dates));
     document.getElementById('subtitlePeriod').textContent = `${fmtDate(minD)} – ${fmtDate(maxD)}`;
+  } else {
+    document.getElementById('subtitlePeriod').textContent = 'Tidak ada data';
   }
+
+  // Jika data kosong, biarkan reduce menghasilkan 0
+  const totalPenjualan = dataPenjualan.reduce((s, r) => s + r.total, 0);
+  const totalQty = dataPenjualan.reduce((s, r) => s + r.qtyJual, 0);
+  const totalOutlet = new Set(dataPenjualan.map(r => r.kodeOutlet).filter(Boolean)).size;
+  
+  // ... sisanya sama, semua reduce akan 0 jika data kosong
+}
 
   // ==================== PENJUALAN (CASH + TOP) ====================
   const totalPenjualan = dataPenjualan.reduce((s, r) => s + r.total, 0);
