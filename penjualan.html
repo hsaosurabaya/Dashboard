@@ -655,7 +655,7 @@ function renderAll() {
   const topPct = totalPenjualan > 0 ? (topTotal / totalPenjualan * 100).toFixed(1) : 0;
 
   // ==================== COH (CASH + TAGIHAN) ====================
-  const cohRetail = dataCOH.filter(r => r.channel === 'RETAIL').reduce((s, r) => s + r.total, 0);
+  const cohRetail = dataCOH.filter(r => r.channel === 'RETAIL' && r.keterangan === 'CASH').reduce((s, r) => s + r.total, 0);
   const cohGrosir = dataCOH.filter(r => r.channel === 'GROSIR').reduce((s, r) => s + r.total, 0);
   const cohAgen = dataCOH.filter(r => r.channel === 'AGEN').reduce((s, r) => s + r.total, 0);
   const totalCOH = cohRetail + cohGrosir + cohAgen;
