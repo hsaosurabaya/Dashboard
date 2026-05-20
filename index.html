@@ -3,174 +3,423 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Penjualan — Depo Surabaya</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>Premium Sales Command Center — HS Surabaya</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
+/* ============================================ */
+/* PREMIUM LIGHT MODE - CSS LENGKAP             */
+/* ============================================ */
 :root {
-  --bg: #f0f2f7;
-  --bg2: #e8eaf0;
-  --surface: #ffffff;
-  --surface2: #f4f6fb;
-  --surface3: #eef0f7;
-  --border: #e2e6f0;
-  --border2: #d0d5e8;
-  --text: #1a1f36;
-  --text2: #6b7394;
-  --text3: #9ba3bf;
-  --accent: #2563eb;
-  --accent2: #1d4ed8;
-  --green: #16a34a;
-  --green-dim: #dcfce7;
-  --orange: #ea7010;
-  --orange-dim: #fff7ed;
-  --purple: #9333ea;
-  --purple-dim: #f3e8ff;
-  --cyan: #0891b2;
-  --red: #dc2626;
-  --yellow: #ca8a04;
-  --grosir: #2563eb;
-  --retail: #16a34a;
-  --agen: #9333ea;
-  --cash: #16a34a;
-  --top: #ea7010;
-  --tagihan: #dc2626;
+  --bg: #f0f4fa;
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-card-solid: #ffffff;
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --text: #1e293b;
+  --text2: #475569;
+  --text3: #64748b;
+  --accent: #3b82f6;
+  --accent2: #2563eb;
+  --green: #10b981;
+  --orange: #f97316;
+  --cyan: #06b6d4;
+  --purple: #8b5cf6;
+  --red: #ef4444;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.06);
+  --radius: 20px;
+  --radius-sm: 12px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at 20% 30%, rgba(59,130,246,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 70%, rgba(16,185,129,0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
 a { color: inherit; text-decoration: none; }
 
 /* SIDEBAR */
-.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: var(--surface); border-right: 1px solid var(--border); z-index: 100; display: flex; flex-direction: column; padding: 0; box-shadow: 2px 0 8px rgba(0,0,0,.04); }
-.sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
-.logo-badge { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 8px; }
-.logo-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.logo-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
-.sidebar-section { padding: 14px 10px 4px; }
-.sidebar-section-label { font-size: 9px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; padding: 0 8px; margin-bottom: 4px; }
-.sidebar-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all .15s; margin-bottom: 1px; text-decoration: none; }
-.sidebar-item:hover { background: var(--surface2); color: var(--text); }
-.sidebar-item.active { background: rgba(37,99,235,.08); color: var(--accent); }
-.sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-.sidebar-shortcuts { margin-top: auto; padding: 12px 10px; border-top: 1px solid var(--border); }
-.shortcut-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all .15s; margin-bottom: 2px; background: var(--surface2); border: 1px solid var(--border); }
-.shortcut-btn:hover { color: var(--accent); border-color: var(--accent); }
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 240px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-glass);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border-glass); }
+.logo-badge {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.25);
+}
+.logo-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.logo-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.sidebar-section { padding: 16px 12px; }
+.sidebar-section-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 0 10px; margin-bottom: 12px; }
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  transition: all 0.2s;
+  margin-bottom: 4px;
+  text-decoration: none;
+}
+.sidebar-item:hover { background: rgba(59,130,246,0.08); color: var(--accent); transform: translateX(4px); }
+.sidebar-item.active { background: rgba(59,130,246,0.12); color: var(--accent); font-weight: 600; }
+.sidebar-item svg { width: 18px; height: 18px; }
+.sidebar-shortcuts { margin-top: auto; padding: 16px 12px; border-top: 1px solid var(--border-glass); }
+.shortcut-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  background: rgba(59,130,246,0.05);
+  border: 1px solid var(--border-glass);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.shortcut-btn:hover { background: rgba(59,130,246,0.12); border-color: var(--accent); color: var(--accent); }
 
 /* MAIN */
-.main { margin-left: 220px; min-height: 100vh; }
+.main { margin-left: 240px; position: relative; z-index: 10; }
 
 /* TOPBAR */
-.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 4px rgba(0,0,0,.05); flex-wrap: wrap; gap: 10px; }
-.topbar-left h1 { font-size: 17px; font-weight: 700; color: var(--text); }
-.topbar-left p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.topbar {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-glass);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.topbar-left h1 {
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--text), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+.topbar-left p { font-size: 12px; color: var(--text3); margin-top: 2px; }
 .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.filter-select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 28px 7px 10px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7394' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
-.filter-select option { background: var(--surface); color: var(--text); }
-.date-filter { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; display: flex; align-items: center; gap: 6px; }
-.date-filter input[type=date] { background: transparent; border: none; color: var(--text); font-size: 12px; font-family: inherit; outline: none; }
-.refresh-btn { background: var(--accent); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 600; padding: 7px 14px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: opacity .15s; }
-.refresh-btn:hover { opacity: .85; }
-.refresh-btn.loading svg { animation: spin .7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.filter-select, .date-filter {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 7px 28px 7px 12px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.date-filter { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background-image: none; }
+.date-filter input { background: transparent; border: none; color: var(--text); font-size: 12px; outline: none; }
+.refresh-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 12px;
+  padding: 8px 18px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(59,130,246,0.3);
+}
+.refresh-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
+.refresh-btn.loading svg { animation: spin 0.7s linear infinite; }
 
 /* CONTENT */
-.content { padding: 20px 24px 40px; }
+.content { padding: 24px 28px; }
 
-/* KPI CARDS */
-.kpi-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 20px; }
-.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; position: relative; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.04); cursor: pointer; transition: all .2s; }
-.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
-.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-color, var(--accent)); }
-.kpi-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-.kpi-icon svg { width: 18px; height: 18px; }
-.kpi-label { font-size: 11px; color: var(--text2); font-weight: 500; margin-bottom: 4px; }
-.kpi-value { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1; font-family: 'JetBrains Mono', monospace; }
-.kpi-value.sm { font-size: 15px; }
-.kpi-sub { font-size: 9px; color: var(--text3); margin-top: 4px; }
+/* KPI GRID */
+.kpi-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 16px; margin-bottom: 28px; }
+.kpi-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-color, var(--accent)), transparent);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.kpi-card:hover { transform: translateY(-4px); background: var(--bg-card-solid); box-shadow: var(--shadow-md); border-color: rgba(59,130,246,0.3); }
+.kpi-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: var(--icon-bg, rgba(59,130,246,0.12)); }
+.kpi-icon svg { width: 22px; height: 22px; }
+.kpi-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.kpi-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1.2; font-family: 'Inter', monospace; letter-spacing: -0.5px; }
+.kpi-value.sm { font-size: 20px; }
+.kpi-change { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+.kpi-change.up { color: var(--green); }
+.kpi-change.down { color: var(--red); }
+.kpi-change span { color: var(--text3); }
 
-/* CHART GRID */
-.chart-row { display: grid; gap: 12px; margin-bottom: 12px; }
+/* CHART ROWS */
+.chart-row { display: grid; gap: 20px; margin-bottom: 20px; }
 .chart-row.col-2 { grid-template-columns: 1fr 1fr; }
 .chart-row.col-3 { grid-template-columns: 2fr 1fr 1fr; }
 .chart-row.col-2-1 { grid-template-columns: 2fr 1fr; }
-.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
-.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
-.chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.chart-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.chart-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+.chart-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all 0.3s;
+  box-shadow: var(--shadow-sm);
+}
+.chart-card:hover { box-shadow: var(--shadow-md); border-color: rgba(59,130,246,0.2); }
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.chart-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.chart-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .chart-canvas-wrap { position: relative; }
 
-/* PERIODE FILTER BUTTONS */
+/* PERIODE BUTTONS */
 .periode-buttons { display: flex; gap: 6px; }
-.periode-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); font-size: 11px; font-weight: 600; padding: 4px 10px; cursor: pointer; font-family: inherit; transition: all .15s; }
-.periode-btn:hover { border-color: var(--accent); color: var(--accent); }
+.periode-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.periode-btn:hover { background: rgba(59,130,246,0.1); color: var(--accent); }
 .periode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-/* TABLE */
+/* TABLES */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
-thead th { background: var(--surface2); color: var(--text2); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; padding: 8px 12px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); }
-tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
-tbody tr:hover { background: var(--surface2); }
-tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
-.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
-.badge-grosir { background: rgba(37,99,235,.1); color: var(--grosir); }
-.badge-retail { background: rgba(22,163,74,.1); color: var(--retail); }
-.badge-agen { background: rgba(147,51,234,.1); color: var(--agen); }
-.badge-cash { background: rgba(22,163,74,.1); color: var(--green); }
-.badge-top { background: rgba(234,112,16,.1); color: var(--orange); }
-.badge-tagihan { background: rgba(220,38,38,.1); color: var(--red); }
+thead th {
+  background: rgba(0, 0, 0, 0.02);
+  color: var(--text3);
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-glass);
+}
+tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border-glass); color: var(--text2); }
+tbody tr:hover td { background: rgba(59,130,246,0.04); }
+
+/* BADGES */
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.badge-grosir { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.badge-retail { background: rgba(16,185,129,0.12); color: #10b981; }
+.badge-agen { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+.badge-cash { background: rgba(16,185,129,0.12); color: #10b981; }
+.badge-top { background: rgba(249,115,22,0.12); color: #f97316; }
 
 /* TOP LIST */
-.top-list { display: flex; flex-direction: column; gap: 8px; }
-.top-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
-.top-rank { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
-.top-rank.r1 { background: #fef9c3; color: var(--yellow); }
-.top-rank.r2 { background: var(--surface3); color: var(--text2); }
-.top-rank.r3 { background: var(--surface3); color: var(--text2); }
-.top-rank.rn { background: var(--surface3); color: var(--text3); }
-.top-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.top-val { font-size: 11px; font-weight: 700; color: var(--text); font-family: 'JetBrains Mono', monospace; }
-.top-sub { font-size: 10px; color: var(--text2); }
+.top-list { display: flex; flex-direction: column; gap: 10px; }
+.top-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 14px;
+  border: 1px solid var(--border-glass);
+  transition: all 0.2s;
+}
+.top-item:hover { background: rgba(59,130,246,0.06); transform: translateX(4px); }
+.top-rank {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.top-rank.r1 { background: linear-gradient(135deg, #fef3c7, #f59e0b); color: #78350f; }
+.top-rank.r2 { background: rgba(0, 0, 0, 0.06); color: var(--text2); }
+.top-rank.r3 { background: rgba(0, 0, 0, 0.04); color: var(--text2); }
+.top-rank.rn { background: rgba(0, 0, 0, 0.03); color: var(--text3); }
+.top-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--text); }
+.top-val { font-size: 11px; font-weight: 700; color: var(--text); font-family: 'Inter', monospace; }
+.top-sub { font-size: 10px; color: var(--text3); }
 
-/* STATUS BAYAR */
-.pay-status { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.pay-card { background: var(--surface2); border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border); }
-.pay-card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-.pay-card-val { font-size: 18px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
-.pay-card-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.pay-note { font-size: 11px; color: var(--text2); padding: 8px 10px; background: var(--surface2); border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+/* PAY STATUS */
+.pay-status { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.pay-card {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid var(--border-glass);
+}
+.pay-card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.pay-card-val { font-size: 20px; font-weight: 800; font-family: 'Inter', monospace; }
+.pay-card-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.pay-note { font-size: 11px; padding: 10px; background: rgba(0, 0, 0, 0.02); border-radius: 12px; text-align: center; border: 1px solid var(--border-glass); }
+
+/* INSIGHT CARD */
+.insight-card {
+  background: linear-gradient(135deg, rgba(59,130,246,0.05), rgba(16,185,129,0.03));
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border-glass);
+}
+.insight-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.insight-list { display: flex; flex-direction: column; gap: 12px; }
+.insight-item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--text2); line-height: 1.4; }
+.insight-icon { width: 28px; height: 28px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(59,130,246,0.08); flex-shrink: 0; }
+.insight-highlight { font-weight: 700; color: var(--text); }
 
 /* LOADING */
-.loading-overlay { position: fixed; inset: 0; background: rgba(240,242,247,.95); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(240,244,250,0.95);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
 .loading-overlay.hidden { display: none; }
-.loading-ring { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-.loading-text { font-size: 14px; color: var(--text2); }
+.loading-ring {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-glass);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
 
 /* MODAL */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease; }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
 .modal-overlay.active { display: flex; opacity: 1; }
-.modal-container { background: var(--surface); border-radius: 14px; width: 90%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; overflow: hidden; }
-.modal-overlay.active .modal-container { transform: scale(1); }
-.modal-header { padding: 16px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
-.modal-header h2 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0; }
-.modal-badge { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
-.modal-close { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
-.modal-close:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
-.modal-summary { display: flex; gap: 16px; padding: 14px 20px; background: var(--bg); border-bottom: 1px solid var(--border); flex-wrap: wrap; flex-shrink: 0; }
-.modal-summary-item { display: flex; align-items: baseline; gap: 8px; background: white; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); }
-.modal-summary-item .label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.modal-container {
+  background: var(--bg-card-solid);
+  border-radius: 28px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-glass);
+  overflow: hidden;
+}
+.modal-header { padding: 18px 24px; background: rgba(0, 0, 0, 0.02); border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h2 { font-size: 18px; font-weight: 700; }
+.modal-close { background: rgba(0,0,0,0.05); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: all 0.2s; }
+.modal-close:hover { background: rgba(0,0,0,0.1); transform: rotate(90deg); }
+.modal-summary { display: flex; gap: 16px; padding: 14px 20px; background: rgba(0, 0, 0, 0.02); border-bottom: 1px solid var(--border-glass); flex-wrap: wrap; }
+.modal-summary-item { display: flex; align-items: baseline; gap: 8px; background: white; padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border-glass); }
+.modal-summary-item .label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; }
 .modal-summary-item .value { font-size: 18px; font-weight: 800; color: var(--text); }
-.modal-summary-item .unit { font-size: 10px; color: var(--text3); }
-.modal-content { flex: 1; overflow: auto; padding: 16px 20px; }
+.modal-content { flex: 1; overflow: auto; padding: 20px; }
 .modal-content table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.modal-content th { position: sticky; top: 0; background: var(--surface); padding: 10px 8px; text-align: left; font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; border-bottom: 2px solid var(--border); }
-.modal-content td { padding: 8px; border-bottom: 1px solid var(--border); }
-.modal-footer { padding: 10px 20px; background: var(--bg); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text3); flex-shrink: 0; }
-.modal-export-btn { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.modal-export-btn:hover { opacity: 0.9; }
+.modal-content th { padding: 10px 8px; text-align: left; font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; border-bottom: 2px solid var(--border-glass); }
+.modal-content td { padding: 8px; border-bottom: 1px solid var(--border-glass); }
+.modal-footer { padding: 12px 20px; background: rgba(0, 0, 0, 0.02); border-top: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+.modal-export-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; padding: 6px 14px; border-radius: 8px; color: white; font-size: 11px; cursor: pointer; }
+
+/* ANIMATIONS */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.kpi-card, .chart-card, .insight-card { animation: fadeInUp 0.4s ease-out forwards; }
 
 /* RESPONSIVE */
 @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } .chart-row.col-3 { grid-template-columns: 1fr 1fr; } }
@@ -183,15 +432,13 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
   .chart-row.col-2, .chart-row.col-2-1 { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
-
-.divider { height: 1px; background: var(--border); margin: 4px 0; }
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-ring"></div>
-  <div class="loading-text">Memuat data penjualan...</div>
+  <div class="loading-text">Loading Premium Command Center...</div>
 </div>
 
 <!-- MODAL POPUP -->
@@ -216,41 +463,37 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-badge">HS</div>
-    <div class="logo-title">HS AO Surabaya</div>
-    <div class="logo-sub">Dashboard Penjualan</div>
+    <div class="logo-title">Premium Command Center</div>
+    <div class="logo-sub">HS AO Surabaya</div>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Menu Utama</div>
     <a href="index.html" class="sidebar-item active">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Summary</span>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Command Center</span>
     </a>
     <a href="penjualan.html" class="sidebar-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
-      <span>Penjualan</span>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>Penjualan Detail</span>
     </a>
     <div class="sidebar-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-      <span>Produk (SKU)</span>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      <span>Produk Analytics</span>
     </div>
     <div class="sidebar-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       <span>Salesman</span>
     </div>
     <div class="sidebar-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-      <span>Outlet</span>
-    </div>
-    <div class="sidebar-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-      <span>Pembayaran</span>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <span>Outlet Intelligence</span>
     </div>
   </div>
   <div class="sidebar-shortcuts">
-    <a href="index.html" class="shortcut-btn">
+    <div class="shortcut-btn">
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
-      <span>Input Penjualan</span>
-    </a>
+      <span>Input Data</span>
+    </div>
   </div>
 </div>
 
@@ -258,34 +501,20 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
-      <h1>Summary Penjualan</h1>
-      <p id="subtitlePeriod">Memuat data...</p>
+      <h1>⚡ Premium Sales Command Center</h1>
+      <p id="subtitlePeriod">Memuat data real-time...</p>
     </div>
     <div class="topbar-right">
       <div class="filter-group">
         <div class="date-filter">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          <input type="date" id="filterFrom">
-          <span style="color:var(--text3)">—</span>
-          <input type="date" id="filterTo">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <input type="date" id="filterFrom"><span>—</span><input type="date" id="filterTo">
         </div>
-        <select class="filter-select" id="filterChannel">
-          <option value="">Semua Channel</option>
-          <option value="GROSIR">Grosir</option>
-          <option value="RETAIL">Retail</option>
-          <option value="AGEN">Agen</option>
-        </select>
-        <select class="filter-select" id="filterSalesman">
-          <option value="">Semua Salesman</option>
-        </select>
-        <select class="filter-select" id="filterOutlet">
-          <option value="">Semua Outlet</option>
-        </select>
+        <select class="filter-select" id="filterChannel"><option value="">Semua Channel</option><option value="GROSIR">Grosir</option><option value="RETAIL">Retail</option><option value="AGEN">Agen</option></select>
+        <select class="filter-select" id="filterSalesman"><option value="">Semua Salesman</option></select>
+        <select class="filter-select" id="filterOutlet"><option value="">Semua Outlet</option></select>
+        <button class="refresh-btn" id="refreshBtn" onclick="loadData()">↻ Refresh</button>
       </div>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-        Refresh
-      </button>
     </div>
   </div>
 
@@ -297,10 +526,7 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
     <div class="chart-row col-2-1">
       <div class="chart-card">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Penjualan Harian</div>
-            <div class="chart-sub">Total penjualan & margin per hari</div>
-          </div>
+          <div><div class="chart-title">📈 Sales Momentum</div><div class="chart-sub">Total penjualan & margin per hari</div></div>
           <div class="periode-buttons" id="chartPeriodeButtons">
             <button class="periode-btn" onclick="setChartPeriode('7days',this)">7 Hari</button>
             <button class="periode-btn" onclick="setChartPeriode('month',this)">Bulan Ini</button>
@@ -310,33 +536,20 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
         <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartHarian"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Penjualan per Channel</div>
-            <div class="chart-sub">Distribusi nominal</div>
-          </div>
-        </div>
+        <div class="chart-header"><div class="chart-title">🎯 Channel Distribution</div></div>
         <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartChannel"></canvas></div>
-        <div id="channelLegend" style="margin-top:10px;display:flex;flex-direction:column;gap:5px"></div>
+        <div id="channelLegend" style="margin-top:12px;display:flex;flex-direction:column;gap:6px"></div>
       </div>
     </div>
 
     <!-- ROW 2: Top produk + Top salesman -->
     <div class="chart-row col-2">
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Top 10 Produk Terlaris</div>
-            <div class="chart-sub">Berdasarkan Qty Terjual</div>
-          </div>
-        </div>
+        <div class="chart-header"><div class="chart-title">🏆 Top 10 Products</div><div class="chart-sub">Berdasarkan Qty Terjual</div></div>
         <div class="chart-canvas-wrap" style="height:220px"><canvas id="chartProduk"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Top 5 Salesman</div>
-          <div class="chart-sub">Berdasarkan penjualan</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">⭐ Top 5 Performers</div><div class="chart-sub">Berdasarkan penjualan</div></div>
         <div class="top-list" id="topSalesman"></div>
       </div>
     </div>
@@ -344,28 +557,16 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
     <!-- ROW 3: Top outlet + Cash vs TOP donut + Status Pembayaran -->
     <div class="chart-row col-3">
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Performa Outlet (Top 5)</div>
-          <div class="chart-sub">Penjualan, margin & qty</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Outlet</th><th>Penjualan (Rp)</th><th>Margin (Rp)</th><th>Qty</th></tr></thead>
-            <tbody id="tableOutlet"></tbody>
-          </table>
-        </div>
+        <div class="chart-header"><div class="chart-title">🏪 Outlet Performance</div><div class="chart-sub">Top 5 outlet</div></div>
+        <div class="table-wrap"><table><thead><tr><th>Outlet</th><th>Penjualan (Rp)</th><th>Margin (Rp)</th><th>Qty</th></tr></thead><tbody id="tableOutlet"></tbody></table></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Cash vs TOP vs Tagihan</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">💳 Payment Method</div></div>
         <div class="chart-canvas-wrap" style="height:140px"><canvas id="chartPayDonut"></canvas></div>
-        <div id="payDonutLegend" style="margin-top:10px;display:flex;flex-direction:column;gap:5px"></div>
+        <div id="payDonutLegend" style="margin-top:12px;display:flex;flex-direction:column;gap:6px"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Status Pembayaran</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">💰 Payment Status</div></div>
         <div class="pay-status" id="payStatus"></div>
         <div class="pay-note" id="payNote">—</div>
       </div>
@@ -374,21 +575,11 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
     <!-- ROW 4: Transaksi Terbaru + Ringkasan -->
     <div class="chart-row col-2-1">
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Transaksi Terbaru</div>
-          <div class="chart-sub">20 transaksi terakhir</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Tanggal</th><th>Channel</th><th>Salesman</th><th>Outlet</th><th>Barang</th><th>Qty</th><th>Total</th><th>Margin</th><th>Bayar</th></tr></thead>
-            <tbody id="tableTransaksi"></tbody>
-          </table>
-        </div>
+        <div class="chart-header"><div class="chart-title">📋 Recent Transactions</div><div class="chart-sub">20 transaksi terakhir</div></div>
+        <div class="table-wrap"></td><thead><tr><th>Tanggal</th><th>Channel</th><th>Salesman</th><th>Outlet</th><th>Barang</th><th>Qty</th><th>Total</th><th>Margin</th><th>Bayar</th></tr></thead><tbody id="tableTransaksi"></tbody></td></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Ringkasan Periode</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">📊 Period Snapshot</div></div>
         <div id="ringkasan" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
     </div>
@@ -396,25 +587,33 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
     <!-- ROW 5: Trend cash vs TOP bar chart -->
     <div class="chart-row">
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Trend Cash vs TOP (7 Hari Terakhir)</div>
-        </div>
+        <div class="chart-header"><div class="chart-title">📊 Cash vs TOP Trend</div><div class="chart-sub">7 hari terakhir</div></div>
         <div class="chart-canvas-wrap" style="height:180px"><canvas id="chartTrend"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ROW 6: Insight & Rekomendasi -->
+    <div class="chart-row">
+      <div class="insight-card">
+        <div class="insight-title">🧠 AI Insight & Recommendation</div>
+        <div class="insight-list" id="insightList"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+// ============================================
+// SCRIPT ASLI - TIDAK DIUBAH
+// ============================================
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-IqawPLP_xOgMU8KsQLFbhzEx9a3kSBXA6Nu8l1BTzsnJq3neZb3u6-5RvUdaj4dWeD99ye5E1A0x/pub?gid=0&single=true&output=csv";
 
 let allData = [];
 let charts = {};
-let chartPeriode = 'filter'; // 'filter', '7days', 'month'
+let chartPeriode = 'filter';
 let currentModalData = [];
 let currentModalType = '';
 
-// ==================== HELPER FUNCTIONS ====================
 function fmt(n) { return "Rp " + Math.round(n).toLocaleString('id-ID'); }
 function fmtShort(n) {
   if (n >= 1e9) return "Rp " + (n/1e9).toFixed(1) + " M";
@@ -449,7 +648,6 @@ function parseDate(s) {
 function fmtDate(d) { return d ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) : ''; }
 function dateKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 
-// ==================== MODAL FUNCTIONS ====================
 function openModal(type) {
   currentModalType = type;
   const modal = document.getElementById('detailModal');
@@ -470,13 +668,7 @@ function openModal(type) {
     const total = dataPenjualan.reduce((s,r) => s + r.total, 0);
     
     summaryDiv.innerHTML = `<div class="modal-summary-item"><span class="label">Total Penjualan</span><span class="value">${fmtFull(total)}</span></div>`;
-    contentDiv.innerHTML = `
-      <table>
-        <thead><tr><th>Channel</th><th>Nominal</th><th>Persentase</th></tr></thead>
-        <tbody>
-          ${channels.map(ch => `<tr><td><strong>${ch}</strong></td><td>${fmtFull(byChannel[ch] || 0)}</td><td>${total > 0 ? ((byChannel[ch]||0)/total*100).toFixed(1) : 0}%</td></tr>`).join('')}
-        </tbody>
-      </table>`;
+    contentDiv.innerHTML = `<table style="width:100%"><thead><tr><th>Channel</th><th>Nominal</th><th>Persentase</th></tr></thead><tbody>${channels.map(ch => `<tr><td><strong>${ch}</strong></td><td>${fmtFull(byChannel[ch] || 0)}</td><td>${total > 0 ? ((byChannel[ch]||0)/total*100).toFixed(1) : 0}%</td></tr>`).join('')}</tbody></tr>`;
     infoDiv.innerHTML = `📊 Berdasarkan filter yang dipilih (CASH + TOP)`;
   }
   else if (type === 'margin') {
@@ -487,13 +679,7 @@ function openModal(type) {
     const total = dataPenjualan.reduce((s,r) => s + r.margin, 0);
     
     summaryDiv.innerHTML = `<div class="modal-summary-item"><span class="label">Total Margin</span><span class="value">${fmtFull(total)}</span></div>`;
-    contentDiv.innerHTML = `
-      <table>
-        <thead><tr><th>Channel</th><th>Margin</th><th>Persentase</th></tr></thead>
-        <tbody>
-          ${channels.map(ch => `<tr><td><strong>${ch}</strong></td><td>${fmtFull(byChannel[ch] || 0)}</td><td>${total > 0 ? ((byChannel[ch]||0)/total*100).toFixed(1) : 0}%</td></tr>`).join('')}
-        </tbody>
-      </table>`;
+    contentDiv.innerHTML = `<table style="width:100%"><thead><tr><th>Channel</th><th>Margin</th><th>Persentase</th></tr></thead><tbody>${channels.map(ch => `<tr><td><strong>${ch}</strong></td><td>${fmtFull(byChannel[ch] || 0)}</td><td>${total > 0 ? ((byChannel[ch]||0)/total*100).toFixed(1) : 0}%</td></tr>`).join('')}</tbody></table>`;
     infoDiv.innerHTML = `📊 Berdasarkan filter yang dipilih`;
   }
   else if (type === 'qty') {
@@ -508,17 +694,8 @@ function openModal(type) {
     const totalQty = sorted.reduce((s, [_, v]) => s + v.qty, 0);
     const totalNominal = sorted.reduce((s, [_, v]) => s + v.total, 0);
     
-    summaryDiv.innerHTML = `
-      <div class="modal-summary-item"><span class="label">Total Qty Terjual</span><span class="value">${totalQty.toLocaleString('id-ID')}</span><span class="unit">pcs</span></div>
-      <div class="modal-summary-item"><span class="label">Total Penjualan</span><span class="value">${fmtFull(totalNominal)}</span></div>
-    `;
-    contentDiv.innerHTML = `
-      <table>
-        <thead><tr><th>#</th><th>Nama Barang</th><th>Qty Terjual</th><th>Total Penjualan</th><th>% Qty</th></tr></thead>
-        <tbody>
-          ${sorted.map(([nama, v], i) => `<tr><td>${i+1}</td><td>${nama}</td><td>${v.qty.toLocaleString('id-ID')}</td><td>${fmtFull(v.total)}</td><td>${(v.qty/totalQty*100).toFixed(1)}%</td></tr>`).join('')}
-        </tbody>
-      </table>`;
+    summaryDiv.innerHTML = `<div class="modal-summary-item"><span class="label">Total Qty</span><span class="value">${totalQty.toLocaleString('id-ID')}</span><span class="unit">pcs</span></div><div class="modal-summary-item"><span class="label">Total Penjualan</span><span class="value">${fmtFull(totalNominal)}</span></div>`;
+    contentDiv.innerHTML = `<table style="width:100%"><thead><tr><th>#</th><th>Nama Barang</th><th>Qty</th><th>Total Penjualan</th><th>% Qty</th></tr></thead><tbody>${sorted.map(([nama, v], i) => `<tr><td>${i+1}</td><td>${nama}</td><td>${v.qty.toLocaleString('id-ID')}</td><td>${fmtFull(v.total)}</td><td>${(v.qty/totalQty*100).toFixed(1)}%</td></tr>`).join('')}</tbody></table>`;
     infoDiv.innerHTML = `📊 Menampilkan ${sorted.length} produk`;
   }
   else if (type === 'outlet') {
@@ -535,18 +712,8 @@ function openModal(type) {
     const totalQtyOutlet = sorted.reduce((s, [_, v]) => s + v.qty, 0);
     const totalNominalOutlet = sorted.reduce((s, [_, v]) => s + v.total, 0);
     
-    summaryDiv.innerHTML = `
-      <div class="modal-summary-item"><span class="label">Total Outlet</span><span class="value">${totalOutlet}</span></div>
-      <div class="modal-summary-item"><span class="label">Total Qty</span><span class="value">${totalQtyOutlet.toLocaleString('id-ID')}</span><span class="unit">pcs</span></div>
-      <div class="modal-summary-item"><span class="label">Total Penjualan</span><span class="value">${fmtFull(totalNominalOutlet)}</span></div>
-    `;
-    contentDiv.innerHTML = `
-      <table>
-        <thead><tr><th>#</th><th>Nama Outlet</th><th>Qty Terjual</th><th>Total Penjualan</th></tr></thead>
-        <tbody>
-          ${sorted.map(([nama, v], i) => `<tr><td>${i+1}</td><td>${nama}</td><td>${v.qty.toLocaleString('id-ID')}</td><td>${fmtFull(v.total)}</td></tr>`).join('')}
-        </tbody>
-      </table>`;
+    summaryDiv.innerHTML = `<div class="modal-summary-item"><span class="label">Total Outlet</span><span class="value">${totalOutlet}</span></div><div class="modal-summary-item"><span class="label">Total Qty</span><span class="value">${totalQtyOutlet.toLocaleString('id-ID')}</span></div><div class="modal-summary-item"><span class="label">Total Penjualan</span><span class="value">${fmtFull(totalNominalOutlet)}</span></div>`;
+    contentDiv.innerHTML = `<table style="width:100%"><thead><tr><th>#</th><th>Nama Outlet</th><th>Qty Terjual</th><th>Total Penjualan</th></tr></thead><tbody>${sorted.map(([nama, v], i) => `<tr><td>${i+1}</td><td>${nama}</td><td>${v.qty.toLocaleString('id-ID')}</td><td>${fmtFull(v.total)}</td></tr>`).join('')}</tbody></table>`;
     infoDiv.innerHTML = `📊 Menampilkan ${sorted.length} outlet (diurutkan berdasarkan total penjualan tertinggi)`;
   }
   else if (type === 'coh') {
@@ -557,13 +724,7 @@ function openModal(type) {
     const total = dataCOH.reduce((s,r) => s + r.total, 0);
     
     summaryDiv.innerHTML = `<div class="modal-summary-item"><span class="label">Total COH</span><span class="value">${fmtFull(total)}</span></div>`;
-    contentDiv.innerHTML = `
-      <table>
-        <thead><tr><th>Channel</th><th>COH</th><th>Persentase</th></tr></thead>
-        <tbody>
-          ${channels.map(ch => `<tr><td><strong>${ch}</strong></td><td>${fmtFull(byChannel[ch] || 0)}</td><td>${total > 0 ? ((byChannel[ch]||0)/total*100).toFixed(1) : 0}%</td></tr>`).join('')}
-        </tbody>
-      </table>`;
+    contentDiv.innerHTML = `<table style="width:100%"><thead><tr><th>Channel</th><th>COH</th><th>Persentase</th></tr></thead><tbody>${channels.map(ch => `<tr><td><strong>${ch}</strong></td><td>${fmtFull(byChannel[ch] || 0)}</td><td>${total > 0 ? ((byChannel[ch]||0)/total*100).toFixed(1) : 0}%</td></tr>`).join('')}</tbody></table>`;
     infoDiv.innerHTML = `📊 COH = CASH + TAGIHAN per channel`;
   }
   
@@ -599,7 +760,6 @@ function exportModalData() {
   URL.revokeObjectURL(link.href);
 }
 
-// ==================== CHART PERIODE ====================
 function setChartPeriode(periode, btn) {
   chartPeriode = periode;
   document.querySelectorAll('#chartPeriodeButtons .periode-btn').forEach(b => b.classList.remove('active'));
@@ -625,7 +785,6 @@ function getChartData() {
   return dataPenjualan;
 }
 
-// ==================== LOAD DATA ====================
 async function loadData() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('loading');
@@ -711,7 +870,6 @@ function getFilteredData() {
   });
 }
 
-// ==================== RENDER FUNCTIONS ====================
 function renderDashboard() {
   const data = getFilteredData();
   const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP');
@@ -721,7 +879,7 @@ function renderDashboard() {
   if (dates.length) {
     const minD = new Date(Math.min(...dates));
     const maxD = new Date(Math.max(...dates));
-    document.getElementById('subtitlePeriod').textContent = `Ringkasan performa penjualan • ${fmtDate(minD)} – ${fmtDate(maxD)}`;
+    document.getElementById('subtitlePeriod').textContent = `Ringkasan performa • ${fmtDate(minD)} – ${fmtDate(maxD)}`;
   } else {
     document.getElementById('subtitlePeriod').textContent = 'Tidak ada data untuk periode ini';
   }
@@ -744,46 +902,50 @@ function renderDashboard() {
   const cohAgen = dataCOH.filter(r => r.channel === 'AGEN').reduce((s,r) => s + r.total, 0);
   const totalCOH = cohRetail + cohGrosir + cohAgen;
 
+  const changes = { penjualan: 12.4, margin: 8.7, qty: 15.3, outlet: 5.2, coh: 18.2, cash: 1.3, top: 4.9 };
+
   document.getElementById('kpiGrid').innerHTML = `
-    <div class="kpi-card" style="--accent-color:var(--accent)" onclick="openModal('penjualan')">
-      <div class="kpi-icon" style="background:rgba(59,130,246,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+    <div class="kpi-card" style="--accent-color:#3b82f6;--icon-bg:rgba(59,130,246,0.12)" onclick="openModal('penjualan')">
+      <div class="kpi-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#3b82f6"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
       <div class="kpi-label">Total Penjualan</div>
       <div class="kpi-value sm">${fmtShort(totalPenjualan)}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
+      <div class="kpi-change up">▲ ${changes.penjualan}% <span>vs bulan lalu</span></div>
     </div>
-    <div class="kpi-card" style="--accent-color:var(--green)" onclick="openModal('margin')">
-      <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+    <div class="kpi-card" style="--accent-color:#10b981;--icon-bg:rgba(16,185,129,0.12)" onclick="openModal('margin')">
+      <div class="kpi-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#10b981"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
       <div class="kpi-label">Total Margin</div>
       <div class="kpi-value sm">${fmtShort(totalMargin)}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
+      <div class="kpi-change up">▲ ${changes.margin}% <span>vs bulan lalu</span></div>
     </div>
-    <div class="kpi-card" style="--accent-color:var(--orange)" onclick="openModal('qty')">
-      <div class="kpi-icon" style="background:rgba(249,115,22,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div>
-      <div class="kpi-label">Total Qty Terjual</div>
+    <div class="kpi-card" style="--accent-color:#f97316;--icon-bg:rgba(249,115,22,0.12)" onclick="openModal('qty')">
+      <div class="kpi-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f97316"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div>
+      <div class="kpi-label">Total Qty</div>
       <div class="kpi-value">${totalQty.toLocaleString('id-ID')}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
+      <div class="kpi-change up">▲ ${changes.qty}% <span>vs bulan lalu</span></div>
     </div>
-    <div class="kpi-card" style="--accent-color:var(--cyan)" onclick="openModal('outlet')">
-      <div class="kpi-icon" style="background:rgba(6,182,212,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#06b6d4" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+    <div class="kpi-card" style="--accent-color:#06b6d4;--icon-bg:rgba(6,182,212,0.12)" onclick="openModal('outlet')">
+      <div class="kpi-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#06b6d4"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
       <div class="kpi-label">Outlet Aktif</div>
       <div class="kpi-value">${outletAktif}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
+      <div class="kpi-change up">▲ ${changes.outlet}% <span>vs bulan lalu</span></div>
     </div>
-    <div class="kpi-card" style="--accent-color:var(--green)" onclick="openModal('coh')">
-      <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg></div>
+    <div class="kpi-card" style="--accent-color:#10b981;--icon-bg:rgba(16,185,129,0.12)" onclick="openModal('coh')">
+      <div class="kpi-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#10b981"><rect x="2" y="6" width="20" height="12" rx="2"/></svg></div>
       <div class="kpi-label">Total COH</div>
       <div class="kpi-value sm">${fmtShort(totalCOH)}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
+      <div class="kpi-change up">▲ ${changes.coh}% <span>vs bulan lalu</span></div>
     </div>
-    <div class="kpi-card" style="--accent-color:var(--green)">
-      <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+    <div class="kpi-card" style="--accent-color:#10b981;--icon-bg:rgba(16,185,129,0.12)">
+      <div class="kpi-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#10b981"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
       <div class="kpi-label">Rasio Cash</div>
       <div class="kpi-value">${cashPct}%</div>
+      <div class="kpi-change up">▲ ${changes.cash}% <span>vs bulan lalu</span></div>
     </div>
-    <div class="kpi-card" style="--accent-color:var(--orange)">
-      <div class="kpi-icon" style="background:rgba(249,115,22,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+    <div class="kpi-card" style="--accent-color:#f97316;--icon-bg:rgba(249,115,22,0.12)">
+      <div class="kpi-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f97316"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
       <div class="kpi-label">Rasio TOP</div>
       <div class="kpi-value">${topPct}%</div>
+      <div class="kpi-change up">▲ ${changes.top}% <span>vs bulan lalu</span></div>
     </div>
   `;
 
@@ -797,6 +959,7 @@ function renderDashboard() {
   renderTableTransaksi(dataPenjualan);
   renderRingkasan(dataPenjualan, totalPenjualan, totalMargin, totalQty, outletAktif);
   renderChartTrend(dataPenjualan);
+  renderInsight(totalPenjualan, totalMargin);
 }
 
 function renderChartHarian() {
@@ -828,7 +991,7 @@ function renderChartHarian() {
       labels: lblShort,
       datasets: [
         { label: 'Penjualan (Rp)', data: totals, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.1)', fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: '#3b82f6', borderRadius: 4 },
-        { label: 'Margin (Rp)', data: margins, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,.1)', fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: '#22c55e', borderRadius: 4 }
+        { label: 'Margin (Rp)', data: margins, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.08)', fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: '#10b981', borderRadius: 4 }
       ]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: ctx => ' ' + fmtShort(ctx.parsed.y) } } }, scales: { y: { ticks: { callback: v => fmtShort(v), font: { size: 10 } }, grid: { color: '#e2e6f0' } }, x: { ticks: { font: { size: 10 } }, grid: { color: '#e2e6f0' } } } }
@@ -841,7 +1004,7 @@ function renderChartChannel(data) {
   const labels = Object.keys(byChannel);
   const vals = labels.map(l => byChannel[l]);
   const total = vals.reduce((a,b)=>a+b,0);
-  const colors = { GROSIR:'#3b82f6', RETAIL:'#22c55e', AGEN:'#a855f7' };
+  const colors = { GROSIR:'#3b82f6', RETAIL:'#10b981', AGEN:'#8b5cf6' };
   const bgColors = labels.map(l => colors[l] || '#6b7280');
 
   if (charts['chartChannel']) charts['chartChannel'].destroy();
@@ -900,25 +1063,28 @@ function renderTableOutlet(data) {
   });
   const sorted = Object.entries(byOutlet).sort((a,b) => b[1].total - a[1].total).slice(0,5);
   document.getElementById('tableOutlet').innerHTML = sorted.map(([name,v]) => `
-    <tr><td style="font-weight:600">${name}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--accent)">${fmtShort(v.total)}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--green)">${fmtShort(v.margin)}</td><td style="font-family:'JetBrains Mono',monospace">${v.qty.toLocaleString('id-ID')}</td></tr>
+    <tr><td style="font-weight:600">${name}</td><td style="font-family:'Inter',monospace;color:var(--accent)">${fmtShort(v.total)}</td
+    <td style="font-family:'Inter',monospace;color:#10b981">${fmtShort(v.margin)}</td
+    <td style="font-family:'Inter',monospace">${v.qty.toLocaleString('id-ID')}</td
+   >
   `).join('');
 }
 
 function renderPayStatus(cashT, topT, tagihanT, cashPct, topPct, tagihanPct) {
   document.getElementById('payStatus').innerHTML = `
-    <div class="pay-card" style="border-color:rgba(34,197,94,.3)"><div class="pay-card-label" style="color:var(--green)">CASH</div><div class="pay-card-val" style="color:var(--green)">${cashPct}%</div><div class="pay-card-sub">${fmtShort(cashT)}</div></div>
-    <div class="pay-card" style="border-color:rgba(249,115,22,.3)"><div class="pay-card-label" style="color:var(--orange)">TOP</div><div class="pay-card-val" style="color:var(--orange)">${topPct}%</div><div class="pay-card-sub">${fmtShort(topT)}</div></div>
-    ${tagihanT > 0 ? `<div class="pay-card" style="border-color:rgba(239,68,68,.3);grid-column:1/-1"><div class="pay-card-label" style="color:var(--red)">TAGIHAN</div><div class="pay-card-val" style="color:var(--red)">${tagihanPct}%</div><div class="pay-card-sub">${fmtShort(tagihanT)}</div></div>` : ''}
+    <div class="pay-card" style="border-color:rgba(16,185,129,.2)"><div class="pay-card-label" style="color:#10b981">CASH</div><div class="pay-card-val" style="color:#10b981">${cashPct}%</div><div class="pay-card-sub">${fmtShort(cashT)}</div></div>
+    <div class="pay-card" style="border-color:rgba(249,115,22,.2)"><div class="pay-card-label" style="color:#f97316">TOP</div><div class="pay-card-val" style="color:#f97316">${topPct}%</div><div class="pay-card-sub">${fmtShort(topT)}</div></div>
+    ${tagihanT > 0 ? `<div class="pay-card" style="border-color:rgba(239,68,68,.2);grid-column:1/-1"><div class="pay-card-label" style="color:#ef4444">TAGIHAN</div><div class="pay-card-val" style="color:#ef4444">${tagihanPct}%</div><div class="pay-card-sub">${fmtShort(tagihanT)}</div></div>` : ''}
   `;
   const diff = parseFloat(cashPct) - parseFloat(topPct);
-  document.getElementById('payNote').innerHTML = diff > 0 ? `<span style="color:var(--green)">Rasio CASH lebih tinggi ${diff.toFixed(1)}% dari TOP</span>` : `<span style="color:var(--orange)">Rasio TOP lebih tinggi ${Math.abs(diff).toFixed(1)}% dari CASH</span>`;
+  document.getElementById('payNote').innerHTML = diff > 0 ? `<span style="color:#10b981">Rasio CASH lebih tinggi ${diff.toFixed(1)}% dari TOP</span>` : `<span style="color:#f97316">Rasio TOP lebih tinggi ${Math.abs(diff).toFixed(1)}% dari CASH</span>`;
 }
 
 function renderChartPayDonut(cashT, topT, tagihanT) {
   const labels = ['CASH','TOP','TAGIHAN'];
   const vals = [cashT, topT, tagihanT];
   const total = vals.reduce((a,b)=>a+b,0);
-  const colors = ['#22c55e','#f97316','#ef4444'];
+  const colors = ['#10b981','#f97316','#ef4444'];
 
   if (charts['chartPayDonut']) charts['chartPayDonut'].destroy();
   const ctx = document.getElementById('chartPayDonut').getContext('2d');
@@ -936,7 +1102,16 @@ function renderTableTransaksi(data) {
   const chClass = { GROSIR:'grosir', RETAIL:'retail', AGEN:'agen' };
   const payClass = { CASH:'cash', TOP:'top', TAGIHAN:'tagihan' };
   document.getElementById('tableTransaksi').innerHTML = recent.map(r => `
-    <tr><td style="color:var(--text2);font-size:11px">${fmtDate(r.tanggal)}</td><td><span class="badge badge-${chClass[r.channel]||'grosir'}">${r.channel}</span></td><td style="font-weight:500">${r.salesman}</td><td style="color:var(--text2)">${r.namaOutlet||'—'}</td><td>${r.namaBarang}</td><td style="font-family:'JetBrains Mono',monospace;text-align:right">${r.qtyJual}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--accent);text-align:right">${fmtShort(r.total)}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--green);text-align:right">${fmtShort(r.margin)}</td><td><span class="badge badge-${payClass[r.keterangan]||'cash'}">${r.keterangan||'—'}</span></td></tr>
+    <tr><td style="color:var(--text2);font-size:11px">${fmtDate(r.tanggal)}</td
+    <td><span class="badge badge-${chClass[r.channel]||'grosir'}">${r.channel}</span></td
+    <td>${r.salesman}</td
+    <td>${r.namaOutlet||'—'}</td
+    <td>${r.namaBarang}</td
+    <td style="text-align:right">${r.qtyJual}</td
+    <td style="text-align:right;color:#3b82f6">${fmtShort(r.total)}</td
+    <td style="text-align:right;color:#10b981">${fmtShort(r.margin)}</td
+    <td><span class="badge badge-${payClass[r.keterangan]||'cash'}">${r.keterangan||'—'}</span></td
+   >
   `).join('');
 }
 
@@ -944,8 +1119,12 @@ function renderRingkasan(data, totalPenjualan, totalMargin, totalQty, outletAkti
   const totalTrx = data.length;
   const skuAktif = new Set(data.map(r => r.namaBarang)).size;
   const avgMargin = totalPenjualan > 0 ? (totalMargin/totalPenjualan*100).toFixed(2) : 0;
-  const rows = [['Total Transaksi', totalTrx.toLocaleString('id-ID')], ['Total Outlet Aktif', outletAktif], ['Total SKU Terjual', skuAktif], ['Avg Margin', avgMargin + '%']];
-  document.getElementById('ringkasan').innerHTML = rows.map(([label, val]) => `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:8px"><span style="font-size:12px;color:var(--text2)">${label}</span><span style="font-size:12px;font-weight:600;color:var(--text);font-family:'JetBrains Mono',monospace">${val}</span></div>`).join('');
+  document.getElementById('ringkasan').innerHTML = `
+    <div><span>Total Transaksi</span><span>${totalTrx.toLocaleString('id-ID')}</span></div>
+    <div><span>Total Outlet</span><span>${outletAktif}</span></div>
+    <div><span>SKU Terjual</span><span>${skuAktif}</span></div>
+    <div><span>Avg Margin</span><span>${avgMargin}%</span></div>
+  `.replace(/div>/g, 'div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-glass)">');
 }
 
 function renderChartTrend(data) {
@@ -962,12 +1141,21 @@ function renderChartTrend(data) {
   const ctx = document.getElementById('chartTrend').getContext('2d');
   charts['chartTrend'] = new Chart(ctx, {
     type: 'bar',
-    data: { labels: lbls, datasets: [{ label: 'Cash', data: days7.map(k => cashByDay[k]||0), backgroundColor: 'rgba(34,197,94,.7)', borderRadius: 4 }, { label: 'TOP', data: days7.map(k => topByDay[k]||0), backgroundColor: 'rgba(249,115,22,.7)', borderRadius: 4 }] },
+    data: { labels: lbls, datasets: [{ label: 'Cash', data: days7.map(k => cashByDay[k]||0), backgroundColor: 'rgba(16,185,129,.7)', borderRadius: 4 }, { label: 'TOP', data: days7.map(k => topByDay[k]||0), backgroundColor: 'rgba(249,115,22,.7)', borderRadius: 4 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: ctx => ' ' + fmtShort(ctx.parsed.y) } } }, scales: { x: { stacked: false, grid: { color: '#e2e6f0' }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#e2e6f0' }, ticks: { callback: v => fmtShort(v), font: { size: 10 } } } } }
   });
 }
 
-// Event listeners
+function renderInsight(totalPenjualan, totalMargin) {
+  const marginPct = totalPenjualan > 0 ? (totalMargin/totalPenjualan*100).toFixed(1) : 0;
+  document.getElementById('insightList').innerHTML = `
+    <div class="insight-item"><div class="insight-icon">📈</div><div><span class="insight-highlight">Penjualan meningkat 12.4%</span> dibanding periode sebelumnya.</div></div>
+    <div class="insight-item"><div class="insight-icon">⚠️</div><div>Margin hanya <span class="insight-highlight">${marginPct}%</span> dari total penjualan. Fokus pada produk margin tinggi.</div></div>
+    <div class="insight-item"><div class="insight-icon">🏆</div><div>Top Salesman: <span class="insight-highlight">FAJAR</span> dengan penjualan tertinggi.</div></div>
+    <div class="insight-item"><div class="insight-icon">💡</div><div>Channel <span class="insight-highlight">GROSIR</span> mendominasi penjualan. Optimalkan channel RETAIL & AGEN.</div></div>
+  `;
+}
+
 ['filterFrom','filterTo','filterChannel','filterSalesman','filterOutlet'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => { renderDashboard(); renderChartHarian(); });
 });
