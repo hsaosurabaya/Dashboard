@@ -1063,10 +1063,12 @@ function renderTableOutlet(data) {
   });
   const sorted = Object.entries(byOutlet).sort((a,b) => b[1].total - a[1].total).slice(0,5);
   document.getElementById('tableOutlet').innerHTML = sorted.map(([name,v]) => `
-    <tr><td style="font-weight:600">${name}</td><td style="font-family:'Inter',monospace;color:var(--accent)">${fmtShort(v.total)}</td
-    <td style="font-family:'Inter',monospace;color:#10b981">${fmtShort(v.margin)}</td
-    <td style="font-family:'Inter',monospace">${v.qty.toLocaleString('id-ID')}</td
-   >
+    <tr>
+      <td style="font-weight:600">${name}</td>
+      <td style="font-family:'Inter',monospace;color:var(--accent)">${fmtShort(v.total)}</td>
+      <td style="font-family:'Inter',monospace;color:#10b981">${fmtShort(v.margin)}</td>
+      <td style="font-family:'Inter',monospace">${v.qty.toLocaleString('id-ID')}</td>
+    </tr>
   `).join('');
 }
 
@@ -1102,16 +1104,17 @@ function renderTableTransaksi(data) {
   const chClass = { GROSIR:'grosir', RETAIL:'retail', AGEN:'agen' };
   const payClass = { CASH:'cash', TOP:'top', TAGIHAN:'tagihan' };
   document.getElementById('tableTransaksi').innerHTML = recent.map(r => `
-    <tr><td style="color:var(--text2);font-size:11px">${fmtDate(r.tanggal)}</td
-    <td><span class="badge badge-${chClass[r.channel]||'grosir'}">${r.channel}</span></td
-    <td>${r.salesman}</td
-    <td>${r.namaOutlet||'—'}</td
-    <td>${r.namaBarang}</td
-    <td style="text-align:right">${r.qtyJual}</td
-    <td style="text-align:right;color:#3b82f6">${fmtShort(r.total)}</td
-    <td style="text-align:right;color:#10b981">${fmtShort(r.margin)}</td
-    <td><span class="badge badge-${payClass[r.keterangan]||'cash'}">${r.keterangan||'—'}</span></td
-   >
+    <tr>
+      <td style="color:var(--text2);font-size:11px">${fmtDate(r.tanggal)}</td>
+      <td><span class="badge badge-${chClass[r.channel]||'grosir'}">${r.channel}</span></td>
+      <td style="font-weight:500">${r.salesman}</td>
+      <td style="color:var(--text2)">${r.namaOutlet||'—'}</td>
+      <td>${r.namaBarang}</td>
+      <td style="text-align:right">${r.qtyJual}</td>
+      <td style="text-align:right;color:#3b82f6">${fmtShort(r.total)}</td>
+      <td style="text-align:right;color:#10b981">${fmtShort(r.margin)}</td>
+      <td><span class="badge badge-${payClass[r.keterangan]||'cash'}">${r.keterangan||'—'}</span></td>
+    </tr>
   `).join('');
 }
 
@@ -1120,11 +1123,23 @@ function renderRingkasan(data, totalPenjualan, totalMargin, totalQty, outletAkti
   const skuAktif = new Set(data.map(r => r.namaBarang)).size;
   const avgMargin = totalPenjualan > 0 ? (totalMargin/totalPenjualan*100).toFixed(2) : 0;
   document.getElementById('ringkasan').innerHTML = `
-    <div><span>Total Transaksi</span><span>${totalTrx.toLocaleString('id-ID')}</span></div>
-    <div><span>Total Outlet</span><span>${outletAktif}</span></div>
-    <div><span>SKU Terjual</span><span>${skuAktif}</span></div>
-    <div><span>Avg Margin</span><span>${avgMargin}%</span></div>
-  `.replace(/div>/g, 'div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-glass)">');
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-glass)">
+      <span style="font-size:12px;color:var(--text3)">Total Transaksi</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',monospace">${totalTrx.toLocaleString('id-ID')}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-glass)">
+      <span style="font-size:12px;color:var(--text3)">Total Outlet</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',monospace">${outletAktif}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-glass)">
+      <span style="font-size:12px;color:var(--text3)">SKU Terjual</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',monospace">${skuAktif}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0">
+      <span style="font-size:12px;color:var(--text3)">Avg Margin</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',monospace">${avgMargin}%</span>
+    </div>
+  `;
 }
 
 function renderChartTrend(data) {
