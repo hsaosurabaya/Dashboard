@@ -260,6 +260,11 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
       <span>Input Penjualan</span>
     </a>
+    <!-- MENU EKSPORT DATA - BARU DITAMBAHKAN -->
+    <div class="shortcut-btn" id="exportMasterBtn" onclick="exportMasterData()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></svg>
+      <span>Eksport Data</span>
+    </div>
   </div>
 </div>
 
@@ -422,6 +427,40 @@ let charts = {};
 let chartPeriode = 'filter'; // 'filter', '7days', 'month'
 let currentModalData = [];
 let currentModalType = '';
+
+// ==================== FUNGSI EKSPORT MASTER DATA ====================
+async function exportMasterData() {
+  const btn = document.getElementById('exportMasterBtn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Memuat...</span>';
+  btn.style.pointerEvents = 'none';
+  
+  try {
+    // Fetch langsung dari URL sumber CSV
+    const response = await fetch(CSV_URL + '&t=' + Date.now());
+    let csvText = await response.text();
+    
+    // Bersihkan BOM jika ada
+    if (csvText.charCodeAt(0) === 0xFEFF) csvText = csvText.slice(1);
+    
+    // Buat blob dan download
+    const blob = new Blob(["\uFEFF" + csvText], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", `master_data_penjualan_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Gagal export data:", error);
+    alert("Gagal mengunduh file master data. Silakan coba lagi.");
+  } finally {
+    btn.innerHTML = originalText;
+    btn.style.pointerEvents = 'auto';
+  }
+}
 
 // ==================== HELPER FUNCTIONS ====================
 function fmt(n) { return "Rp " + Math.round(n).toLocaleString('id-ID'); }
