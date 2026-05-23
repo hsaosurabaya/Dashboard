@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="ai-insight.js"></script>
 <style>
 :root {
   --bg: #f2f7f4;
@@ -750,7 +751,31 @@ function renderAll() {
   renderSalesList(dataPenjualan, 'ws', activeDepo.ws);
   renderChartDepoHarian(dataPenjualan);
   renderTabelSKUChannel(dataPenjualan);
-}
+
+    // ── AI INSIGHT ──────────────────────────────────────────────────
+    const filterFrom = document.getElementById('filterFrom').value;
+    const filterTo   = document.getElementById('filterTo').value;
+    const filterLabel = filterFrom === filterTo
+      ? filterFrom
+      : filterFrom + ' s/d ' + filterTo;
+
+    const aiPayload = AIInsight.buildPenjualanPayload(allData.filter(r => {
+      if (!r.tanggal) return false;
+      const dk = r.tanggal.getFullYear() + '-' +
+        String(r.tanggal.getMonth()+1).padStart(2,'0') + '-' +
+        String(r.tanggal.getDate()).padStart(2,'0');
+      const depo = document.getElementById('filterDepo').value;
+      const ch   = document.getElementById('filterChannel').value;
+      const sm   = document.getElementById('filterSalesman').value;
+      if (filterFrom && dk < filterFrom) return false;
+      if (filterTo   && dk > filterTo)   return false;
+      if (depo && r.depo    !== depo) return false;
+      if (ch   && r.channel !== ch)   return false;
+      if (sm   && r.salesman !== sm)  return false;
+      return true;
+    }), filterLabel);
+    AIInsight.run(aiPayload);
+  }
 
 function renderTopProduk(data) {
   const limit = parseInt(document.getElementById('topProdukLimit').value) || 13;
