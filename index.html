@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="ai-insight.js"></script>
 <style>
 :root {
   --bg: #f2f7f4;
@@ -845,7 +846,17 @@ function renderDashboard() {
   renderTableTransaksi(dataPenjualan);
   renderRingkasan(dataPenjualan, totalPenjualan, totalMargin, totalQty, outletAktif);
   renderChartTrend(dataPenjualan);
-}
+
+    // ── AI INSIGHT ──────────────────────────────────────────────────
+    const filterFrom = document.getElementById('filterFrom').value;
+    const filterTo   = document.getElementById('filterTo').value;
+    const filterLabel = filterFrom === filterTo
+      ? filterFrom
+      : filterFrom + ' s/d ' + filterTo;
+
+    const aiPayload = AIInsight.buildSummaryPayload(getFilteredData(), filterLabel);
+    AIInsight.run(aiPayload);
+  }
 
 function renderChartHarian() {
   const data = getChartData();
