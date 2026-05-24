@@ -610,7 +610,14 @@ ${payload.topWS.map((s, i) => `${i+1}. ${s.nama} (${s.depo}): ${s.total} — ${s
     }
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content || '';
+    console.log('AI Insight API response:', JSON.stringify(data).substring(0, 800));
+    // Support berbagai struktur response OpenAI (Chat Completions & Responses API)
+    const content = data.choices?.[0]?.message?.content
+      || data.choices?.[0]?.text
+      || data.output?.[0]?.content?.[0]?.text
+      || data.output_text
+      || '';
+    return content;
   }
 
   // ── MAIN: RUN INSIGHT ─────────────────────────────────────────────────
