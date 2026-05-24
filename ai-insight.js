@@ -395,6 +395,8 @@ const AIInsight = (() => {
 
   // ── FORMAT INSIGHT TO HTML ────────────────────────────────────────────
   function formatInsight(text) {
+    if (!text || !text.trim()) return '';
+
     const sectionStyles = {
       '📊': { border: '#1a6b3c', bg: 'rgba(26,107,60,0.05)' },
       '✅': { border: '#16a34a', bg: 'rgba(22,163,74,0.05)' },
@@ -402,6 +404,23 @@ const AIInsight = (() => {
       '🔮': { border: '#9333ea', bg: 'rgba(147,51,234,0.05)' },
       '💡': { border: '#0891b2', bg: 'rgba(8,145,178,0.05)' },
     };
+
+    // Cek apakah ada emoji heading — kalau tidak, tampilkan sebagai plain text
+    const hasEmojiHeading = Object.keys(sectionStyles).some(k => text.includes(k));
+
+    if (!hasEmojiHeading) {
+      // Fallback: tampilkan teks mentah dengan formatting minimal
+      const fallbackHtml = text.trim()
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/^#{1,3}\s+(.+)$/gm, '<div style="font-size:12px;font-weight:700;color:#0d2115;margin:12px 0 6px">$1</div>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>\n?)+/gs, m => `<ul style="margin:6px 0;padding-left:16px">${m}</ul>`)
+        .replace(/\n\n/g, '</p><p style="margin:8px 0">')
+        .replace(/\n/g, '<br>');
+      return `<div class="ai-section" style="background:rgba(26,107,60,0.04);border-left:3px solid #1a6b3c;border-radius:0 8px 8px 0;padding:14px 16px;">
+        <div style="font-size:12px;color:#2d4a3a;line-height:1.8"><p style="margin:0">${fallbackHtml}</p></div>
+      </div>`;
+    }
 
     let html = '';
     const lines = text.split('\n');
@@ -413,8 +432,9 @@ const AIInsight = (() => {
       const cfg = Object.entries(sectionStyles).find(([k]) => currentSection.startsWith(k));
       const style = cfg ? cfg[1] : { border: '#ccc', bg: 'rgba(0,0,0,0.03)' };
       const contentHtml = sectionContent.join('\n').trim()
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/^- (.+)$/gm, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>\n?)+/gs, m => `<ul>${m}</ul>`)
+        .replace(/(<li>.*<\/li>\n?)+/gs, m => `<ul style="margin:6px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:4px">${m}</ul>`)
         .replace(/\n/g, '<br>');
 
       html += `
