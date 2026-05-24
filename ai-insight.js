@@ -15,8 +15,8 @@ const AIInsight = (() => {
   // ── CONFIG ────────────────────────────────────────────────────────────
   const CACHE_KEY_PREFIX = 'ai_insight_cache_';
   const API_KEY_STORAGE  = 'ai_insight_api_key';
-  const MODEL            = 'gpt-5.5';
-  const MAX_TOKENS       = 1024;
+  const MODEL            = 'gpt-5.4-mini';
+  const MAX_TOKENS       = 4096;
 
   // ── STATE ─────────────────────────────────────────────────────────────
   let _apiKey      = localStorage.getItem(API_KEY_STORAGE) || '';
@@ -318,7 +318,7 @@ const AIInsight = (() => {
           <div class="ai-icon">🧠</div>
           <div>
             <div class="ai-title">AI Business Analyst</div>
-            <div class="ai-subtitle">Powered by GPT-5.5 · HS AO Surabaya</div>
+            <div class="ai-subtitle">Powered by GPT-5.4-mini · HS AO Surabaya</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
