@@ -573,7 +573,7 @@ ${payload.topWS.map((s, i) => `${i+1}. ${s.nama} (${s.depo}): ${s.total} — ${s
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: MAX_TOKENS,
+        max_completion_tokens: MAX_TOKENS,
         messages: [
           {
             role: 'system',
