@@ -938,6 +938,7 @@ function renderChartProduk(data) {
 function renderTopSalesman(data) {
   const bySales = {};
   data.forEach(r => {
+    if (!r.salesman || !r.salesman.trim()) return;  // ← tambah baris ini
     if (!bySales[r.salesman]) bySales[r.salesman] = { total: 0, margin: 0 };
     bySales[r.salesman].total += r.total;
     bySales[r.salesman].margin += r.margin;
@@ -952,6 +953,7 @@ function renderTopSalesman(data) {
 function renderTableOutlet(data) {
   const byOutlet = {};
   data.forEach(r => {
+    if (!r.namaOutlet || !r.namaOutlet.trim()) return;  // ← tambah baris ini
     if (!byOutlet[r.namaOutlet]) byOutlet[r.namaOutlet] = { total:0, margin:0, qty:0 };
     byOutlet[r.namaOutlet].total += r.total;
     byOutlet[r.namaOutlet].margin += r.margin;
