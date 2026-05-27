@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piutang — Depo Surabaya</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root {
+  --bg: #f2f7f4;
+  --bg2: #e8f0eb;
+  --surface: #ffffff;
+  --surface2: #f4faf6;
+  --surface3: #edf5ef;
+  --border: #e0ece4;
+  --border2: #c8dece;
+  --text: #0d2115;
+  --text2: #4a7260;
+  --text3: #89aa96;
+  --accent: #1a6b3c;
+  --accent2: #0f4d2b;
+  --green: #16a34a;
+  --green-dim: #dcfce7;
+  --orange: #ea7010;
+  --orange-dim: #fff7ed;
+  --purple: #9333ea;
+  --red: #dc2626;
+  --yellow: #ca8a04;
+  --grosir: #185fa5;
+  --retail: #16a34a;
+  --agen: #9333ea;
+  --cash: #16a34a;
+  --top: #ea7010;
+  --tagihan: #dc2626;
+
+  --sidebar-grad-top: #0a2e1a;
+  --sidebar-grad-mid: #1a6b3c;
+  --sidebar-grad-bot: #27ae60;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* SIDEBAR */
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: linear-gradient(175deg, var(--sidebar-grad-top) 0%, var(--sidebar-grad-mid) 50%, var(--sidebar-grad-bot) 100%); z-index: 100; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(10,46,26,0.25); }
+.sidebar-logo { padding: 20px 10px 25px; display: flex; justify-content: center; align-items: center; }
+.sidebar-brand-logo { width: 180px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); }
+.sidebar-section { padding-top: 10px; }
+.sidebar-section-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: .1em; padding: 0 8px; margin-bottom: 4px; }
+.sidebar-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.65); cursor: pointer; transition: all .15s; margin-bottom: 1px; text-decoration: none; }
+.sidebar-item:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.95); }
+.sidebar-item.active { background: rgba(255,255,255,0.18); color: #ffffff; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); }
+.sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.sidebar-shortcuts { margin-top: auto; padding: 12px 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+.shortcut-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.75); cursor: pointer; transition: all .15s; margin-bottom: 2px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); }
+.shortcut-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+/* MAIN */
+.main { margin-left: 250px; min-height: 100vh; width: calc(100% - 250px); overflow-x: hidden; }
+
+/* TOPBAR */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 0 var(--border), 0 2px 12px rgba(10,46,26,0.06); flex-wrap: wrap; gap: 10px; }
+.topbar-left h1 { font-size: 17px; font-weight: 700; color: var(--text); }
+.topbar-left p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 28px 7px 10px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a7260' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+.date-filter { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; display: flex; align-items: center; gap: 6px; }
+.date-filter input { background: transparent; border: none; color: var(--text); font-size: 12px; font-family: inherit; outline: none; }
+.refresh-btn { background: var(--accent); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 600; padding: 7px 14px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: all .15s; box-shadow: 0 2px 8px rgba(26,107,60,0.35); }
+.refresh-btn:hover { background: var(--accent2); }
+
+/* CONTENT */
+.content { padding: 20px 24px 40px; }
+
+/* KPI CARDS */
+.kpi-grid { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 160px; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(10,46,26,0.06); }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-color, var(--accent)); }
+.kpi-label { font-size: 11px; color: var(--text2); font-weight: 500; margin-bottom: 4px; }
+.kpi-value { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; font-family: 'Sora', sans-serif; }
+.kpi-sub { font-size: 9px; color: var(--text3); margin-top: 4px; }
+
+/* TABLES */
+.table-wrap { overflow-x: auto; margin-top: 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { background: var(--surface2); color: var(--text2); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:hover { background: var(--surface2); }
+tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
+
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+.badge-tagihan { background: rgba(220,38,38,.1); color: var(--red); }
+.badge-cash { background: rgba(22,163,74,.1); color: var(--green); }
+.badge-top { background: rgba(234,112,16,.1); color: var(--orange); }
+.badge-grosir { background: rgba(24,95,165,.1); color: var(--grosir); }
+.badge-retail { background: rgba(22,163,74,.1); color: var(--retail); }
+.badge-agen { background: rgba(147,51,234,.1); color: var(--agen); }
+
+/* CHART CARD */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; }
+.chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
+
+/* MODAL */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease; }
+.modal-overlay.active { display: flex; opacity: 1; }
+.modal-container { background: var(--surface); border-radius: 14px; width: 90%; max-width: 1000px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; overflow: hidden; }
+.modal-overlay.active .modal-container { transform: scale(1); }
+.modal-header { padding: 16px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.modal-header h2 { font-size: 16px; font-weight: 700; }
+.modal-close { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-content { flex: 1; overflow: auto; padding: 16px 20px; }
+.modal-footer { padding: 10px 20px; background: var(--bg); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; flex-shrink: 0; }
+.modal-export-btn { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+/* LOADING */
+.loading-overlay { position: fixed; inset: 0; background: rgba(242,247,244,.97); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.loading-overlay.hidden { display: none; }
+.loading-ring { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 900px) {
+  .sidebar { width: 60px; }
+  .sidebar-brand-logo { width: 110px; }
+  .sidebar-item span, .sidebar-section-label, .shortcut-btn span { display: none; }
+  .sidebar-item { justify-content: center; }
+  .main { margin-left: 60px; width: calc(100% - 60px); }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <div class="loading-text">Memuat data piutang...</div>
+</div>
+
+<div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="modalTitle">📋 Detail Piutang</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-content" id="modalContent"></div>
+    <div class="modal-footer">
+      <button class="modal-export-btn" onclick="exportModalData()">📥 Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <img src="assets/logo-hs-bonek.png" alt="HS BONEK" class="sidebar-brand-logo" onerror="this.style.display='none'">
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu Utama</div>
+    <a href="index.html" class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Summary</span>
+    </a>
+    <a href="penjualan.html" class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>Penjualan</span>
+    </a>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      <span>Produk (SKU)</span>
+    </div>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span>Salesman</span>
+    </div>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <span>Outlet</span>
+    </div>
+    <a href="piutang.html" class="sidebar-item active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Piutang</span>
+    </a>
+  </div>
+  <div class="sidebar-shortcuts">
+    <div class="shortcut-btn" id="exportPiutangBtn" onclick="exportPiutangData()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></svg>
+      <span>Eksport Piutang</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>📋 Manajemen Piutang</h1>
+      <p id="subtitlePeriod">Memuat data piutang berdasarkan transaksi TAGIHAN</p>
+    </div>
+    <div class="topbar-right">
+      <div class="filter-group">
+        <div class="date-filter">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <input type="date" id="filterFrom">
+          <span style="color:var(--text3)">—</span>
+          <input type="date" id="filterTo">
+        </div>
+        <select class="filter-select" id="filterChannel">
+          <option value="">Semua Channel</option>
+          <option value="GROSIR">Grosir</option>
+          <option value="RETAIL">Retail</option>
+          <option value="AGEN">Agen</option>
+        </select>
+        <select class="filter-select" id="filterSalesman">
+          <option value="">Semua Salesman</option>
+        </select>
+        <select class="filter-select" id="filterOutlet">
+          <option value="">Semua Outlet</option>
+        </select>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- KPI Cards -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Chart: Piutang per Channel -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">📊 Piutang (TAGIHAN) per Channel</div>
+      </div>
+      <div style="height: 200px;"><canvas id="chartPiutangChannel"></canvas></div>
+    </div>
+
+    <!-- Tabel Daftar Piutang per Outlet -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">🏪 Daftar Piutang per Outlet</div>
+        <div class="chart-sub">Total TAGIHAN yang belum lunas (berdasarkan data penjualan)</div>
+      </div>
+      <div class="table-wrap">
+        <table id="piutangTable">
+          <thead>
+            <tr><th>Outlet</th><th>Channel</th><th>Total Piutang (Rp)</th><th>Jumlah Transaksi</th><th>Terakhir Transaksi</th><th>Salesman</th></tr>
+          </thead>
+          <tbody id="piutangTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabel Transaksi Piutang -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">📝 Detail Transaksi Piutang (TAGIHAN)</div>
+        <div class="chart-sub">50 transaksi terbaru dengan status TAGIHAN</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tanggal</th><th>Channel</th><th>Salesman</th><th>Outlet</th><th>Barang</th><th>Qty</th><th>Total (Rp)</th></tr>
+          </thead>
+          <tbody id="detailTagihanTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-IqawPLP_xOgMU8KsQLFbhzEx9a3kSBXA6Nu8l1BTzsnJq3neZb3u6-5RvUdaj4dWeD99ye5E1A0x/pub?gid=0&single=true&output=csv";
+
+let allData = [];
+let charts = {};
+let currentModalData = [];
+
+function fmtShort(n) {
+  if (n >= 1e9) return "Rp " + (n/1e9).toFixed(1) + " M";
+  if (n >= 1e6) return "Rp " + (n/1e6).toFixed(1) + " Jt";
+  if (n >= 1e3) return "Rp " + (n/1e3).toFixed(0) + " Rb";
+  return "Rp " + Math.round(n).toLocaleString('id-ID');
+}
+function fmtFull(n) { return "Rp " + Math.round(n).toLocaleString('id-ID'); }
+function parseNum(s) {
+  if (!s || s === '') return 0;
+  let cleaned = s.toString().replace(/,/g, '');
+  let result = parseFloat(cleaned);
+  return isNaN(result) ? 0 : result;
+}
+function parseDate(s) {
+  if (!s) return null;
+  const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
+  const parts = s.trim().split(/[\s\-\/]+/);
+  if (parts.length === 3) {
+    let d, m, y;
+    if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
+    else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
+    else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
+    if (!isNaN(d) && m!==undefined && !isNaN(y)) return new Date(y,m,d);
+  }
+  const dt = new Date(s);
+  return isNaN(dt) ? null : dt;
+}
+function fmtDate(d) { return d ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) : ''; }
+function dateKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+
+function getFilteredData() {
+  const from = document.getElementById('filterFrom').value;
+  const to = document.getElementById('filterTo').value;
+  const ch = document.getElementById('filterChannel').value;
+  const sm = document.getElementById('filterSalesman').value;
+  const ot = document.getElementById('filterOutlet').value;
+  return allData.filter(r => {
+    if (r.keterangan !== 'TAGIHAN') return false;
+    if (!r.tanggal) return false;
+    const dk = dateKey(r.tanggal);
+    if (from && dk < from) return false;
+    if (to && dk > to) return false;
+    if (ch && r.channel !== ch) return false;
+    if (sm && r.salesman !== sm) return false;
+    if (ot && r.namaOutlet !== ot) return false;
+    return true;
+  });
+}
+
+function populateFilters() {
+  const salesSet = [...new Set(allData.map(r => r.salesman))].sort();
+  const outletSet = [...new Set(allData.map(r => r.namaOutlet))].sort();
+  document.getElementById('filterSalesman').innerHTML = '<option value="">Semua Salesman</option>' + salesSet.map(s => `<option>${s}</option>`).join('');
+  document.getElementById('filterOutlet').innerHTML = '<option value="">Semua Outlet</option>' + outletSet.map(o => `<option>${o}</option>`).join('');
+}
+
+function setDefaultDates() {
+  if (!allData.length) return;
+  const tagihanData = allData.filter(r => r.keterangan === 'TAGIHAN');
+  if (!tagihanData.length) return;
+  const dates = tagihanData.map(r => r.tanggal).filter(Boolean);
+  const maxD = new Date(Math.max(...dates));
+  const lastDate = dateKey(maxD);
+  document.getElementById('filterFrom').value = lastDate;
+  document.getElementById('filterTo').value = lastDate;
+}
+
+function renderKPI(data) {
+  const totalPiutang = data.reduce((s,r) => s + r.total, 0);
+  const uniqueOutlets = new Set(data.map(r => r.kodeOutlet)).size;
+  const uniqueSalesmen = new Set(data.map(r => r.salesman)).size;
+  const avgPerOutlet = uniqueOutlets > 0 ? totalPiutang / uniqueOutlets : 0;
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi-card" style="--accent-color:var(--red)"><div class="kpi-label">Total Piutang</div><div class="kpi-value">${fmtShort(totalPiutang)}</div><div class="kpi-sub">Total TAGIHAN</div></div>
+    <div class="kpi-card" style="--accent-color:var(--accent)"><div class="kpi-label">Outlet Bermasalah</div><div class="kpi-value">${uniqueOutlets}</div><div class="kpi-sub">Outlet dengan piutang</div></div>
+    <div class="kpi-card" style="--accent-color:var(--orange)"><div class="kpi-label">Salesman Terkait</div><div class="kpi-value">${uniqueSalesmen}</div><div class="kpi-sub">Penanggung jawab</div></div>
+    <div class="kpi-card" style="--accent-color:var(--purple)"><div class="kpi-label">Rata-rata per Outlet</div><div class="kpi-value">${fmtShort(avgPerOutlet)}</div><div class="kpi-sub">Per outlet</div></div>
+  `;
+}
+
+function renderChartPiutangChannel(data) {
+  const byChannel = {};
+  data.forEach(r => { byChannel[r.channel] = (byChannel[r.channel]||0) + r.total; });
+  const labels = Object.keys(byChannel);
+  const vals = labels.map(l => byChannel[l]);
+  const colors = { GROSIR:'#185fa5', RETAIL:'#1a6b3c', AGEN:'#a855f7' };
+  const bgColors = labels.map(l => colors[l] || '#6b7280');
+  if (charts['chartPiutangChannel']) charts['chartPiutangChannel'].destroy();
+  const ctx = document.getElementById('chartPiutangChannel').getContext('2d');
+  charts['chartPiutangChannel'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: bgColors, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + fmtShort(ctx.parsed.y) } } }, scales: { y: { ticks: { callback: v => fmtShort(v), font: { size: 10 } } } } }
+  });
+}
+
+function renderPiutangTable(data) {
+  const byOutlet = {};
+  data.forEach(r => {
+    if (!r.namaOutlet) return;
+    if (!byOutlet[r.namaOutlet]) {
+      byOutlet[r.namaOutlet] = { total: 0, count: 0, lastDate: null, channel: r.channel, salesman: r.salesman, kode: r.kodeOutlet };
+    }
+    byOutlet[r.namaOutlet].total += r.total;
+    byOutlet[r.namaOutlet].count++;
+    if (!byOutlet[r.namaOutlet].lastDate || r.tanggal > byOutlet[r.namaOutlet].lastDate) {
+      byOutlet[r.namaOutlet].lastDate = r.tanggal;
+      byOutlet[r.namaOutlet].salesman = r.salesman;
+      byOutlet[r.namaOutlet].channel = r.channel;
+    }
+  });
+  const sorted = Object.entries(byOutlet).sort((a,b) => b[1].total - a[1].total);
+  const channelClass = { GROSIR:'grosir', RETAIL:'retail', AGEN:'agen' };
+  document.getElementById('piutangTableBody').innerHTML = sorted.map(([name, v]) => `
+    <tr onclick="showOutletDetail('${name.replace(/'/g, "\\'")}')" style="cursor:pointer">
+      <td style="font-weight:600">${name}</td>
+      <td><span class="badge badge-${channelClass[v.channel] || 'grosir'}">${v.channel || '—'}</span></td>
+      <td style="color:var(--red);font-family:'JetBrains Mono',monospace">${fmtFull(v.total)}</td>
+      <td>${v.count} transaksi</td>
+      <td>${v.lastDate ? fmtDate(v.lastDate) : '—'}</td>
+      <td>${v.salesman || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function showOutletDetail(outletName) {
+  const data = getFilteredData();
+  const outletData = data.filter(r => r.namaOutlet === outletName);
+  const total = outletData.reduce((s,r) => s + r.total, 0);
+  currentModalData = outletData;
+  document.getElementById('modalTitle').innerHTML = `🏪 Detail Piutang - ${outletName}`;
+  document.getElementById('modalContent').innerHTML = `
+    <div style="margin-bottom:16px;padding:12px;background:var(--surface2);border-radius:8px;display:flex;gap:16px;flex-wrap:wrap">
+      <div><strong>Total Piutang:</strong> <span style="color:var(--red)">${fmtFull(total)}</span></div>
+      <div><strong>Jumlah Transaksi:</strong> ${outletData.length}</div>
+      <div><strong>Channel:</strong> ${outletData[0]?.channel || '—'}</div>
+      <div><strong>Salesman:</strong> ${outletData[0]?.salesman || '—'}</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tanggal</th><th>Barang</th><th>Qty</th><th>Total (Rp)</th><th>Harga Jual</th><th>Harga Pabrik</th><th>Margin</th></tr></thead>
+        <tbody>
+          ${outletData.sort((a,b)=>b.tanggal - a.tanggal).map(r => `
+            <tr><td>${fmtDate(r.tanggal)}</td><td>${r.namaBarang}</td><td>${r.qtyJual}</td><td style="color:var(--red)">${fmtFull(r.total)}</td><td>${fmtFull(r.hargaJual)}</td><td>${fmtFull(r.hargaPabrik)}</td><td>${fmtFull(r.margin)}</td></tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function renderDetailTagihanTable(data) {
+  const recent = [...data].sort((a,b) => b.tanggal - a.tanggal).slice(0,50);
+  document.getElementById('detailTagihanTable').innerHTML = recent.map(r => `
+    <tr>
+      <td>${fmtDate(r.tanggal)}</td>
+      <td><span class="badge badge-${r.channel === 'GROSIR' ? 'grosir' : r.channel === 'RETAIL' ? 'retail' : 'agen'}">${r.channel}</span></td>
+      <td>${r.salesman}</td>
+      <td>${r.namaOutlet || '—'}</td>
+      <td>${r.namaBarang}</td>
+      <td>${r.qtyJual}</td>
+      <td style="color:var(--red);font-family:'JetBrains Mono',monospace">${fmtFull(r.total)}</td>
+    </tr>
+  `).join('');
+}
+
+function closeModal() { document.getElementById('detailModal').classList.remove('active'); }
+function exportModalData() {
+  if (!currentModalData.length) { alert('Tidak ada data untuk diekspor'); return; }
+  let csv = [['Tanggal','Channel','Salesman','Outlet','Barang','Qty','Total','Harga Jual','Harga Pabrik','Margin']];
+  currentModalData.forEach(r => {
+    csv.push([fmtDate(r.tanggal), r.channel, r.salesman, r.namaOutlet, r.namaBarang, r.qtyJual, r.total, r.hargaJual, r.hargaPabrik, r.margin]);
+  });
+  const blob = new Blob(["\uFEFF" + csv.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `piutang_detail_${new Date().toISOString().slice(0,19)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function exportPiutangData() {
+  const data = getFilteredData();
+  if (!data.length) { alert('Tidak ada data piutang untuk diekspor'); return; }
+  const byOutlet = {};
+  data.forEach(r => {
+    if (!r.namaOutlet) return;
+    if (!byOutlet[r.namaOutlet]) byOutlet[r.namaOutlet] = { total: 0, count: 0, lastDate: null, channel: r.channel, salesman: r.salesman };
+    byOutlet[r.namaOutlet].total += r.total;
+    byOutlet[r.namaOutlet].count++;
+    if (!byOutlet[r.namaOutlet].lastDate || r.tanggal > byOutlet[r.namaOutlet].lastDate) {
+      byOutlet[r.namaOutlet].lastDate = r.tanggal;
+      byOutlet[r.namaOutlet].salesman = r.salesman;
+    }
+  });
+  let csv = [['Outlet','Channel','Total Piutang','Jumlah Transaksi','Terakhir Transaksi','Salesman']];
+  Object.entries(byOutlet).forEach(([name, v]) => {
+    csv.push([name, v.channel, v.total, v.count, v.lastDate ? fmtDate(v.lastDate) : '', v.salesman]);
+  });
+  const blob = new Blob(["\uFEFF" + csv.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `piutang_summary_${new Date().toISOString().slice(0,19)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+async function loadData() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  try {
+    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    let text = await res.text();
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true, transformHeader: h => h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase() });
+    allData = parsed.data.map(row => ({
+      tanggal: parseDate(row['TANGGAL'] || ''),
+      channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
+      salesman: (row['SALESMAN'] || '').toString().trim(),
+      jobtitle: (row['JOBTITTLE'] || '').toString().trim().toUpperCase(),
+      kodeOutlet: (row['KODE OUTLET'] || '').toString().trim(),
+      namaOutlet: (row['NAMA OUTLET'] || '').toString().trim(),
+      namaBarang: (row['NAMA BARANG'] || '').toString().trim(),
+      hargaJual: parseNum(row['HARGA JUAL']),
+      hargaPabrik: parseNum(row['HARGA PABRIK']),
+      qtyJual: parseNum(row['QTY JUAL']),
+      total: parseNum(row['TOTAL']),
+      margin: parseNum(row['MARGIN']),
+      keterangan: (row['KETERANGAN'] || '').toString().trim().toUpperCase(),
+      depo: (row['DEPO'] || '').toString().trim().toUpperCase(),
+    })).filter(r => r.tanggal && r.namaBarang);
+    populateFilters();
+    setDefaultDates();
+    renderDashboard();
+  } catch(e) { console.error(e); alert('Gagal memuat data: ' + e.message); }
+  document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+function renderDashboard() {
+  const data = getFilteredData();
+  renderKPI(data);
+  renderChartPiutangChannel(data);
+  renderPiutangTable(data);
+  renderDetailTagihanTable(data);
+  const total = data.reduce((s,r) => s + r.total, 0);
+  const outletCount = new Set(data.map(r => r.kodeOutlet)).size;
+  document.getElementById('subtitlePeriod').innerHTML = `Total piutang: ${fmtFull(total)} dari ${outletCount} outlet • ${data.length} transaksi TAGIHAN`;
+}
+
+['filterFrom','filterTo','filterChannel','filterSalesman','filterOutlet'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => renderDashboard());
+});
+
+loadData();
+</script>
+</body>
+</html>
