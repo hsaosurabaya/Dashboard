@@ -6,7 +6,9 @@
 <title>Piutang — HS AO Surabaya</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
+/* ========== STYLE SAMA PERSIS DENGAN INDEX.HTML ========== */
 :root {
   --bg: #f2f7f4;
   --surface: #ffffff;
@@ -89,7 +91,6 @@ a { color: inherit; text-decoration: none; }
 .chart-row.col-2 { grid-template-columns: 1fr 1fr; }
 .chart-row.col-3 { grid-template-columns: 1fr 1fr 1fr; }
 .chart-row.col-2-1 { grid-template-columns: 2fr 1fr; }
-.chart-row.col-1-2 { grid-template-columns: 1fr 2fr; }
 .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(10,46,26,0.05); min-width: 0; box-sizing: border-box; }
 .chart-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
 .chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
@@ -171,7 +172,6 @@ tbody tr:last-child td { border-bottom: none; }
 @media (max-width: 1200px) {
   .chart-row.col-3 { grid-template-columns: 1fr 1fr; }
   .chart-row.col-2-1 { grid-template-columns: 1fr; }
-  .chart-row.col-1-2 { grid-template-columns: 1fr; }
 }
 @media (max-width: 900px) {
   .sidebar { width: 60px; }
@@ -192,7 +192,7 @@ tbody tr:last-child td { border-bottom: none; }
   <div class="loading-text">Memuat data piutang...</div>
 </div>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR (SAMA PERSIS DENGAN INDEX.HTML) -->
 <div class="sidebar">
   <div class="sidebar-logo">
     <img src="assets/logo-hs-bonek.png" alt="HS BONEK" class="sidebar-brand-logo" onerror="this.style.display='none'">
@@ -272,11 +272,7 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
 
   <div class="content">
-
-    <!-- KPI CARDS - 4 BARIS KPI UTAMA -->
     <div class="kpi-grid" id="kpiGrid"></div>
-
-    <!-- ALERT: JATUH TEMPO -->
     <div class="alert-section" id="alertSection" style="display:none">
       <div class="alert-header">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -285,69 +281,35 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="alert-list" id="alertList"></div>
     </div>
-
-    <!-- ROW 1: Donut Grosir vs Agen + Bar Aging + Tren -->
     <div class="chart-row col-3">
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Distribusi Channel</div>
-            <div class="chart-sub">Grosir vs Agen</div>
-          </div>
-        </div>
+        <div class="chart-header"><div><div class="chart-title">Distribusi Channel</div><div class="chart-sub">Grosir vs Agen</div></div></div>
         <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartChannel"></canvas></div>
         <div class="legend-wrap" id="legendChannel"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Aging Piutang</div>
-            <div class="chart-sub">Distribusi umur piutang</div>
-          </div>
-        </div>
+        <div class="chart-header"><div><div class="chart-title">Aging Piutang</div><div class="chart-sub">Distribusi umur piutang</div></div></div>
         <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartAging"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Status Piutang</div>
-            <div class="chart-sub">Lunas vs Belum Lunas</div>
-          </div>
-        </div>
+        <div class="chart-header"><div><div class="chart-title">Status Piutang</div><div class="chart-sub">Lunas vs Belum Lunas</div></div></div>
         <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartStatus"></canvas></div>
         <div class="legend-wrap" id="legendStatus"></div>
       </div>
     </div>
-
-    <!-- ROW 2: Tren piutang + Top 10 outlet -->
     <div class="chart-row col-2-1">
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Tren Piutang Harian</div>
-            <div class="chart-sub">Sisa AR per hari berdasarkan tanggal nota</div>
-          </div>
-        </div>
+        <div class="chart-header"><div><div class="chart-title">Tren Piutang Harian</div><div class="chart-sub">Sisa AR per hari</div></div></div>
         <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartTren"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Top 10 Outlet</div>
-            <div class="chart-sub">Terbesar sisa AR-nya</div>
-          </div>
-        </div>
+        <div class="chart-header"><div><div class="chart-title">Top 10 Outlet</div><div class="chart-sub">Terbesar sisa AR</div></div></div>
         <div class="top-list" id="topOutletList"></div>
       </div>
     </div>
-
-    <!-- ROW 3: Tabel Piutang Detail -->
     <div class="chart-card" style="margin-bottom:12px">
       <div class="chart-header">
-        <div>
-          <div class="chart-title">Detail Piutang per Outlet</div>
-          <div class="chart-sub">Semua data piutang sesuai filter</div>
-        </div>
+        <div><div class="chart-title">Detail Piutang per Outlet</div><div class="chart-sub">Semua data piutang sesuai filter</div></div>
         <div class="channel-tabs">
           <div class="channel-tab active" data-ch="ALL" onclick="switchChannelTab('ALL',this)">Semua</div>
           <div class="channel-tab" data-ch="GROSIR" onclick="switchChannelTab('GROSIR',this)">Grosir</div>
@@ -356,22 +318,7 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="table-wrap">
         <table id="piutangTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Kode Outlet</th>
-              <th>Nama Outlet</th>
-              <th>Channel</th>
-              <th>Salesman</th>
-              <th class="right">Tagihan</th>
-              <th class="right">Terbayar</th>
-              <th class="right">Sisa AR</th>
-              <th>Tgl Nota</th>
-              <th>Jatuh Tempo</th>
-              <th class="right">Aging</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+          <thead><tr><th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th><th class="right">Tagihan</th><th class="right">Terbayar</th><th class="right">Sisa AR</th><th>Tgl Nota</th><th>Jatuh Tempo</th><th class="right">Aging</th><th>Status</th></tr></thead>
           <tbody id="tablePiutang"></tbody>
         </table>
       </div>
@@ -380,13 +327,12 @@ tbody tr:last-child td { border-bottom: none; }
         <div style="font-size:11px;font-weight:600;color:var(--text)" id="tableTotals">—</div>
       </div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ==================== CONFIG ====================
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=0&single=true&output=csv';
+// ==================== KONFIGURASI ====================
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-IqawPLP_xOgMU8KsQLFbhzEx9a3kSBXA6Nu8l1BTzsnJq3neZb3u6-5RvUdaj4dWeD99ye5E1A0x/pub?gid=0&single=true&output=csv';
 
 let allData = [];
 let activeChannelTab = 'ALL';
@@ -406,29 +352,27 @@ function fmtFull(n) {
   return 'Rp ' + Math.round(n).toLocaleString('id-ID');
 }
 function parseNum(s) {
-  if (!s) return 0;
-  return parseFloat(String(s).replace(/[^\d.-]/g,'')) || 0;
+  if (!s || s === '') return 0;
+  let cleaned = s.toString().replace(/,/g, '');
+  let result = parseFloat(cleaned);
+  return isNaN(result) ? 0 : result;
 }
 function parseDate(s) {
   if (!s) return null;
-  const parts = String(s).trim().split(/[\/\-]/);
+  const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
+  const parts = s.toString().trim().split(/[\s\-\/]+/);
   if (parts.length === 3) {
-    let [a, b, c] = parts;
-    if (String(a).length === 4) return new Date(+a, +b-1, +c);
-    if (String(c).length === 4) return new Date(+c, +b-1, +a);
-    return new Date(+c+2000, +b-1, +a);
+    let d, m, y;
+    if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
+    else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
+    else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
+    if (!isNaN(d) && m!==undefined && !isNaN(y) && y>1900) return new Date(y,m,d);
   }
-  const d = new Date(s);
-  return isNaN(d) ? null : d;
+  const dt = new Date(s);
+  return isNaN(dt.getTime()) ? null : dt;
 }
-function dateKey(d) {
-  if (!d) return '';
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-function fmtDate(d) {
-  if (!d) return '—';
-  return d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
-}
+function fmtDate(d) { return d ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) : '-'; }
+function dateKey(d) { return d ? d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') : ''; }
 function agingDays(tglNota) {
   if (!tglNota) return 0;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -445,77 +389,64 @@ function destroyChart(id) {
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
 
-// ==================== LOAD DATA ====================
+// ==================== LOAD DATA (Gunakan PapaParse seperti index.html) ====================
 async function loadData() {
   const btn = document.getElementById('btnRefresh');
   btn.classList.add('loading');
   document.getElementById('loadingOverlay').classList.remove('hidden');
 
   try {
-    const res = await fetch(CSV_URL + '&t=' + Date.now());
-    let csv = await res.text();
-    if (csv.charCodeAt(0) === 0xFEFF) csv = csv.slice(1);
-
-    const lines = csv.split('\n').filter(l => l.trim());
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toUpperCase());
-
-    const idx = (name) => headers.findIndex(h => h.includes(name));
-    const iDate    = idx('TANGGAL');
-    const iCh      = idx('CHANNEL');
-    const iSales   = idx('SALESMAN');
-    const iKode    = idx('KODE OUTLET');
-    const iNama    = idx('NAMA OUTLET');
-    const iTotal   = idx('TOTAL');
-    const iKet     = idx('KETERANGAN');
-    const iDepo    = idx('DEPO');
-    const iTempo   = idx('TANGGAL TEMPO');
-    const iNota    = idx('TANGGAL NOTA AWAL');
-    const iTerbayar= idx('TERBAYAR');
-    const iSisaAR  = idx('SISA AR');
-    const iStatus  = idx('STATUS');
+    const response = await fetch(CSV_URL + '&t=' + Date.now());
+    let csvText = await response.text();
+    if (csvText.charCodeAt(0) === 0xFEFF) csvText = csvText.slice(1);
+    
+    const parsed = Papa.parse(csvText, { 
+      header: true, 
+      skipEmptyLines: true,
+      transformHeader: h => h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase()
+    });
 
     allData = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g,''));
-      if (!cols[iDate]) continue;
-
-      const ket = (cols[iKet]||'').toUpperCase();
-      if (!['TOP','TAGIHAN'].includes(ket)) continue;
-
-      const tglNota  = parseDate(cols[iNota] || cols[iDate]);
-      const tglTempo = parseDate(cols[iTempo]);
-      const sisaAR   = parseNum(cols[iSisaAR]);
-      const rawStatus = (cols[iStatus]||'').toUpperCase().trim();
-      const aging    = agingDays(tglNota);
-      const today    = new Date(); today.setHours(0,0,0,0);
+    for (const row of parsed.data) {
+      const keterangan = (row['KETERANGAN'] || '').toString().toUpperCase().trim();
+      if (!['TOP', 'TAGIHAN'].includes(keterangan)) continue;
+      
+      const tglNota = parseDate(row['TANGGAL NOTA AWAL'] || row['TANGGAL']);
+      const tglTempo = parseDate(row['TANGGAL TEMPO']);
+      const sisaAR = parseNum(row['SISA AR']);
+      const total = parseNum(row['TOTAL']);
+      const terbayar = parseNum(row['TERBAYAR']);
+      const rawStatus = (row['STATUS'] || '').toString().toUpperCase().trim();
+      const aging = agingDays(tglNota);
+      const today = new Date(); today.setHours(0,0,0,0);
       const isJatuhTempo = tglTempo && tglTempo < today && rawStatus !== 'LUNAS' && sisaAR > 0;
-
+      
       let finalStatus = rawStatus;
       if (!finalStatus) {
         if (sisaAR <= 0) finalStatus = 'LUNAS';
         else if (isJatuhTempo) finalStatus = 'JATUH TEMPO';
         else finalStatus = 'BELUM LUNAS';
       }
-
+      
       allData.push({
-        tanggal:    parseDate(cols[iDate]),
-        channel:    (cols[iCh]||'').toUpperCase(),
-        salesman:   cols[iSales]||'',
-        kodeOutlet: cols[iKode]||'',
-        namaOutlet: cols[iNama]||'',
-        total:      parseNum(cols[iTotal]),
-        keterangan: ket,
-        depo:       cols[iDepo]||'',
-        tglNota,
-        tglTempo,
-        terbayar:   parseNum(cols[iTerbayar]),
-        sisaAR,
-        status:     finalStatus,
-        aging,
-        isJatuhTempo,
+        tanggal: parseDate(row['TANGGAL']),
+        channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
+        salesman: row['SALESMAN'] || '',
+        kodeOutlet: row['KODE OUTLET'] || '',
+        namaOutlet: row['NAMA OUTLET'] || '',
+        total: total,
+        keterangan: keterangan,
+        tglNota: tglNota,
+        tglTempo: tglTempo,
+        terbayar: terbayar,
+        sisaAR: sisaAR,
+        status: finalStatus,
+        aging: aging,
+        isJatuhTempo: isJatuhTempo,
       });
     }
-
+    
+    console.log('Data loaded:', allData.length);
     setDefaultDates();
     populateFilters();
     renderAll();
@@ -531,6 +462,7 @@ async function loadData() {
 function setDefaultDates() {
   if (!allData.length) return;
   const dates = allData.map(r => r.tglNota || r.tanggal).filter(Boolean);
+  if (!dates.length) return;
   const max = new Date(Math.max(...dates));
   const dateStr = dateKey(max);
   document.getElementById('filterFrom').value = dateStr;
@@ -545,24 +477,23 @@ function populateFilters() {
 }
 
 function getFilteredData() {
-  const from   = document.getElementById('filterFrom').value;
-  const to     = document.getElementById('filterTo').value;
-  const ch     = document.getElementById('filterChannel').value;
-  const sales  = document.getElementById('filterSalesman').value;
+  const from = document.getElementById('filterFrom').value;
+  const to = document.getElementById('filterTo').value;
+  const ch = document.getElementById('filterChannel').value;
+  const sales = document.getElementById('filterSalesman').value;
   const status = document.getElementById('filterStatus').value;
-
+  
   return allData.filter(r => {
     const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
     if (from && dk < from) return false;
-    if (to   && dk > to)   return false;
-    if (ch   && r.channel !== ch) return false;
+    if (to && dk > to) return false;
+    if (ch && r.channel !== ch) return false;
     if (sales && r.salesman !== sales) return false;
     if (status && r.status !== status) return false;
     return true;
   });
 }
 
-// ==================== RENDER ALL ====================
 function renderAll() {
   const data = getFilteredData();
   renderKPI(data);
@@ -578,25 +509,16 @@ function renderAll() {
 
 function updateSubtitle(data) {
   const from = document.getElementById('filterFrom').value;
-  const to   = document.getElementById('filterTo').value;
+  const to = document.getElementById('filterTo').value;
   const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-  const totalAR = data.reduce((s,r) => s + r.sisaAR, 0);
+  const totalAR = data.reduce((s,r) => s + (r.sisaAR || 0), 0);
   document.getElementById('subtitlePeriod').textContent = `${fmtD(from)} – ${fmtD(to)} • Total Piutang: ${fmtShort(totalAR)}`;
 }
 
-// ==================== KPI (4 KPI Cards sesuai diskusi) ====================
 function renderKPI(data) {
-  // 1. Total Outstanding Piutang (semua data dari awal, sebelum filter)
-  const totalOutstandingAll = allData.filter(r => r.status !== 'LUNAS' && r.sisaAR > 0).reduce((s,r) => s + r.sisaAR, 0);
-  
-  // 2. Jatuh Tempo Hari Ini (berdasarkan tanggal filter)
-  const fromDate = document.getElementById('filterFrom').value;
-  const jatuhTempoHariIni = data.filter(r => r.isJatuhTempo && r.sisaAR > 0).reduce((s,r) => s + r.sisaAR, 0);
-  
-  // 3. Pembayaran Periode (TAGIHAN pada rentang filter)
-  const pembayaranPeriode = data.filter(r => r.keterangan === 'TAGIHAN').reduce((s,r) => s + r.total, 0);
-  
-  // 4. Progress Pembayaran (Pembayaran / Total Outstanding)
+  const totalOutstandingAll = allData.filter(r => r.status !== 'LUNAS' && r.sisaAR > 0).reduce((s,r) => s + (r.sisaAR || 0), 0);
+  const jatuhTempoHariIni = data.filter(r => r.isJatuhTempo && r.sisaAR > 0).reduce((s,r) => s + (r.sisaAR || 0), 0);
+  const pembayaranPeriode = data.filter(r => r.keterangan === 'TAGIHAN').reduce((s,r) => s + (r.total || 0), 0);
   const progressPercent = totalOutstandingAll > 0 ? (pembayaranPeriode / totalOutstandingAll) * 100 : 0;
   const sisaSetelahBayar = totalOutstandingAll - pembayaranPeriode;
 
@@ -641,10 +563,8 @@ function renderKPI(data) {
   `;
 }
 
-// ==================== ALERT ====================
 function renderAlert(data) {
-  const jatuh = data.filter(r => r.isJatuhTempo && r.sisaAR > 0)
-    .sort((a,b) => b.aging - a.aging);
+  const jatuh = data.filter(r => r.isJatuhTempo && r.sisaAR > 0);
   const uniqueOutlets = new Map();
   jatuh.forEach(r => {
     const key = r.kodeOutlet || r.namaOutlet;
@@ -663,29 +583,25 @@ function renderAlert(data) {
   document.getElementById('alertList').innerHTML = sorted.map(o => `
     <div class="alert-item">
       <div class="alert-days">+${o.aging} hari</div>
-      <div>
-        <div class="alert-outlet">${o.nama}</div>
-        <div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div>
-      </div>
+      <div><div class="alert-outlet">${o.nama}</div><div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div></div>
       <div class="alert-amount">${fmtShort(o.sisaAR)}</div>
     </div>
   `).join('');
 }
 
-// ==================== CHARTS ====================
 function renderChartChannel(data) {
   destroyChart('chartChannel');
-  const grosir = data.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.sisaAR,0);
-  const agen   = data.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.sisaAR,0);
+  const grosir = data.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+(r.sisaAR||0),0);
+  const agen = data.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+(r.sisaAR||0),0);
   const ctx = document.getElementById('chartChannel').getContext('2d');
   charts['chartChannel'] = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels:['Grosir','Agen'], datasets:[{ data:[grosir,agen], backgroundColor:['rgba(26,107,60,0.85)','rgba(147,51,234,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => ' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
+    data: { labels:['Grosir','Agen'], datasets:[{ data:[grosir,agen], backgroundColor:['rgba(26,107,60,0.85)','rgba(147,51,234,0.85)'], borderWidth:2, borderColor:'#fff' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
   });
   document.getElementById('legendChannel').innerHTML = [
     {label:'Grosir', val:grosir, color:'rgba(26,107,60,0.85)'},
-    {label:'Agen',   val:agen,   color:'rgba(147,51,234,0.85)'},
+    {label:'Agen', val:agen, color:'rgba(147,51,234,0.85)'},
   ].map(l => `<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
 }
 
@@ -697,27 +613,24 @@ function renderChartAging(data) {
   const ctx = document.getElementById('chartAging').getContext('2d');
   charts['chartAging'] = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: Object.keys(buckets),
-      datasets: [{ data: Object.values(buckets), backgroundColor: ['rgba(22,163,74,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)','rgba(127,0,0,0.8)'], borderRadius:6, borderSkipped:false }]
-    },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{display:false},ticks:{font:{size:10}}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}} } }
+    data: { labels: Object.keys(buckets), datasets: [{ data: Object.values(buckets), backgroundColor: ['rgba(22,163,74,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)','rgba(127,0,0,0.8)'], borderRadius:6 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{display:false}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v)}}} }
   });
 }
 
 function renderChartStatus(data) {
   destroyChart('chartStatus');
-  const lunas    = data.filter(r=>r.status==='LUNAS').reduce((s,r)=>s+r.total,0);
-  const belum    = data.filter(r=>r.status==='BELUM LUNAS').reduce((s,r)=>s+r.sisaAR,0);
-  const jatuh    = data.filter(r=>r.status==='JATUH TEMPO').reduce((s,r)=>s+r.sisaAR,0);
+  const lunas = data.filter(r=>r.status==='LUNAS').reduce((s,r)=>s+(r.total||0),0);
+  const belum = data.filter(r=>r.status==='BELUM LUNAS').reduce((s,r)=>s+(r.sisaAR||0),0);
+  const jatuh = data.filter(r=>r.status==='JATUH TEMPO').reduce((s,r)=>s+(r.sisaAR||0),0);
   const ctx = document.getElementById('chartStatus').getContext('2d');
   charts['chartStatus'] = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels:['Lunas','Belum Lunas','Jatuh Tempo'], datasets:[{ data:[lunas,belum,jatuh], backgroundColor:['rgba(22,163,74,0.85)','rgba(234,112,16,0.85)','rgba(220,38,38,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
+    data: { labels:['Lunas','Belum Lunas','Jatuh Tempo'], datasets:[{ data:[lunas,belum,jatuh], backgroundColor:['rgba(22,163,74,0.85)','rgba(234,112,16,0.85)','rgba(220,38,38,0.85)'], borderWidth:2, borderColor:'#fff' }] },
     options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
   });
   document.getElementById('legendStatus').innerHTML = [
-    {label:'Lunas',       val:lunas, color:'rgba(22,163,74,0.85)'},
+    {label:'Lunas', val:lunas, color:'rgba(22,163,74,0.85)'},
     {label:'Belum Lunas', val:belum, color:'rgba(234,112,16,0.85)'},
     {label:'Jatuh Tempo', val:jatuh, color:'rgba(220,38,38,0.85)'},
   ].map(l=>`<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
@@ -729,17 +642,16 @@ function renderChartTren(data) {
   data.filter(r=>r.sisaAR>0).forEach(r => {
     const k = dateKey(r.tglNota || r.tanggal);
     if (!k) return;
-    if (!byDay[k]) byDay[k] = 0;
-    byDay[k] += r.sisaAR;
+    byDay[k] = (byDay[k] || 0) + r.sisaAR;
   });
   const sorted = Object.entries(byDay).sort((a,b)=>a[0].localeCompare(b[0]));
   const labels = sorted.map(([d]) => new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
-  const vals   = sorted.map(([,v]) => v);
+  const vals = sorted.map(([,v]) => v);
   const ctx = document.getElementById('chartTren').getContext('2d');
   charts['chartTren'] = new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets:[{ label:'Sisa AR', data:vals, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.08)', tension:.35, fill:true, pointRadius:3, pointBackgroundColor:'#dc2626' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{color:'#e0ece4'},ticks:{font:{size:10}}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}} } }
+    data: { labels, datasets:[{ label:'Sisa AR', data:vals, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.08)', tension:.35, fill:true, pointRadius:3 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ y:{ ticks:{ callback:v=>fmtShort(v) } } } }
   });
 }
 
@@ -747,33 +659,23 @@ function renderTopOutlet(data) {
   const byOutlet = {};
   data.filter(r=>r.sisaAR>0).forEach(r => {
     const k = r.kodeOutlet || r.namaOutlet;
-    if (!byOutlet[k]) byOutlet[k] = {nama:r.namaOutlet, sisaAR:0, aging:0, channel:r.channel};
+    if (!byOutlet[k]) byOutlet[k] = { nama: r.namaOutlet, sisaAR: 0, aging: 0, channel: r.channel };
     byOutlet[k].sisaAR += r.sisaAR;
     if (r.aging > byOutlet[k].aging) byOutlet[k].aging = r.aging;
   });
-  const sorted = Object.values(byOutlet).sort((a,b)=>b.sisaAR-a.sisaAR).slice(0,10);
-  const maxAR  = sorted[0]?.sisaAR || 1;
+  const sorted = Object.values(byOutlet).sort((a,b)=>b.sisaAR - a.sisaAR).slice(0,10);
+  const maxAR = sorted[0]?.sisaAR || 1;
   const rankBg = ['#fef9c3','#f1f5f1','#fef3c7'];
-  const rankClr= ['#ca8a04','#4a7260','#d97706'];
-
+  const rankClr = ['#ca8a04','#4a7260','#d97706'];
   document.getElementById('topOutletList').innerHTML = sorted.length ? sorted.map((o,i) => `
     <div class="top-item">
-      <div class="top-rank ${i<3?'':'rn'}" style="${i<3?`background:${rankBg[i]};color:${rankClr[i]}`:''}">
-        ${i+1}
-      </div>
-      <div class="top-info">
-        <div class="top-name">${o.nama}</div>
-        <div class="top-sub">${o.channel} · Aging ${o.aging} hari</div>
-        <div class="bar-progress"><div class="bar-fill" style="width:${(o.sisaAR/maxAR*100).toFixed(1)}%"></div></div>
-      </div>
-      <div class="top-right">
-        <div class="top-val">${fmtShort(o.sisaAR)}</div>
-      </div>
+      <div class="top-rank ${i<3?'':'rn'}" style="${i<3?`background:${rankBg[i]};color:${rankClr[i]}`:''}">${i+1}</div>
+      <div class="top-info"><div class="top-name">${o.nama}</div><div class="top-sub">${o.channel} · Aging ${o.aging} hari</div><div class="bar-progress"><div class="bar-fill" style="width:${(o.sisaAR/maxAR*100).toFixed(1)}%"></div></div></div>
+      <div class="top-right"><div class="top-val">${fmtShort(o.sisaAR)}</div></div>
     </div>
   `).join('') : '<div class="empty-state">Tidak ada data piutang</div>';
 }
 
-// ==================== TABLE ====================
 function switchChannelTab(ch, el) {
   activeChannelTab = ch;
   document.querySelectorAll('.channel-tab').forEach(t => t.classList.remove('active'));
@@ -783,59 +685,43 @@ function switchChannelTab(ch, el) {
 
 function renderTable(data, chFilter) {
   let rows = chFilter === 'ALL' ? data : data.filter(r=>r.channel===chFilter);
-  // Urutkan berdasarkan sisa AR terbesar
-  rows = [...rows].sort((a,b) => b.sisaAR - a.sisaAR);
-  
+  rows = [...rows].sort((a,b) => (b.sisaAR||0) - (a.sisaAR||0));
   const tbody = document.getElementById('tablePiutang');
-
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="12" class="empty-state">Tidak ada data</td></tr>';
     document.getElementById('tableInfo').textContent = '0 data';
     document.getElementById('tableTotals').textContent = '';
     return;
   }
-
   const statusBadge = (s) => {
-    if (s==='LUNAS')       return '<span class="badge badge-lunas">✓ Lunas</span>';
+    if (s==='LUNAS') return '<span class="badge badge-lunas">✓ Lunas</span>';
     if (s==='JATUH TEMPO') return '<span class="badge badge-tempo">⚠ Jatuh Tempo</span>';
     return '<span class="badge badge-jatuh">● Belum Lunas</span>';
   };
-  const chBadge = (ch) => ch==='AGEN'
-    ? '<span class="badge badge-agen">Agen</span>'
-    : '<span class="badge badge-grosir">Grosir</span>';
-
+  const chBadge = (ch) => ch==='AGEN' ? '<span class="badge badge-agen">Agen</span>' : '<span class="badge badge-grosir">Grosir</span>';
   tbody.innerHTML = rows.map((r,i) => `
     <tr>
       <td style="color:var(--text3)">${i+1}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${r.kodeOutlet||'—'}</td>
+      <td style="font-family:monospace;font-size:11px">${r.kodeOutlet||'—'}</td>
       <td style="font-weight:600">${r.namaOutlet}</td>
       <td>${chBadge(r.channel)}</td>
       <td>${r.salesman}</td>
       <td class="right">${fmtShort(r.total)}</td>
       <td class="right" style="color:var(--green)">${fmtShort(r.terbayar)}</td>
-      <td class="right" style="font-weight:700;color:${r.sisaAR>0?'var(--red)':'var(--green)'}">${fmtShort(r.sisaAR)}</td>
+      <td class="right" style="font-weight:700;color:${(r.sisaAR||0)>0?'var(--red)':'var(--green)'}">${fmtShort(r.sisaAR)}</td>
       <td>${fmtDate(r.tglNota)}</td>
       <td style="color:${r.isJatuhTempo?'var(--red)':'var(--text)'}">${fmtDate(r.tglTempo)}</td>
-      <td class="right">
-        <span style="font-weight:600;color:${r.aging>90?'var(--red)':r.aging>60?'var(--orange)':r.aging>30?'var(--yellow)':'var(--green)'}">${r.aging}h</span>
-      </td>
+      <td class="right"><span style="font-weight:600;color:${r.aging>90?'var(--red)':r.aging>60?'var(--orange)':r.aging>30?'var(--yellow)':'var(--green)'}">${r.aging}h</span></td>
       <td>${statusBadge(r.status)}</td>
     </tr>
   `).join('');
-
-  const totalTagihan = rows.reduce((s,r)=>s+r.total,0);
-  const totalBayar   = rows.reduce((s,r)=>s+r.terbayar,0);
-  const totalSisa    = rows.reduce((s,r)=>s+r.sisaAR,0);
-
+  const totalTagihan = rows.reduce((s,r)=>s+(r.total||0),0);
+  const totalBayar = rows.reduce((s,r)=>s+(r.terbayar||0),0);
+  const totalSisa = rows.reduce((s,r)=>s+(r.sisaAR||0),0);
   document.getElementById('tableInfo').textContent = `${rows.length} data piutang`;
-  document.getElementById('tableTotals').innerHTML = `
-    Tagihan: <span style="color:var(--text)">${fmtShort(totalTagihan)}</span> &nbsp;|&nbsp;
-    Terbayar: <span style="color:var(--green)">${fmtShort(totalBayar)}</span> &nbsp;|&nbsp;
-    Sisa AR: <span style="color:var(--red)">${fmtShort(totalSisa)}</span>
-  `;
+  document.getElementById('tableTotals').innerHTML = `Tagihan: <span style="color:var(--text)">${fmtShort(totalTagihan)}</span> &nbsp;|&nbsp; Terbayar: <span style="color:var(--green)">${fmtShort(totalBayar)}</span> &nbsp;|&nbsp; Sisa AR: <span style="color:var(--red)">${fmtShort(totalSisa)}</span>`;
 }
 
-// ==================== EXPORT ====================
 async function exportData() {
   const btn = document.getElementById('exportBtn');
   btn.style.pointerEvents = 'none';
@@ -851,12 +737,10 @@ async function exportData() {
   finally { btn.style.pointerEvents = 'auto'; }
 }
 
-// ==================== EVENT LISTENERS ====================
 ['filterFrom','filterTo','filterChannel','filterSalesman','filterStatus'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => renderAll());
 });
 
-// START
 loadData();
 </script>
 </body>
