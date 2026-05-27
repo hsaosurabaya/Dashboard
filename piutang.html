@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piutang — Depo Surabaya</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root {
+  --bg: #f2f7f4;
+  --bg2: #e8f0eb;
+  --surface: #ffffff;
+  --surface2: #f4faf6;
+  --surface3: #edf5ef;
+  --border: #e0ece4;
+  --border2: #c8dece;
+  --text: #0d2115;
+  --text2: #4a7260;
+  --text3: #89aa96;
+  --accent: #1a6b3c;
+  --accent2: #0f4d2b;
+  --green: #16a34a;
+  --green-dim: #dcfce7;
+  --orange: #ea7010;
+  --orange-dim: #fff7ed;
+  --red: #dc2626;
+  --yellow: #ca8a04;
+  --grosir: #185fa5;
+  --retail: #16a34a;
+  --agen: #9333ea;
+  --sidebar-grad-top: #0a2e1a;
+  --sidebar-grad-mid: #1a6b3c;
+  --sidebar-grad-bot: #27ae60;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* SIDEBAR */
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: linear-gradient(175deg, var(--sidebar-grad-top) 0%, var(--sidebar-grad-mid) 50%, var(--sidebar-grad-bot) 100%); z-index: 100; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(10,46,26,0.25); }
+.sidebar-logo { padding: 20px 10px 25px; display: flex; justify-content: center; align-items: center; }
+.sidebar-brand-logo { width: 180px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); }
+.sidebar-section { padding-top: 10px; }
+.sidebar-section-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: .1em; padding: 0 8px; margin-bottom: 4px; }
+.sidebar-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.65); cursor: pointer; transition: all .15s; margin-bottom: 1px; text-decoration: none; }
+.sidebar-item:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.95); }
+.sidebar-item.active { background: rgba(255,255,255,0.18); color: #ffffff; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); }
+.sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.sidebar-shortcuts { margin-top: auto; padding: 12px 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+.shortcut-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.75); cursor: pointer; transition: all .15s; margin-bottom: 2px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); }
+.shortcut-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+/* MAIN */
+.main { margin-left: 250px; min-height: 100vh; width: calc(100% - 250px); overflow-x: hidden; }
+
+/* TOPBAR */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 0 var(--border), 0 2px 12px rgba(10,46,26,0.06); flex-wrap: wrap; gap: 10px; }
+.topbar-left h1 { font-size: 17px; font-weight: 700; color: var(--text); }
+.topbar-left p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 28px 7px 10px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a7260' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+.date-filter { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; display: flex; align-items: center; gap: 6px; }
+.date-filter input { background: transparent; border: none; color: var(--text); font-size: 12px; font-family: inherit; outline: none; }
+.refresh-btn { background: var(--accent); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 600; padding: 7px 14px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: all .15s; box-shadow: 0 2px 8px rgba(26,107,60,0.35); }
+.refresh-btn:hover { background: var(--accent2); }
+
+/* CONTENT */
+.content { padding: 20px 24px 40px; }
+
+/* KPI CARDS */
+.kpi-grid { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 140px; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(10,46,26,0.06); }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-color, var(--accent)); }
+.kpi-label { font-size: 11px; color: var(--text2); font-weight: 500; margin-bottom: 4px; }
+.kpi-value { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; font-family: 'Sora', sans-serif; }
+.kpi-sub { font-size: 9px; color: var(--text3); margin-top: 4px; }
+
+/* CHART CARD */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; }
+.chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.chart-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+/* TABLES */
+.table-wrap { overflow-x: auto; margin-top: 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { background: var(--surface2); color: var(--text2); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:hover { background: var(--surface2); }
+tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
+.clickable-row { cursor: pointer; }
+.clickable-row:hover { background: var(--surface3) !important; }
+
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+.badge-outstanding { background: rgba(220,38,38,.1); color: var(--red); }
+.badge-lunas { background: rgba(22,163,74,.1); color: var(--green); }
+.badge-warning { background: rgba(234,112,16,.1); color: var(--orange); }
+.badge-ontime { background: rgba(22,163,74,.1); color: var(--green); }
+.badge-overdue { background: rgba(220,38,38,.1); color: var(--red); }
+.badge-grosir { background: rgba(24,95,165,.1); color: var(--grosir); }
+.badge-agen { background: rgba(147,51,234,.1); color: var(--agen); }
+
+/* MODAL */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease; }
+.modal-overlay.active { display: flex; opacity: 1; }
+.modal-container { background: var(--surface); border-radius: 14px; width: 90%; max-width: 1100px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; overflow: hidden; }
+.modal-overlay.active .modal-container { transform: scale(1); }
+.modal-header { padding: 16px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.modal-header h2 { font-size: 16px; font-weight: 700; }
+.modal-close { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-summary { display: flex; gap: 16px; padding: 12px 20px; background: var(--bg); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.modal-summary-item { background: white; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); }
+.modal-summary-item .label { font-size: 10px; color: var(--text3); }
+.modal-summary-item .value { font-size: 18px; font-weight: 800; color: var(--text); }
+.modal-content { flex: 1; overflow: auto; padding: 16px 20px; }
+.modal-footer { padding: 10px 20px; background: var(--bg); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; flex-shrink: 0; }
+.modal-export-btn { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+/* LOADING */
+.loading-overlay { position: fixed; inset: 0; background: rgba(242,247,244,.97); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.loading-overlay.hidden { display: none; }
+.loading-ring { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.top-list { display: flex; flex-direction: column; gap: 8px; }
+.top-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
+.top-rank { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; background: var(--surface3); color: var(--text2); }
+.top-name { flex: 1; font-size: 12px; font-weight: 600; }
+.top-val { font-size: 11px; font-weight: 700; color: var(--red); }
+
+@media (max-width: 900px) {
+  .sidebar { width: 60px; }
+  .sidebar-brand-logo { width: 110px; }
+  .sidebar-item span, .sidebar-section-label, .shortcut-btn span { display: none; }
+  .sidebar-item { justify-content: center; }
+  .main { margin-left: 60px; width: calc(100% - 60px); }
+  .chart-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <div class="loading-text">Memuat data piutang...</div>
+</div>
+
+<div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="modalTitle">📋 Detail Piutang</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-summary" id="modalSummary"></div>
+    <div class="modal-content" id="modalContent"></div>
+    <div class="modal-footer">
+      <button class="modal-export-btn" onclick="exportModalData()">📥 Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <img src="assets/logo-hs-bonek.png" alt="HS BONEK" class="sidebar-brand-logo" onerror="this.style.display='none'">
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu Utama</div>
+    <a href="index.html" class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Summary</span>
+    </a>
+    <a href="penjualan.html" class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>Penjualan</span>
+    </a>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      <span>Produk (SKU)</span>
+    </div>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span>Salesman</span>
+    </div>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <span>Outlet</span>
+    </div>
+    <a href="piutang.html" class="sidebar-item active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Piutang</span>
+    </a>
+  </div>
+  <div class="sidebar-shortcuts">
+    <div class="shortcut-btn" id="exportPiutangBtn" onclick="exportPiutangData()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></svg>
+      <span>Eksport Piutang</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>📋 Manajemen Piutang</h1>
+      <p id="subtitlePeriod">Memuat data...</p>
+    </div>
+    <div class="topbar-right">
+      <div class="filter-group">
+        <div class="date-filter">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <input type="date" id="filterFrom">
+          <span style="color:var(--text3)">—</span>
+          <input type="date" id="filterTo">
+        </div>
+        <select class="filter-select" id="filterChannel">
+          <option value="">Semua Channel</option>
+          <option value="GROSIR">Grosir</option>
+          <option value="AGEN">Agen</option>
+        </select>
+        <select class="filter-select" id="filterSalesman">
+          <option value="">Semua Salesman</option>
+        </select>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">📈 Trend Piutang per Minggu</div>
+        </div>
+        <div style="height: 200px;"><canvas id="chartWeekly"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">📊 Trend Piutang per Bulan</div>
+        </div>
+        <div style="height: 200px;"><canvas id="chartMonthly"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">🏪 Top 5 Outlet dengan Aging Terlama</div>
+        <div class="chart-sub">Berdasarkan hari terlambat pembayaran (maksimal 7 hari)</div>
+      </div>
+      <div class="top-list" id="topAgingOutlets"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">📋 Daftar Piutang per Outlet</div>
+        <div class="chart-sub">Klik pada baris untuk melihat detail histori TOP & TAGIHAN</div>
+      </div>
+      <div class="table-wrap">
+        <table id="piutangTable">
+          <thead>
+            <tr><th>Outlet</th><th>Kode Outlet</th><th>Channel</th><th>Salesman</th><th>Total Piutang (Rp)</th><th>Aging (hari)</th><th>Status</th></tr>
+          </thead>
+          <tbody id="piutangTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-IqawPLP_xOgMU8KsQLFbhzEx9a3kSBXA6Nu8l1BTzsnJq3neZb3u6-5RvUdaj4dWeD99ye5E1A0x/pub?gid=0&single=true&output=csv";
+
+let allData = [];
+let charts = {};
+let currentModalData = { topRows: [], paymentRows: [] };
+let currentModalOutlet = '';
+
+function fmtShort(n) {
+  if (n >= 1e9) return "Rp " + (n/1e9).toFixed(1) + " M";
+  if (n >= 1e6) return "Rp " + (n/1e6).toFixed(1) + " Jt";
+  if (n >= 1e3) return "Rp " + (n/1e3).toFixed(0) + " Rb";
+  return "Rp " + Math.round(n).toLocaleString('id-ID');
+}
+function fmtFull(n) { return "Rp " + Math.round(n).toLocaleString('id-ID'); }
+function parseNum(s) {
+  if (!s || s === '') return 0;
+  let cleaned = s.toString().replace(/,/g, '').replace(/\./g, '');
+  let result = parseFloat(cleaned);
+  return isNaN(result) ? 0 : result;
+}
+function parseDate(s) {
+  if (!s) return null;
+  const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
+  const parts = s.toString().trim().split(/[\s\-\/]+/);
+  if (parts.length === 3) {
+    let d, m, y;
+    if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
+    else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
+    else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
+    if (!isNaN(d) && m!==undefined && !isNaN(y) && y>1900) return new Date(y,m,d);
+  }
+  const dt = new Date(s);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+function fmtDate(d) { return d ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) : ''; }
+function dateKey(d) { return d ? d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') : ''; }
+
+function getFilteredData() {
+  const from = document.getElementById('filterFrom').value;
+  const to = document.getElementById('filterTo').value;
+  const ch = document.getElementById('filterChannel').value;
+  const sm = document.getElementById('filterSalesman').value;
+  return allData.filter(r => {
+    if (!r.tanggal) return false;
+    const dk = dateKey(r.tanggal);
+    if (from && dk < from) return false;
+    if (to && dk > to) return false;
+    if (ch && r.channel !== ch) return false;
+    if (sm && r.salesman !== sm) return false;
+    return true;
+  });
+}
+
+function getOutstandingPiutangPerOutlet(data) {
+  const topTransactions = data.filter(r => r.keterangan === 'TOP' && r.status === 'OUTSTANDING');
+  const tagihanTransactions = data.filter(r => r.keterangan === 'TAGIHAN');
+  
+  const outstandingByOutlet = {};
+  topTransactions.forEach(r => {
+    const key = r.kodeOutlet || r.namaOutlet;
+    if (!key) return;
+    if (!outstandingByOutlet[key]) {
+      outstandingByOutlet[key] = { total: 0, nama: r.namaOutlet, kode: r.kodeOutlet, channel: r.channel, salesman: r.salesman, lastTopDate: r.tanggal, topTransactions: [] };
+    }
+    outstandingByOutlet[key].total += r.total;
+    outstandingByOutlet[key].topTransactions.push(r);
+    if (r.tanggal > outstandingByOutlet[key].lastTopDate) outstandingByOutlet[key].lastTopDate = r.tanggal;
+  });
+  
+  tagihanTransactions.forEach(r => {
+    const key = r.kodeOutlet || r.namaOutlet;
+    if (!key || !outstandingByOutlet[key]) return;
+    outstandingByOutlet[key].total -= r.total;
+  });
+  
+  return Object.values(outstandingByOutlet).filter(o => o.total > 0);
+}
+
+function calculateAging(lastTopDate) {
+  if (!lastTopDate) return 0;
+  const today = new Date();
+  const diffDays = Math.floor((today - lastTopDate) / (1000 * 60 * 60 * 24));
+  return diffDays;
+}
+
+function getAgingStatus(days) {
+  if (days <= 3) return { text: 'On Time', class: 'ontime' };
+  if (days <= 7) return { text: 'Warning', class: 'warning' };
+  return { text: 'Overdue', class: 'overdue' };
+}
+
+function populateSalesmanFilter(data) {
+  const salesSet = [...new Set(data.map(r => r.salesman).filter(s => s && s.trim()))].sort();
+  document.getElementById('filterSalesman').innerHTML = '<option value="">Semua Salesman</option>' + salesSet.map(s => `<option>${s}</option>`).join('');
+}
+
+function setDefaultDates() {
+  if (!allData.length) return;
+  const dates = allData.map(r => r.tanggal).filter(Boolean);
+  const maxD = new Date(Math.max(...dates));
+  document.getElementById('filterFrom').value = dateKey(maxD);
+  document.getElementById('filterTo').value = dateKey(maxD);
+}
+
+function renderKPI(outlets, data) {
+  const totalPiutang = outlets.reduce((s, o) => s + o.total, 0);
+  const avgPiutang = outlets.length ? totalPiutang / outlets.length : 0;
+  const avgAging = outlets.length ? outlets.reduce((s, o) => s + calculateAging(o.lastTopDate), 0) / outlets.length : 0;
+  
+  const outletsGrosir = outlets.filter(o => o.channel === 'GROSIR');
+  const outletsAgen = outlets.filter(o => o.channel === 'AGEN');
+  const totalPiutangGrosir = outletsGrosir.reduce((s, o) => s + o.total, 0);
+  const totalPiutangAgen = outletsAgen.reduce((s, o) => s + o.total, 0);
+  
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi-card" style="--accent-color:var(--red)"><div class="kpi-label">Total Outstanding Piutang</div><div class="kpi-value">${fmtShort(totalPiutang)}</div><div class="kpi-sub">TOP - TAGIHAN</div></div>
+    <div class="kpi-card" style="--accent-color:var(--grosir)"><div class="kpi-label">Piutang Grosir</div><div class="kpi-value">${fmtShort(totalPiutangGrosir)}</div><div class="kpi-sub">${outletsGrosir.length} outlet</div></div>
+    <div class="kpi-card" style="--accent-color:var(--agen)"><div class="kpi-label">Piutang Agen</div><div class="kpi-value">${fmtShort(totalPiutangAgen)}</div><div class="kpi-sub">${outletsAgen.length} outlet</div></div>
+    <div class="kpi-card" style="--accent-color:var(--orange)"><div class="kpi-label">Rata-rata Aging</div><div class="kpi-value">${avgAging.toFixed(1)} hari</div><div class="kpi-sub">Maksimal 7 hari</div></div>
+  `;
+}
+
+function renderTopAgingOutlets(outlets) {
+  const sorted = [...outlets].sort((a,b) => calculateAging(b.lastTopDate) - calculateAging(a.lastTopDate)).slice(0,5);
+  document.getElementById('topAgingOutlets').innerHTML = sorted.map((o, i) => {
+    const days = calculateAging(o.lastTopDate);
+    const status = getAgingStatus(days);
+    return `<div class="top-item"><div class="top-rank">${i+1}</div><div class="top-name">${o.nama || o.kode}</div><div style="text-align:right"><div class="top-val">${fmtShort(o.total)}</div><div class="top-sub">Aging: ${days} hari • <span class="badge badge-${status.class}">${status.text}</span></div></div></div>`;
+  }).join('');
+}
+
+function renderPiutangTable(outlets) {
+  const sorted = [...outlets].sort((a,b) => b.total - a.total);
+  document.getElementById('piutangTableBody').innerHTML = sorted.map(o => {
+    const days = calculateAging(o.lastTopDate);
+    const status = getAgingStatus(days);
+    return `<tr class="clickable-row" onclick="showOutletDetail('${(o.kode || '').replace(/'/g, "\\'")}', '${(o.nama || '').replace(/'/g, "\\'")}')">
+      <td style="font-weight:600">${o.nama || '-'}</td>
+      <td>${o.kode || '-'}</td>
+      <td><span class="badge badge-${o.channel === 'GROSIR' ? 'grosir' : 'agen'}">${o.channel || '-'}</span></td>
+      <td>${o.salesman || '-'}</td>
+      <td style="color:var(--red);font-family:'JetBrains Mono',monospace">${fmtFull(o.total)}</td>
+      <td>${days} hari</td>
+      <td><span class="badge badge-${status.class}">${status.text}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderWeeklyTrend(data) {
+  const topTransactions = data.filter(r => r.keterangan === 'TOP' && r.status === 'OUTSTANDING');
+  const tagihanTransactions = data.filter(r => r.keterangan === 'TAGIHAN');
+  
+  const byWeek = {};
+  const getWeekKey = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const firstJan = new Date(year, 0, 1);
+    const weekNum = Math.ceil(((d - firstJan) / 86400000 + firstJan.getDay() + 1) / 7);
+    return `${year}-W${weekNum}`;
+  };
+  
+  topTransactions.forEach(r => {
+    const week = getWeekKey(r.tanggal);
+    if (!byWeek[week]) byWeek[week] = { top: 0, tagihan: 0 };
+    byWeek[week].top += r.total;
+  });
+  tagihanTransactions.forEach(r => {
+    const week = getWeekKey(r.tanggal);
+    if (byWeek[week]) byWeek[week].tagihan += r.total;
+    else byWeek[week] = { top: 0, tagihan: r.total };
+  });
+  
+  const weeks = Object.keys(byWeek).sort();
+  const netPiutang = weeks.map(w => (byWeek[w].top - (byWeek[w].tagihan || 0)));
+  const labels = weeks.map(w => w.replace('-W', ' Minggu '));
+  
+  if (charts['chartWeekly']) charts['chartWeekly'].destroy();
+  const ctx = document.getElementById('chartWeekly').getContext('2d');
+  charts['chartWeekly'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label: 'Net Piutang', data: netPiutang, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.1)', fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => ' ' + fmtShort(ctx.parsed.y) } } }, scales: { y: { ticks: { callback: v => fmtShort(v) } } } }
+  });
+}
+
+function renderMonthlyTrend(data) {
+  const topTransactions = data.filter(r => r.keterangan === 'TOP' && r.status === 'OUTSTANDING');
+  const tagihanTransactions = data.filter(r => r.keterangan === 'TAGIHAN');
+  
+  const byMonth = {};
+  topTransactions.forEach(r => {
+    const month = r.tanggal.getFullYear() + '-' + String(r.tanggal.getMonth()+1).padStart(2,'0');
+    if (!byMonth[month]) byMonth[month] = { top: 0, tagihan: 0 };
+    byMonth[month].top += r.total;
+  });
+  tagihanTransactions.forEach(r => {
+    const month = r.tanggal.getFullYear() + '-' + String(r.tanggal.getMonth()+1).padStart(2,'0');
+    if (byMonth[month]) byMonth[month].tagihan += r.total;
+    else byMonth[month] = { top: 0, tagihan: r.total };
+  });
+  
+  const months = Object.keys(byMonth).sort();
+  const netPiutang = months.map(m => (byMonth[m].top - (byMonth[m].tagihan || 0)));
+  const labels = months.map(m => { const [y,mo] = m.split('-'); return `${mo}/${y.slice(-2)}`; });
+  
+  if (charts['chartMonthly']) charts['chartMonthly'].destroy();
+  const ctx = document.getElementById('chartMonthly').getContext('2d');
+  charts['chartMonthly'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Net Piutang', data: netPiutang, backgroundColor: 'rgba(26,107,60,0.7)', borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => ' ' + fmtShort(ctx.parsed.y) } } }, scales: { y: { ticks: { callback: v => fmtShort(v) } } } }
+  });
+}
+
+function showOutletDetail(kodeOutlet, namaOutlet) {
+  const data = getFilteredData();
+  const topRows = data.filter(r => r.keterangan === 'TOP' && (r.kodeOutlet === kodeOutlet || r.namaOutlet === namaOutlet)).sort((a,b) => b.tanggal - a.tanggal);
+  const paymentRows = data.filter(r => r.keterangan === 'TAGIHAN' && (r.kodeOutlet === kodeOutlet || r.namaOutlet === namaOutlet)).sort((a,b) => b.tanggal - a.tanggal);
+  
+  currentModalData = { topRows, paymentRows };
+  currentModalOutlet = namaOutlet || kodeOutlet;
+  
+  const totalOutstanding = topRows.filter(r => r.status === 'OUTSTANDING').reduce((s,r) => s + r.total, 0) - paymentRows.reduce((s,r) => s + r.total, 0);
+  
+  document.getElementById('modalTitle').innerHTML = `🏪 Detail Piutang - ${namaOutlet || kodeOutlet}`;
+  document.getElementById('modalSummary').innerHTML = `
+    <div class="modal-summary-item"><span class="label">Total Outstanding</span><span class="value">${fmtFull(totalOutstanding)}</span></div>
+    <div class="modal-summary-item"><span class="label">Total TOP (Kredit)</span><span class="value">${topRows.length} transaksi</span></div>
+    <div class="modal-summary-item"><span class="label">Total Pembayaran</span><span class="value">${paymentRows.length} kali</span></div>
+  `;
+  
+  document.getElementById('modalContent').innerHTML = `
+    <h4 style="margin-bottom:8px;font-size:12px;color:var(--text2)">📦 Riwayat Piutang (TOP)</h4>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <table style="width:100%">
+        <thead><tr><th>Tanggal</th><th>Barang</th><th>Qty</th><th>Total</th><th>Tanggal Tempo</th><th>Status</th></tr></thead>
+        <tbody>${topRows.map(r => `<tr><td>${fmtDate(r.tanggal)}</td><td>${r.namaBarang}</td><td>${r.qtyJual}</td><td style="color:var(--red)">${fmtFull(r.total)}</td><td>${r.tanggalTempo ? fmtDate(r.tanggalTempo) : '-'}</td><td><span class="badge badge-${r.status === 'OUTSTANDING' ? 'outstanding' : 'lunas'}">${r.status || 'TOP'}</span></td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <h4 style="margin-bottom:8px;font-size:12px;color:var(--text2)">💰 Riwayat Pembayaran (TAGIHAN)</h4>
+    <div class="table-wrap">
+      <table style="width:100%">
+        <thead><tr><th>Tanggal Bayar</th><th>Tanggal Nota Asal</th><th>Total Bayar</th><th>Sisa AR</th></tr></thead>
+        <tbody>${paymentRows.map(r => `<tr><td>${fmtDate(r.tanggal)}</td><td>${r.tanggalNotaAwal ? fmtDate(r.tanggalNotaAwal) : '-'}</td><td style="color:var(--green)">${fmtFull(r.total)}</td><td>${r.sisaAR ? fmtFull(parseNum(r.sisaAR)) : '-'}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+    ${paymentRows.length === 0 ? '<p style="text-align:center;padding:20px;color:var(--text3)">Belum ada riwayat pembayaran</p>' : ''}
+  `;
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function closeModal() { document.getElementById('detailModal').classList.remove('active'); }
+
+function exportModalData() {
+  if (!currentModalData.topRows.length && !currentModalData.paymentRows.length) { alert('Tidak ada data untuk diekspor'); return; }
+  let csv = [['Jenis','Tanggal','Barang','Qty','Total','Tanggal Tempo/Tanggal Nota Asal','Status/Sisa AR']];
+  currentModalData.topRows.forEach(r => {
+    csv.push(['TOP', fmtDate(r.tanggal), r.namaBarang, r.qtyJual, r.total, r.tanggalTempo ? fmtDate(r.tanggalTempo) : '', r.status || '']);
+  });
+  currentModalData.paymentRows.forEach(r => {
+    csv.push(['TAGIHAN', fmtDate(r.tanggal), '', '', r.total, r.tanggalNotaAwal ? fmtDate(r.tanggalNotaAwal) : '', r.sisaAR || '']);
+  });
+  const blob = new Blob(["\uFEFF" + csv.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `piutang_${currentModalOutlet}_${new Date().toISOString().slice(0,19)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function exportPiutangData() {
+  const data = getFilteredData();
+  const outlets = getOutstandingPiutangPerOutlet(data);
+  let csv = [['Outlet','Kode Outlet','Channel','Salesman','Total Piutang','Aging (hari)','Status']];
+  outlets.forEach(o => {
+    const days = calculateAging(o.lastTopDate);
+    const status = getAgingStatus(days);
+    csv.push([o.nama || '', o.kode || '', o.channel || '', o.salesman || '', o.total, days, status.text]);
+  });
+  const blob = new Blob(["\uFEFF" + csv.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `piutang_summary_${new Date().toISOString().slice(0,19)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+async function loadData() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  try {
+    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    let text = await res.text();
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true, transformHeader: h => h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase() });
+    
+    allData = parsed.data.map(row => ({
+      tanggal: parseDate(row['TANGGAL'] || ''),
+      channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
+      salesman: (row['SALESMAN'] || '').toString().trim(),
+      kodeOutlet: (row['KODE OUTLET'] || '').toString().trim(),
+      namaOutlet: (row['NAMA OUTLET'] || '').toString().trim(),
+      namaBarang: (row['NAMA BARANG'] || '').toString().trim(),
+      qtyJual: parseNum(row['QTY JUAL']),
+      total: parseNum(row['TOTAL']),
+      keterangan: (row['KETERANGAN'] || '').toString().trim().toUpperCase(),
+      status: (row['STATUS'] || '').toString().trim().toUpperCase(),
+      tanggalTempo: parseDate(row['TANGGAL TEMPO'] || ''),
+      tanggalNotaAwal: parseDate(row['TANGGAL NOTA AWAL'] || ''),
+      sisaAR: row['SISA AR'] || '',
+    })).filter(r => r.tanggal && (r.keterangan === 'TOP' || r.keterangan === 'TAGIHAN'));
+    
+    populateSalesmanFilter(allData);
+    setDefaultDates();
+    renderDashboard();
+  } catch(e) { console.error(e); alert('Gagal memuat data: ' + e.message); }
+  document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+function renderDashboard() {
+  const data = getFilteredData();
+  const outlets = getOutstandingPiutangPerOutlet(data);
+  renderKPI(outlets, data);
+  renderTopAgingOutlets(outlets);
+  renderPiutangTable(outlets);
+  renderWeeklyTrend(data);
+  renderMonthlyTrend(data);
+  
+  const totalOutstanding = outlets.reduce((s,o) => s + o.total, 0);
+  document.getElementById('subtitlePeriod').innerHTML = `Total outstanding: ${fmtFull(totalOutstanding)} dari ${outlets.length} outlet • Maksimal aging 7 hari`;
+}
+
+['filterFrom','filterTo','filterChannel','filterSalesman'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', () => renderDashboard());
+});
+
+loadData();
+</script>
+</body>
+</html>
