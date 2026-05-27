@@ -50,7 +50,7 @@ a { color: inherit; text-decoration: none; }
 /* SIDEBAR */
 .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: linear-gradient(175deg, var(--sidebar-grad-top) 0%, var(--sidebar-grad-mid) 50%, var(--sidebar-grad-bot) 100%); border-right: none; z-index: 100; display: flex; flex-direction: column; padding: 0; box-shadow: 4px 0 20px rgba(10,46,26,0.25); }
 .sidebar-logo{
-  padding:12px 10px 8px;
+  padding:20px 10px 25px;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -62,7 +62,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .sidebar-brand-logo{
-    width:220px;
+    width:180px;
     height:auto;
     display:block;
     margin:auto;
@@ -110,7 +110,10 @@ a { color: inherit; text-decoration: none; }
 .content { padding: 20px 24px 40px; }
 
 /* KPI CARDS */
-.kpi-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 20px; }
+.kpi-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.kpi-row { display: flex; gap: 12px; justify-content: center; }
+.kpi-row .kpi-card { flex: 1; min-width: 0; max-width: calc(25% - 9px); }
+.kpi-row.kpi-row-bottom .kpi-card { max-width: calc(25% - 9px); flex: 0 1 calc(25% - 9px); }
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(10,46,26,0.06); cursor: pointer; transition: all .2s; }
 .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(10,46,26,0.12); border-color: var(--border2); }
 .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-color, var(--accent)); }
@@ -205,17 +208,17 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
 .modal-export-btn:hover { opacity: 0.9; }
 
 /* RESPONSIVE */
-@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } .chart-row.col-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1200px) { .kpi-row .kpi-card { max-width: calc(50% - 6px); flex: 1 1 calc(50% - 6px); } .kpi-row.kpi-row-bottom .kpi-card { max-width: calc(50% - 6px); flex: 0 1 calc(50% - 6px); } .chart-row.col-3 { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 900px) {
   .sidebar { width: 60px; }
   .sidebar-brand-logo{width:110px; }
   .sidebar-logo .logo-title, .sidebar-logo .logo-sub, .sidebar-item span, .sidebar-section-label, .shortcut-btn span { display: none; }
   .sidebar-item { justify-content: center; }
   .main { margin-left: 60px; }
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-row .kpi-card, .kpi-row.kpi-row-bottom .kpi-card { max-width: calc(50% - 6px); flex: 1 1 calc(50% - 6px); }
   .chart-row.col-2, .chart-row.col-2-1 { grid-template-columns: 1fr; }
 }
-@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .kpi-row .kpi-card, .kpi-row.kpi-row-bottom .kpi-card { max-width: 100%; flex: 1 1 100%; } }
 
 .divider { height: 1px; background: var(--border); margin: 4px 0; }
 </style>
@@ -815,45 +818,49 @@ function renderDashboard() {
   const totalCOH = cohRetail + cohGrosir + cohAgen;
 
   document.getElementById('kpiGrid').innerHTML = `
-    <div class="kpi-card" style="--accent-color:var(--accent)" onclick="openModal('penjualan')">
-      <div class="kpi-icon" style="background:rgba(59,130,246,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-      <div class="kpi-label">Total Penjualan</div>
-      <div class="kpi-value sm">${fmtShort(totalPenjualan)}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
+    <div class="kpi-row">
+      <div class="kpi-card" style="--accent-color:var(--accent)" onclick="openModal('penjualan')">
+        <div class="kpi-icon" style="background:rgba(59,130,246,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <div class="kpi-label">Total Penjualan</div>
+        <div class="kpi-value sm">${fmtShort(totalPenjualan)}</div>
+        <div class="kpi-sub">Klik untuk detail</div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--green)" onclick="openModal('margin')">
+        <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div class="kpi-label">Total Margin</div>
+        <div class="kpi-value sm">${fmtShort(totalMargin)}</div>
+        <div class="kpi-sub">Klik untuk detail</div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--orange)" onclick="openModal('qty')">
+        <div class="kpi-icon" style="background:rgba(249,115,22,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div>
+        <div class="kpi-label">Total Qty Terjual</div>
+        <div class="kpi-value">${totalQty.toLocaleString('id-ID')}</div>
+        <div class="kpi-sub">Klik untuk detail</div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--cyan)" onclick="openModal('outlet')">
+        <div class="kpi-icon" style="background:rgba(6,182,212,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#06b6d4" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+        <div class="kpi-label">Outlet Aktif</div>
+        <div class="kpi-value">${outletAktif}</div>
+        <div class="kpi-sub">Klik untuk detail</div>
+      </div>
     </div>
-    <div class="kpi-card" style="--accent-color:var(--green)" onclick="openModal('margin')">
-      <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-      <div class="kpi-label">Total Margin</div>
-      <div class="kpi-value sm">${fmtShort(totalMargin)}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
-    </div>
-    <div class="kpi-card" style="--accent-color:var(--orange)" onclick="openModal('qty')">
-      <div class="kpi-icon" style="background:rgba(249,115,22,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div>
-      <div class="kpi-label">Total Qty Terjual</div>
-      <div class="kpi-value">${totalQty.toLocaleString('id-ID')}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
-    </div>
-    <div class="kpi-card" style="--accent-color:var(--cyan)" onclick="openModal('outlet')">
-      <div class="kpi-icon" style="background:rgba(6,182,212,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#06b6d4" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
-      <div class="kpi-label">Outlet Aktif</div>
-      <div class="kpi-value">${outletAktif}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
-    </div>
-    <div class="kpi-card" style="--accent-color:var(--green)" onclick="openModal('coh')">
-      <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg></div>
-      <div class="kpi-label">Total COH</div>
-      <div class="kpi-value sm">${fmtShort(totalCOH)}</div>
-      <div class="kpi-sub">Klik untuk detail</div>
-    </div>
-    <div class="kpi-card" style="--accent-color:var(--green)">
-      <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-      <div class="kpi-label">Rasio Cash</div>
-      <div class="kpi-value">${cashPct}%</div>
-    </div>
-    <div class="kpi-card" style="--accent-color:var(--orange)">
-      <div class="kpi-icon" style="background:rgba(249,115,22,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
-      <div class="kpi-label">Rasio TOP</div>
-      <div class="kpi-value">${topPct}%</div>
+    <div class="kpi-row kpi-row-bottom">
+      <div class="kpi-card" style="--accent-color:var(--green)" onclick="openModal('coh')">
+        <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg></div>
+        <div class="kpi-label">Total COH</div>
+        <div class="kpi-value sm">${fmtShort(totalCOH)}</div>
+        <div class="kpi-sub">Klik untuk detail</div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--green)">
+        <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="kpi-label">Rasio Cash</div>
+        <div class="kpi-value">${cashPct}%</div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--orange)">
+        <div class="kpi-icon" style="background:rgba(249,115,22,.1)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div class="kpi-label">Rasio TOP</div>
+        <div class="kpi-value">${topPct}%</div>
+      </div>
     </div>
   `;
 
