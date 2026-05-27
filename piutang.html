@@ -70,10 +70,8 @@ a { color: inherit; text-decoration: none; }
 
 /* KPI */
 .kpi-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; width: 100%; }
-.kpi-row { display: flex; gap: 12px; justify-content: center; width: 100%; }
-.kpi-row .kpi-card { flex: 1; min-width: 0; box-sizing: border-box; }
-.kpi-row.row-3 .kpi-card { max-width: calc(33.333% - 8px); }
-.kpi-row.row-4 .kpi-card { max-width: calc(25% - 9px); }
+.kpi-row { display: flex; gap: 12px; justify-content: center; width: 100%; flex-wrap: wrap; }
+.kpi-row .kpi-card { flex: 1; min-width: 180px; box-sizing: border-box; }
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(10,46,26,0.06); transition: all .2s; }
 .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(10,46,26,0.12); border-color: var(--border2); }
 .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--kpi-color, var(--accent)); }
@@ -83,6 +81,8 @@ a { color: inherit; text-decoration: none; }
 .kpi-value { font-size: 20px; font-weight: 800; color: var(--text); font-family: 'Sora', sans-serif; line-height: 1.1; }
 .kpi-value.md { font-size: 17px; }
 .kpi-sub { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.progress-bar-container { margin-top: 8px; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: var(--kpi-color, var(--accent)); transition: width .5s; }
 
 /* CHART ROW */
 .chart-row { display: grid; gap: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
@@ -108,7 +108,7 @@ a { color: inherit; text-decoration: none; }
 .alert-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .alert-title { font-size: 13px; font-weight: 700; color: var(--red); }
 .alert-count { background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
-.alert-list { display: flex; flex-direction: column; gap: 6px; }
+.alert-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
 .alert-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface); border-radius: 8px; border: 1px solid rgba(220,38,38,0.15); }
 .alert-days { font-size: 11px; font-weight: 700; color: var(--red); background: rgba(220,38,38,0.08); padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
 .alert-outlet { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
@@ -172,7 +172,6 @@ tbody tr:last-child td { border-bottom: none; }
   .chart-row.col-3 { grid-template-columns: 1fr 1fr; }
   .chart-row.col-2-1 { grid-template-columns: 1fr; }
   .chart-row.col-1-2 { grid-template-columns: 1fr; }
-  .kpi-row.row-4 .kpi-card { max-width: calc(50% - 6px); flex: 1 1 calc(50% - 6px); }
 }
 @media (max-width: 900px) {
   .sidebar { width: 60px; }
@@ -181,7 +180,7 @@ tbody tr:last-child td { border-bottom: none; }
   .sidebar-item { justify-content: center; }
   .main { margin-left: 60px; width: calc(100% - 60px); }
   .chart-row.col-2 { grid-template-columns: 1fr; }
-  .kpi-row.row-3 .kpi-card, .kpi-row.row-4 .kpi-card { max-width: calc(50% - 6px); flex: 1 1 calc(50% - 6px); }
+  .kpi-row .kpi-card { min-width: 160px; }
 }
 </style>
 </head>
@@ -196,7 +195,7 @@ tbody tr:last-child td { border-bottom: none; }
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-logo">
-    <img src="assets/logo-hs-bonek.png" alt="HS BONEK" class="sidebar-brand-logo">
+    <img src="assets/logo-hs-bonek.png" alt="HS BONEK" class="sidebar-brand-logo" onerror="this.style.display='none'">
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">Menu Utama</div>
@@ -274,10 +273,8 @@ tbody tr:last-child td { border-bottom: none; }
 
   <div class="content">
 
-    <!-- KPI CARDS -->
-    <div class="kpi-grid" id="kpiGrid">
-      <!-- rendered by JS -->
-    </div>
+    <!-- KPI CARDS - 4 BARIS KPI UTAMA -->
+    <div class="kpi-grid" id="kpiGrid"></div>
 
     <!-- ALERT: JATUH TEMPO -->
     <div class="alert-section" id="alertSection" style="display:none">
@@ -358,7 +355,7 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
       </div>
       <div class="table-wrap">
-        <table>
+        <table id="piutangTable">
           <thead>
             <tr>
               <th>#</th>
@@ -389,7 +386,6 @@ tbody tr:last-child td { border-bottom: none; }
 
 <script>
 // ==================== CONFIG ====================
-// Ganti URL ini dengan URL CSV sheet piutang kamu
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-IqawPLP_xOgMU8KsQLFbhzEx9a3kSBXA6Nu8l1BTzsnJq3neZb3u6-5RvUdaj4dWeD99ye5E1A0x/pub?gid=0&single=true&output=csv';
 
 let allData = [];
@@ -467,13 +463,13 @@ async function loadData() {
     const iDate    = idx('TANGGAL');
     const iCh      = idx('CHANNEL');
     const iSales   = idx('SALESMAN');
-    const iKode    = idx('KODE');
+    const iKode    = idx('KODE OUTLET');
     const iNama    = idx('NAMA OUTLET');
     const iTotal   = idx('TOTAL');
     const iKet     = idx('KETERANGAN');
     const iDepo    = idx('DEPO');
     const iTempo   = idx('TANGGAL TEMPO');
-    const iNota    = idx('TANGGAL NOTA');
+    const iNota    = idx('TANGGAL NOTA AWAL');
     const iTerbayar= idx('TERBAYAR');
     const iSisaAR  = idx('SISA AR');
     const iStatus  = idx('STATUS');
@@ -484,16 +480,22 @@ async function loadData() {
       if (!cols[iDate]) continue;
 
       const ket = (cols[iKet]||'').toUpperCase();
-      // Ambil data yang merupakan piutang (TOP atau TAGIHAN)
       if (!['TOP','TAGIHAN'].includes(ket)) continue;
 
       const tglNota  = parseDate(cols[iNota] || cols[iDate]);
       const tglTempo = parseDate(cols[iTempo]);
       const sisaAR   = parseNum(cols[iSisaAR]);
-      const status   = (cols[iStatus]||'').toUpperCase().trim();
+      const rawStatus = (cols[iStatus]||'').toUpperCase().trim();
       const aging    = agingDays(tglNota);
       const today    = new Date(); today.setHours(0,0,0,0);
-      const isJatuhTempo = tglTempo && tglTempo < today && status !== 'LUNAS';
+      const isJatuhTempo = tglTempo && tglTempo < today && rawStatus !== 'LUNAS' && sisaAR > 0;
+
+      let finalStatus = rawStatus;
+      if (!finalStatus) {
+        if (sisaAR <= 0) finalStatus = 'LUNAS';
+        else if (isJatuhTempo) finalStatus = 'JATUH TEMPO';
+        else finalStatus = 'BELUM LUNAS';
+      }
 
       allData.push({
         tanggal:    parseDate(cols[iDate]),
@@ -508,7 +510,7 @@ async function loadData() {
         tglTempo,
         terbayar:   parseNum(cols[iTerbayar]),
         sisaAR,
-        status:     status || (sisaAR <= 0 ? 'LUNAS' : isJatuhTempo ? 'JATUH TEMPO' : 'BELUM LUNAS'),
+        status:     finalStatus,
         aging,
         isJatuhTempo,
       });
@@ -528,11 +530,11 @@ async function loadData() {
 
 function setDefaultDates() {
   if (!allData.length) return;
-  const dates = allData.map(r => r.tanggal).filter(Boolean);
-  const min = new Date(Math.min(...dates));
+  const dates = allData.map(r => r.tglNota || r.tanggal).filter(Boolean);
   const max = new Date(Math.max(...dates));
-  document.getElementById('filterFrom').value = dateKey(min);
-  document.getElementById('filterTo').value   = dateKey(max);
+  const dateStr = dateKey(max);
+  document.getElementById('filterFrom').value = dateStr;
+  document.getElementById('filterTo').value = dateStr;
 }
 
 function populateFilters() {
@@ -578,82 +580,62 @@ function updateSubtitle(data) {
   const from = document.getElementById('filterFrom').value;
   const to   = document.getElementById('filterTo').value;
   const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-  document.getElementById('subtitlePeriod').textContent = fmtD(from) + ' – ' + fmtD(to);
+  const totalAR = data.reduce((s,r) => s + r.sisaAR, 0);
+  document.getElementById('subtitlePeriod').textContent = `${fmtD(from)} – ${fmtD(to)} • Total Piutang: ${fmtShort(totalAR)}`;
 }
 
-// ==================== KPI ====================
+// ==================== KPI (4 KPI Cards sesuai diskusi) ====================
 function renderKPI(data) {
-  const totalAR    = data.reduce((s,r) => s + r.sisaAR, 0);
-  const grosirAR   = data.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.sisaAR,0);
-  const agenAR     = data.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.sisaAR,0);
-  const outletCount= new Set(data.filter(r=>r.sisaAR>0).map(r=>r.kodeOutlet)).size;
-  const jatuhTempo = data.filter(r=>r.isJatuhTempo && r.sisaAR>0);
-  const jatuhAR    = jatuhTempo.reduce((s,r)=>s+r.sisaAR,0);
-  const avgAging   = data.filter(r=>r.sisaAR>0).length > 0
-    ? Math.round(data.filter(r=>r.sisaAR>0).reduce((s,r)=>s+r.aging,0) / data.filter(r=>r.sisaAR>0).length)
-    : 0;
-  const totalTagihan = data.reduce((s,r)=>s+r.total,0);
-  const totalBayar   = data.reduce((s,r)=>s+r.terbayar,0);
+  // 1. Total Outstanding Piutang (semua data dari awal, sebelum filter)
+  const totalOutstandingAll = allData.filter(r => r.status !== 'LUNAS' && r.sisaAR > 0).reduce((s,r) => s + r.sisaAR, 0);
+  
+  // 2. Jatuh Tempo Hari Ini (berdasarkan tanggal filter)
+  const fromDate = document.getElementById('filterFrom').value;
+  const jatuhTempoHariIni = data.filter(r => r.isJatuhTempo && r.sisaAR > 0).reduce((s,r) => s + r.sisaAR, 0);
+  
+  // 3. Pembayaran Periode (TAGIHAN pada rentang filter)
+  const pembayaranPeriode = data.filter(r => r.keterangan === 'TAGIHAN').reduce((s,r) => s + r.total, 0);
+  
+  // 4. Progress Pembayaran (Pembayaran / Total Outstanding)
+  const progressPercent = totalOutstandingAll > 0 ? (pembayaranPeriode / totalOutstandingAll) * 100 : 0;
+  const sisaSetelahBayar = totalOutstandingAll - pembayaranPeriode;
 
   document.getElementById('kpiGrid').innerHTML = `
-    <div class="kpi-row row-4">
+    <div class="kpi-row">
       <div class="kpi-card" style="--kpi-color:var(--red)">
         <div class="kpi-icon" style="background:rgba(220,38,38,.08)">
           <svg fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M9 14l2 2 4-4M3 6h18M3 10h18M3 14h7M3 18h7"/></svg>
         </div>
-        <div class="kpi-label">Total Piutang (Sisa AR)</div>
-        <div class="kpi-value md">${fmtShort(totalAR)}</div>
-        <div class="kpi-sub">Dari tagihan ${fmtShort(totalTagihan)}</div>
+        <div class="kpi-label">Total Outstanding Piutang</div>
+        <div class="kpi-value">${fmtShort(totalOutstandingAll)}</div>
+        <div class="kpi-sub">Seluruh piutang belum lunas</div>
       </div>
-      <div class="kpi-card" style="--kpi-color:var(--accent)">
-        <div class="kpi-icon" style="background:rgba(26,107,60,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/></svg>
-        </div>
-        <div class="kpi-label">Piutang Grosir</div>
-        <div class="kpi-value md">${fmtShort(grosirAR)}</div>
-        <div class="kpi-sub">${totalAR>0?(grosirAR/totalAR*100).toFixed(1):0}% dari total</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--purple)">
-        <div class="kpi-icon" style="background:rgba(147,51,234,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#9333ea" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
-        <div class="kpi-label">Piutang Agen</div>
-        <div class="kpi-value md">${fmtShort(agenAR)}</div>
-        <div class="kpi-sub">${totalAR>0?(agenAR/totalAR*100).toFixed(1):0}% dari total</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--cyan)">
-        <div class="kpi-icon" style="background:rgba(8,145,178,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        </div>
-        <div class="kpi-label">Outlet Berpiutang</div>
-        <div class="kpi-value">${outletCount}</div>
-        <div class="kpi-sub">outlet aktif punya AR</div>
-      </div>
-    </div>
-    <div class="kpi-row row-3">
       <div class="kpi-card" style="--kpi-color:var(--orange)">
         <div class="kpi-icon" style="background:rgba(234,112,16,.08)">
           <svg fill="none" viewBox="0 0 24 24" stroke="#ea7010" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <div class="kpi-label">Piutang Jatuh Tempo</div>
-        <div class="kpi-value md" style="color:var(--orange)">${fmtShort(jatuhAR)}</div>
-        <div class="kpi-sub">${jatuhTempo.length} outlet belum bayar</div>
+        <div class="kpi-label">Jatuh Tempo (Periode)</div>
+        <div class="kpi-value md" style="color:var(--orange)">${fmtShort(jatuhTempoHariIni)}</div>
+        <div class="kpi-sub">Piutang lewat jatuh tempo</div>
       </div>
+    </div>
+    <div class="kpi-row">
       <div class="kpi-card" style="--kpi-color:var(--green)">
         <div class="kpi-icon" style="background:rgba(22,163,74,.08)">
           <svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         </div>
-        <div class="kpi-label">Total Terbayar</div>
-        <div class="kpi-value md" style="color:var(--green)">${fmtShort(totalBayar)}</div>
-        <div class="kpi-sub">${totalTagihan>0?(totalBayar/totalTagihan*100).toFixed(1):0}% dari tagihan</div>
+        <div class="kpi-label">Pembayaran Periode</div>
+        <div class="kpi-value md" style="color:var(--green)">${fmtShort(pembayaranPeriode)}</div>
+        <div class="kpi-sub">Total TAGIHAN dalam rentang filter</div>
       </div>
-      <div class="kpi-card" style="--kpi-color:var(--yellow)">
-        <div class="kpi-icon" style="background:rgba(202,138,4,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <div class="kpi-card" style="--kpi-color:var(--accent)">
+        <div class="kpi-icon" style="background:rgba(26,107,60,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
         </div>
-        <div class="kpi-label">Rata-rata Aging</div>
-        <div class="kpi-value" style="color:var(--yellow)">${avgAging} <span style="font-size:13px;font-weight:500">hari</span></div>
-        <div class="kpi-sub">umur rata-rata piutang aktif</div>
+        <div class="kpi-label">Progress Pembayaran</div>
+        <div class="kpi-value">${progressPercent.toFixed(1)}%</div>
+        <div class="progress-bar-container"><div class="progress-fill" style="width:${Math.min(100, progressPercent)}%"></div></div>
+        <div class="kpi-sub">Sisa piutang: ${fmtShort(sisaSetelahBayar)}</div>
       </div>
     </div>
   `;
@@ -662,23 +644,22 @@ function renderKPI(data) {
 // ==================== ALERT ====================
 function renderAlert(data) {
   const jatuh = data.filter(r => r.isJatuhTempo && r.sisaAR > 0)
-    .sort((a,b) => a.aging - b.aging);
-
-  const sec = document.getElementById('alertSection');
-  if (!jatuh.length) { sec.style.display = 'none'; return; }
-  sec.style.display = 'block';
-  document.getElementById('alertCount').textContent = jatuh.length;
-
-  // group by outlet, ambil max aging
-  const byOutlet = {};
+    .sort((a,b) => b.aging - a.aging);
+  const uniqueOutlets = new Map();
   jatuh.forEach(r => {
-    const k = r.kodeOutlet || r.namaOutlet;
-    if (!byOutlet[k]) byOutlet[k] = { nama: r.namaOutlet, salesman: r.salesman, sisaAR: 0, aging: 0, tglTempo: r.tglTempo };
-    byOutlet[k].sisaAR += r.sisaAR;
-    if (r.aging > byOutlet[k].aging) byOutlet[k].aging = r.aging;
+    const key = r.kodeOutlet || r.namaOutlet;
+    if (!uniqueOutlets.has(key)) {
+      uniqueOutlets.set(key, { nama: r.namaOutlet, salesman: r.salesman, sisaAR: 0, aging: r.aging, tglTempo: r.tglTempo });
+    }
+    const u = uniqueOutlets.get(key);
+    u.sisaAR += r.sisaAR;
+    if (r.aging > u.aging) u.aging = r.aging;
   });
-
-  const sorted = Object.values(byOutlet).sort((a,b) => b.sisaAR - a.sisaAR).slice(0,10);
+  const sorted = Array.from(uniqueOutlets.values()).sort((a,b) => b.sisaAR - a.sisaAR).slice(0,10);
+  const sec = document.getElementById('alertSection');
+  if (!sorted.length) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  document.getElementById('alertCount').textContent = sorted.length;
   document.getElementById('alertList').innerHTML = sorted.map(o => `
     <div class="alert-item">
       <div class="alert-days">+${o.aging} hari</div>
@@ -801,7 +782,10 @@ function switchChannelTab(ch, el) {
 }
 
 function renderTable(data, chFilter) {
-  const rows = chFilter === 'ALL' ? data : data.filter(r=>r.channel===chFilter);
+  let rows = chFilter === 'ALL' ? data : data.filter(r=>r.channel===chFilter);
+  // Urutkan berdasarkan sisa AR terbesar
+  rows = [...rows].sort((a,b) => b.sisaAR - a.sisaAR);
+  
   const tbody = document.getElementById('tablePiutang');
 
   if (!rows.length) {
