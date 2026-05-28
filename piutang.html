@@ -299,7 +299,7 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
     <div class="chart-row col-2-1">
       <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Tren Piutang Harian</div><div class="chart-sub">Sisa AR per hari</div></div></div>
+        <div class="chart-header"><div><div class="chart-title">Tren Piutang Harian</div><div class="chart-sub">Nominal piutang outstanding per tanggal nota</div></div></div>
         <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartTren"></canvas></div>
       </div>
       <div class="chart-card">
@@ -318,7 +318,7 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="table-wrap">
         <table id="piutangTable">
-          <thead><tr><th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th><th class="right">Tagihan</th><th class="right">Terbayar</th><th class="right">Sisa AR</th><th>Tgl Nota</th><th>Jatuh Tempo</th><th class="right">Aging</th><th>Status</th></tr></thead>
+          <thead><tr><th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th><th class="right">Jumlah Piutang</th><th>Tgl Nota Awal</th><th>Jatuh Tempo</th><th class="right">Aging</th><th>Status</th></tr></thead>
           <tbody id="tablePiutang"></tbody>
         </table>
       </div>
@@ -399,57 +399,58 @@ async function loadData() {
     const response = await fetch(CSV_URL + '&t=' + Date.now());
     let csvText = await response.text();
     if (csvText.charCodeAt(0) === 0xFEFF) csvText = csvText.slice(1);
-    
-    const parsed = Papa.parse(csvText, { 
-      header: true, 
+
+    const parsed = Papa.parse(csvText, {
+      header: true,
       skipEmptyLines: true,
-      transformHeader: h => h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase()
+      transformHeader: h => h.trim().toUpperCase()
     });
 
     allData = [];
+    const today = new Date(); today.setHours(0,0,0,0);
+
     for (const row of parsed.data) {
-      const keterangan = (row['KETERANGAN'] || '').toString().toUpperCase().trim();
-      if (!['TOP', 'TAGIHAN'].includes(keterangan)) continue;
-      
-      const tglNota = parseDate(row['TANGGAL NOTA AWAL'] || row['TANGGAL']);
-      const tglTempo = parseDate(row['TANGGAL TEMPO']);
-      const sisaAR = parseNum(row['SISA AR']);
-      const total = parseNum(row['TOTAL']);
-      const terbayar = parseNum(row['TERBAYAR']);
+      const ket = (row['KETERANGAN'] || '').toString().toUpperCase().trim();
+      // Hanya ambil TOP dan TAGIHAN
+      if (!['TOP','TAGIHAN'].includes(ket)) continue;
+
+      const tglInput  = parseDate(row['TANGGAL']);
+      const tglNota   = parseDate(row['TANGGAL NOTA AWAL']) || tglInput;
+      const tglTempo  = parseDate(row['TANGGAL TEMPO']);
+      const total     = parseNum(row['TOTAL']);
       const rawStatus = (row['STATUS'] || '').toString().toUpperCase().trim();
+
+      // Aging dihitung dari TANGGAL NOTA AWAL ke hari ini
       const aging = agingDays(tglNota);
-      const today = new Date(); today.setHours(0,0,0,0);
-      const isJatuhTempo = tglTempo && tglTempo < today && rawStatus !== 'LUNAS' && sisaAR > 0;
-      
-      let finalStatus = rawStatus;
-      if (!finalStatus) {
-        if (sisaAR <= 0) finalStatus = 'LUNAS';
-        else if (isJatuhTempo) finalStatus = 'JATUH TEMPO';
-        else finalStatus = 'BELUM LUNAS';
-      }
-      
+      // Jatuh tempo: tglTempo sudah lewat hari ini dan status bukan LUNAS
+      const isJatuhTempo = tglTempo && tglTempo < today
+        && rawStatus !== 'LUNAS' && ket === 'TOP';
+
       allData.push({
-        tanggal: parseDate(row['TANGGAL']),
-        channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
-        salesman: row['SALESMAN'] || '',
-        kodeOutlet: row['KODE OUTLET'] || '',
-        namaOutlet: row['NAMA OUTLET'] || '',
-        total: total,
-        keterangan: keterangan,
-        tglNota: tglNota,
-        tglTempo: tglTempo,
-        terbayar: terbayar,
-        sisaAR: sisaAR,
-        status: finalStatus,
-        aging: aging,
+        tanggal:    tglInput,
+        tglNota:    tglNota,
+        tglTempo:   tglTempo,
+        channel:    (row['CHANNEL'] || '').toString().toUpperCase().trim(),
+        salesman:   (row['SALESMAN'] || '').toString().trim(),
+        kodeOutlet: (row['KODE OUTLET'] || '').toString().trim(),
+        namaOutlet: (row['NAMA OUTLET'] || '').toString().trim(),
+        total:      total,
+        keterangan: ket,
+        status:     rawStatus,   // OUTSTANDING, LUNAS, atau blank
+        aging:      aging,
         isJatuhTempo: isJatuhTempo,
+        key:        (row['KEY'] || '').toString().trim(),
       });
     }
-    
-    console.log('Data loaded:', allData.length);
-    setDefaultDates();
+
+    console.log('Total rows loaded:', allData.length);
+    console.log('TOP rows:', allData.filter(r=>r.keterangan==='TOP').length);
+    console.log('TAGIHAN rows:', allData.filter(r=>r.keterangan==='TAGIHAN').length);
+    console.log('OUTSTANDING rows:', allData.filter(r=>r.keterangan==='TOP' && r.status==='OUTSTANDING').length);
+
     populateFilters();
     renderAll();
+
   } catch(e) {
     console.error(e);
     alert('Gagal memuat data: ' + e.message);
@@ -460,13 +461,9 @@ async function loadData() {
 }
 
 function setDefaultDates() {
-  if (!allData.length) return;
-  const dates = allData.map(r => r.tglNota || r.tanggal).filter(Boolean);
-  if (!dates.length) return;
-  const max = new Date(Math.max(...dates));
-  const dateStr = dateKey(max);
-  document.getElementById('filterFrom').value = dateStr;
-  document.getElementById('filterTo').value = dateStr;
+  // Kosongkan filter tanggal by default → tampilkan semua piutang outstanding
+  document.getElementById('filterFrom').value = '';
+  document.getElementById('filterTo').value   = '';
 }
 
 function populateFilters() {
@@ -477,201 +474,297 @@ function populateFilters() {
 }
 
 function getFilteredData() {
-  const from = document.getElementById('filterFrom').value;
-  const to = document.getElementById('filterTo').value;
-  const ch = document.getElementById('filterChannel').value;
-  const sales = document.getElementById('filterSalesman').value;
+  const from   = document.getElementById('filterFrom').value;
+  const to     = document.getElementById('filterTo').value;
+  const ch     = document.getElementById('filterChannel').value;
+  const sales  = document.getElementById('filterSalesman').value;
   const status = document.getElementById('filterStatus').value;
-  
+
   return allData.filter(r => {
-    const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
-    if (from && dk < from) return false;
-    if (to && dk > to) return false;
-    if (ch && r.channel !== ch) return false;
+    // Filter channel & salesman berlaku untuk semua
+    if (ch    && r.channel  !== ch)    return false;
     if (sales && r.salesman !== sales) return false;
-    if (status && r.status !== status) return false;
+
+    // Filter status: map ke nilai STATUS di data
+    // "OUTSTANDING" = belum lunas, "LUNAS" = lunas
+    if (status === 'OUTSTANDING' && r.status !== 'OUTSTANDING') return false;
+    if (status === 'LUNAS'       && r.status !== 'LUNAS')       return false;
+    if (status === 'JATUH TEMPO' && !r.isJatuhTempo)            return false;
+
+    // Filter tanggal berdasarkan TANGGAL NOTA AWAL (hanya jika diisi)
+    if (from || to) {
+      const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
+      if (from && dk < from) return false;
+      if (to   && dk > to)   return false;
+    }
+
+    return true;
+  });
+}
+
+// Data piutang aktif = TOP + OUTSTANDING saja (untuk KPI & chart)
+function getOutstandingData() {
+  const from   = document.getElementById('filterFrom').value;
+  const to     = document.getElementById('filterTo').value;
+  const ch     = document.getElementById('filterChannel').value;
+  const sales  = document.getElementById('filterSalesman').value;
+
+  return allData.filter(r => {
+    if (r.keterangan !== 'TOP') return false;
+    if (r.status !== 'OUTSTANDING') return false;
+    if (ch    && r.channel  !== ch)    return false;
+    if (sales && r.salesman !== sales) return false;
+    if (from || to) {
+      const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
+      if (from && dk < from) return false;
+      if (to   && dk > to)   return false;
+    }
+    return true;
+  });
+}
+
+// Data pembayaran = TAGIHAN saja (untuk KPI pembayaran)
+function getPembayaranData() {
+  const from  = document.getElementById('filterFrom').value;
+  const to    = document.getElementById('filterTo').value;
+  const ch    = document.getElementById('filterChannel').value;
+  const sales = document.getElementById('filterSalesman').value;
+
+  return allData.filter(r => {
+    if (r.keterangan !== 'TAGIHAN') return false;
+    if (ch    && r.channel  !== ch)    return false;
+    if (sales && r.salesman !== sales) return false;
+    if (from || to) {
+      const dk = r.tanggal ? dateKey(r.tanggal) : '';
+      if (from && dk < from) return false;
+      if (to   && dk > to)   return false;
+    }
     return true;
   });
 }
 
 function renderAll() {
-  const data = getFilteredData();
-  renderKPI(data);
-  renderAlert(data);
-  renderChartChannel(data);
-  renderChartAging(data);
-  renderChartStatus(data);
-  renderChartTren(data);
-  renderTopOutlet(data);
-  renderTable(data, activeChannelTab);
-  updateSubtitle(data);
+  const outstanding  = getOutstandingData();   // TOP + OUTSTANDING
+  const pembayaran   = getPembayaranData();    // TAGIHAN
+  renderKPI(outstanding, pembayaran);
+  renderAlert(outstanding);
+  renderChartChannel(outstanding);
+  renderChartAging(outstanding);
+  renderChartStatus();
+  renderChartTren(outstanding);
+  renderTopOutlet(outstanding);
+  renderTable(outstanding, activeChannelTab);
+  updateSubtitle(outstanding);
 }
 
-function updateSubtitle(data) {
+function updateSubtitle(outstanding) {
   const from = document.getElementById('filterFrom').value;
-  const to = document.getElementById('filterTo').value;
-  const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-  const totalAR = data.reduce((s,r) => s + (r.sisaAR || 0), 0);
-  document.getElementById('subtitlePeriod').textContent = `${fmtD(from)} – ${fmtD(to)} • Total Piutang: ${fmtShort(totalAR)}`;
+  const to   = document.getElementById('filterTo').value;
+  const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : null;
+  const totalAR = outstanding.reduce((s,r) => s + r.total, 0);
+  const periodeStr = (from || to)
+    ? ((fmtD(from) || '...') + ' – ' + (fmtD(to) || '...') + ' · ')
+    : 'Semua periode · ';
+  document.getElementById('subtitlePeriod').textContent = periodeStr + 'Outstanding: ' + fmtShort(totalAR);
 }
 
-function renderKPI(data) {
-  const totalOutstandingAll = allData.filter(r => r.status !== 'LUNAS' && r.sisaAR > 0).reduce((s,r) => s + (r.sisaAR || 0), 0);
-  const jatuhTempoHariIni = data.filter(r => r.isJatuhTempo && r.sisaAR > 0).reduce((s,r) => s + (r.sisaAR || 0), 0);
-  const pembayaranPeriode = data.filter(r => r.keterangan === 'TAGIHAN').reduce((s,r) => s + (r.total || 0), 0);
-  const progressPercent = totalOutstandingAll > 0 ? (pembayaranPeriode / totalOutstandingAll) * 100 : 0;
-  const sisaSetelahBayar = totalOutstandingAll - pembayaranPeriode;
+function renderKPI(outstanding, pembayaran) {
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const totalAR    = outstanding.reduce((s,r) => s + r.total, 0);
+  const grosirAR   = outstanding.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.total,0);
+  const agenAR     = outstanding.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.total,0);
+  const outletCount= new Set(outstanding.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+  const jatuhList  = outstanding.filter(r=>r.isJatuhTempo);
+  const jatuhAR    = jatuhList.reduce((s,r)=>s+r.total,0);
+  const avgAging   = outstanding.length > 0
+    ? Math.round(outstanding.reduce((s,r)=>s+r.aging,0) / outstanding.length) : 0;
+  const totalBayar = pembayaran.reduce((s,r)=>s+r.total,0);
 
   document.getElementById('kpiGrid').innerHTML = `
-    <div class="kpi-row">
+    <div class="kpi-row row-4">
       <div class="kpi-card" style="--kpi-color:var(--red)">
         <div class="kpi-icon" style="background:rgba(220,38,38,.08)">
           <svg fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M9 14l2 2 4-4M3 6h18M3 10h18M3 14h7M3 18h7"/></svg>
         </div>
-        <div class="kpi-label">Total Outstanding Piutang</div>
-        <div class="kpi-value">${fmtShort(totalOutstandingAll)}</div>
-        <div class="kpi-sub">Seluruh piutang belum lunas</div>
+        <div class="kpi-label">Total Piutang Outstanding</div>
+        <div class="kpi-value md">${fmtShort(totalAR)}</div>
+        <div class="kpi-sub">${outstanding.length} nota belum lunas</div>
       </div>
+      <div class="kpi-card" style="--kpi-color:var(--accent)">
+        <div class="kpi-icon" style="background:rgba(26,107,60,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/></svg>
+        </div>
+        <div class="kpi-label">Piutang Grosir</div>
+        <div class="kpi-value md">${fmtShort(grosirAR)}</div>
+        <div class="kpi-sub">${totalAR>0?(grosirAR/totalAR*100).toFixed(1):0}% dari total</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color:var(--purple)">
+        <div class="kpi-icon" style="background:rgba(147,51,234,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#9333ea" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div class="kpi-label">Piutang Agen</div>
+        <div class="kpi-value md">${fmtShort(agenAR)}</div>
+        <div class="kpi-sub">${totalAR>0?(agenAR/totalAR*100).toFixed(1):0}% dari total</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color:var(--cyan)">
+        <div class="kpi-icon" style="background:rgba(8,145,178,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        </div>
+        <div class="kpi-label">Outlet Berpiutang</div>
+        <div class="kpi-value">${outletCount}</div>
+        <div class="kpi-sub">outlet dengan nota outstanding</div>
+      </div>
+    </div>
+    <div class="kpi-row row-3">
       <div class="kpi-card" style="--kpi-color:var(--orange)">
         <div class="kpi-icon" style="background:rgba(234,112,16,.08)">
           <svg fill="none" viewBox="0 0 24 24" stroke="#ea7010" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <div class="kpi-label">Jatuh Tempo (Periode)</div>
-        <div class="kpi-value md" style="color:var(--orange)">${fmtShort(jatuhTempoHariIni)}</div>
-        <div class="kpi-sub">Piutang lewat jatuh tempo</div>
+        <div class="kpi-label">Piutang Jatuh Tempo</div>
+        <div class="kpi-value md" style="color:var(--orange)">${fmtShort(jatuhAR)}</div>
+        <div class="kpi-sub">${jatuhList.length} nota lewat tempo</div>
       </div>
-    </div>
-    <div class="kpi-row">
       <div class="kpi-card" style="--kpi-color:var(--green)">
         <div class="kpi-icon" style="background:rgba(22,163,74,.08)">
           <svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         </div>
-        <div class="kpi-label">Pembayaran Periode</div>
-        <div class="kpi-value md" style="color:var(--green)">${fmtShort(pembayaranPeriode)}</div>
-        <div class="kpi-sub">Total TAGIHAN dalam rentang filter</div>
+        <div class="kpi-label">Pembayaran Diterima</div>
+        <div class="kpi-value md" style="color:var(--green)">${fmtShort(totalBayar)}</div>
+        <div class="kpi-sub">${pembayaran.length} transaksi tagihan</div>
       </div>
-      <div class="kpi-card" style="--kpi-color:var(--accent)">
-        <div class="kpi-icon" style="background:rgba(26,107,60,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <div class="kpi-card" style="--kpi-color:var(--yellow)">
+        <div class="kpi-icon" style="background:rgba(202,138,4,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
         </div>
-        <div class="kpi-label">Progress Pembayaran</div>
-        <div class="kpi-value">${progressPercent.toFixed(1)}%</div>
-        <div class="progress-bar-container"><div class="progress-fill" style="width:${Math.min(100, progressPercent)}%"></div></div>
-        <div class="kpi-sub">Sisa piutang: ${fmtShort(sisaSetelahBayar)}</div>
+        <div class="kpi-label">Rata-rata Aging</div>
+        <div class="kpi-value" style="color:var(--yellow)">${avgAging} <span style="font-size:13px;font-weight:500">hari</span></div>
+        <div class="kpi-sub">umur rata-rata piutang aktif</div>
       </div>
     </div>
   `;
 }
 
-function renderAlert(data) {
-  const jatuh = data.filter(r => r.isJatuhTempo && r.sisaAR > 0);
-  const uniqueOutlets = new Map();
+function renderAlert(outstanding) {
+  const jatuh = outstanding.filter(r => r.isJatuhTempo);
+  const byOutlet = {};
   jatuh.forEach(r => {
-    const key = r.kodeOutlet || r.namaOutlet;
-    if (!uniqueOutlets.has(key)) {
-      uniqueOutlets.set(key, { nama: r.namaOutlet, salesman: r.salesman, sisaAR: 0, aging: r.aging, tglTempo: r.tglTempo });
-    }
-    const u = uniqueOutlets.get(key);
-    u.sisaAR += r.sisaAR;
-    if (r.aging > u.aging) u.aging = r.aging;
+    const k = r.kodeOutlet || r.namaOutlet;
+    if (!byOutlet[k]) byOutlet[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, aging:0, tglTempo:r.tglTempo };
+    byOutlet[k].total += r.total;
+    if (r.aging > byOutlet[k].aging) byOutlet[k].aging = r.aging;
   });
-  const sorted = Array.from(uniqueOutlets.values()).sort((a,b) => b.sisaAR - a.sisaAR).slice(0,10);
+  const sorted = Object.values(byOutlet).sort((a,b)=>b.total-a.total).slice(0,10);
   const sec = document.getElementById('alertSection');
-  if (!sorted.length) { sec.style.display = 'none'; return; }
+  if (!sorted.length) { sec.style.display='none'; return; }
   sec.style.display = 'block';
   document.getElementById('alertCount').textContent = sorted.length;
   document.getElementById('alertList').innerHTML = sorted.map(o => `
     <div class="alert-item">
       <div class="alert-days">+${o.aging} hari</div>
       <div><div class="alert-outlet">${o.nama}</div><div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div></div>
-      <div class="alert-amount">${fmtShort(o.sisaAR)}</div>
+      <div class="alert-amount">${fmtShort(o.total)}</div>
     </div>
   `).join('');
 }
 
-function renderChartChannel(data) {
+function renderChartChannel(outstanding) {
   destroyChart('chartChannel');
-  const grosir = data.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+(r.sisaAR||0),0);
-  const agen = data.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+(r.sisaAR||0),0);
+  const grosir = outstanding.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.total,0);
+  const agen   = outstanding.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.total,0);
   const ctx = document.getElementById('chartChannel').getContext('2d');
   charts['chartChannel'] = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels:['Grosir','Agen'], datasets:[{ data:[grosir,agen], backgroundColor:['rgba(26,107,60,0.85)','rgba(147,51,234,0.85)'], borderWidth:2, borderColor:'#fff' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
+    type:'doughnut',
+    data:{ labels:['Grosir','Agen'], datasets:[{ data:[grosir,agen], backgroundColor:['rgba(26,107,60,0.85)','rgba(147,51,234,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
   });
   document.getElementById('legendChannel').innerHTML = [
     {label:'Grosir', val:grosir, color:'rgba(26,107,60,0.85)'},
-    {label:'Agen', val:agen, color:'rgba(147,51,234,0.85)'},
-  ].map(l => `<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
-}
-
-function renderChartAging(data) {
-  destroyChart('chartAging');
-  const active = data.filter(r=>r.sisaAR>0);
-  const buckets = {'0–30 hari':0,'31–60 hari':0,'61–90 hari':0,'>90 hari':0};
-  active.forEach(r => { buckets[agingBucket(r.aging)] += r.sisaAR; });
-  const ctx = document.getElementById('chartAging').getContext('2d');
-  charts['chartAging'] = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: Object.keys(buckets), datasets: [{ data: Object.values(buckets), backgroundColor: ['rgba(22,163,74,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)','rgba(127,0,0,0.8)'], borderRadius:6 }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{display:false}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v)}}} }
-  });
-}
-
-function renderChartStatus(data) {
-  destroyChart('chartStatus');
-  const lunas = data.filter(r=>r.status==='LUNAS').reduce((s,r)=>s+(r.total||0),0);
-  const belum = data.filter(r=>r.status==='BELUM LUNAS').reduce((s,r)=>s+(r.sisaAR||0),0);
-  const jatuh = data.filter(r=>r.status==='JATUH TEMPO').reduce((s,r)=>s+(r.sisaAR||0),0);
-  const ctx = document.getElementById('chartStatus').getContext('2d');
-  charts['chartStatus'] = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels:['Lunas','Belum Lunas','Jatuh Tempo'], datasets:[{ data:[lunas,belum,jatuh], backgroundColor:['rgba(22,163,74,0.85)','rgba(234,112,16,0.85)','rgba(220,38,38,0.85)'], borderWidth:2, borderColor:'#fff' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
-  });
-  document.getElementById('legendStatus').innerHTML = [
-    {label:'Lunas', val:lunas, color:'rgba(22,163,74,0.85)'},
-    {label:'Belum Lunas', val:belum, color:'rgba(234,112,16,0.85)'},
-    {label:'Jatuh Tempo', val:jatuh, color:'rgba(220,38,38,0.85)'},
+    {label:'Agen',   val:agen,   color:'rgba(147,51,234,0.85)'},
   ].map(l=>`<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
 }
 
-function renderChartTren(data) {
-  destroyChart('chartTren');
-  const byDay = {};
-  data.filter(r=>r.sisaAR>0).forEach(r => {
-    const k = dateKey(r.tglNota || r.tanggal);
-    if (!k) return;
-    byDay[k] = (byDay[k] || 0) + r.sisaAR;
-  });
-  const sorted = Object.entries(byDay).sort((a,b)=>a[0].localeCompare(b[0]));
-  const labels = sorted.map(([d]) => new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
-  const vals = sorted.map(([,v]) => v);
-  const ctx = document.getElementById('chartTren').getContext('2d');
-  charts['chartTren'] = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets:[{ label:'Sisa AR', data:vals, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.08)', tension:.35, fill:true, pointRadius:3 }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ y:{ ticks:{ callback:v=>fmtShort(v) } } } }
+function renderChartAging(outstanding) {
+  destroyChart('chartAging');
+  const buckets = {'0–30 hari':0,'31–60 hari':0,'61–90 hari':0,'>90 hari':0};
+  outstanding.forEach(r => { buckets[agingBucket(r.aging)] += r.total; });
+  const ctx = document.getElementById('chartAging').getContext('2d');
+  charts['chartAging'] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:Object.keys(buckets), datasets:[{ data:Object.values(buckets), backgroundColor:['rgba(22,163,74,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)','rgba(127,0,0,0.8)'], borderRadius:6, borderSkipped:false }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{display:false},ticks:{font:{size:10}}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}} } }
   });
 }
 
-function renderTopOutlet(data) {
+function renderChartStatus() {
+  destroyChart('chartStatus');
+  // Hitung dari allData langsung (tidak perlu filter)
+  const ch    = document.getElementById('filterChannel').value;
+  const sales = document.getElementById('filterSalesman').value;
+  const topData = allData.filter(r => {
+    if (r.keterangan !== 'TOP') return false;
+    if (ch    && r.channel  !== ch)    return false;
+    if (sales && r.salesman !== sales) return false;
+    return true;
+  });
+  const outstanding = topData.filter(r=>r.status==='OUTSTANDING').reduce((s,r)=>s+r.total,0);
+  const lunas       = topData.filter(r=>r.status==='LUNAS').reduce((s,r)=>s+r.total,0);
+  const jatuh       = topData.filter(r=>r.isJatuhTempo).reduce((s,r)=>s+r.total,0);
+  const ctx = document.getElementById('chartStatus').getContext('2d');
+  charts['chartStatus'] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:['Outstanding','Lunas','Jatuh Tempo'], datasets:[{ data:[outstanding,lunas,jatuh], backgroundColor:['rgba(234,112,16,0.85)','rgba(22,163,74,0.85)','rgba(220,38,38,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
+  });
+  document.getElementById('legendStatus').innerHTML = [
+    {label:'Outstanding', val:outstanding, color:'rgba(234,112,16,0.85)'},
+    {label:'Lunas',       val:lunas,       color:'rgba(22,163,74,0.85)'},
+    {label:'Jatuh Tempo', val:jatuh,       color:'rgba(220,38,38,0.85)'},
+  ].map(l=>`<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
+}
+
+function renderChartTren(outstanding) {
+  destroyChart('chartTren');
+  const byDay = {};
+  outstanding.forEach(r => {
+    const k = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
+    if (!k) return;
+    byDay[k] = (byDay[k]||0) + r.total;
+  });
+  const sorted = Object.entries(byDay).sort((a,b)=>a[0].localeCompare(b[0]));
+  const labels = sorted.map(([d]) => new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
+  const vals   = sorted.map(([,v]) => v);
+  const ctx = document.getElementById('chartTren').getContext('2d');
+  charts['chartTren'] = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[{ label:'Piutang Outstanding', data:vals, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.08)', tension:.35, fill:true, pointRadius:4, pointBackgroundColor:'#dc2626' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{color:'#e0ece4'},ticks:{font:{size:10}}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}} } }
+  });
+}
+
+function renderTopOutlet(outstanding) {
   const byOutlet = {};
-  data.filter(r=>r.sisaAR>0).forEach(r => {
+  outstanding.forEach(r => {
     const k = r.kodeOutlet || r.namaOutlet;
-    if (!byOutlet[k]) byOutlet[k] = { nama: r.namaOutlet, sisaAR: 0, aging: 0, channel: r.channel };
-    byOutlet[k].sisaAR += r.sisaAR;
+    if (!byOutlet[k]) byOutlet[k] = { nama:r.namaOutlet, total:0, aging:0, channel:r.channel };
+    byOutlet[k].total += r.total;
     if (r.aging > byOutlet[k].aging) byOutlet[k].aging = r.aging;
   });
-  const sorted = Object.values(byOutlet).sort((a,b)=>b.sisaAR - a.sisaAR).slice(0,10);
-  const maxAR = sorted[0]?.sisaAR || 1;
-  const rankBg = ['#fef9c3','#f1f5f1','#fef3c7'];
+  const sorted = Object.values(byOutlet).sort((a,b)=>b.total-a.total).slice(0,10);
+  const maxVal = sorted[0]?.total || 1;
+  const rankBg  = ['#fef9c3','#f1f5f1','#fef3c7'];
   const rankClr = ['#ca8a04','#4a7260','#d97706'];
-  document.getElementById('topOutletList').innerHTML = sorted.length ? sorted.map((o,i) => `
+  document.getElementById('topOutletList').innerHTML = sorted.length ? sorted.map((o,i)=>`
     <div class="top-item">
-      <div class="top-rank ${i<3?'':'rn'}" style="${i<3?`background:${rankBg[i]};color:${rankClr[i]}`:''}">${i+1}</div>
-      <div class="top-info"><div class="top-name">${o.nama}</div><div class="top-sub">${o.channel} · Aging ${o.aging} hari</div><div class="bar-progress"><div class="bar-fill" style="width:${(o.sisaAR/maxAR*100).toFixed(1)}%"></div></div></div>
-      <div class="top-right"><div class="top-val">${fmtShort(o.sisaAR)}</div></div>
+      <div class="top-rank ${i<3?'':'rn'}" style="${i<3?`background:${rankBg[i]};color:${rankClr[i]}`:''}">
+        ${i+1}
+      </div>
+      <div class="top-info">
+        <div class="top-name">${o.nama}</div>
+        <div class="top-sub">${o.channel} · Aging ${o.aging} hari</div>
+        <div class="bar-progress"><div class="bar-fill" style="width:${(o.total/maxVal*100).toFixed(1)}%"></div></div>
+      </div>
+      <div class="top-right"><div class="top-val">${fmtShort(o.total)}</div></div>
     </div>
   `).join('') : '<div class="empty-state">Tidak ada data piutang</div>';
 }
@@ -680,25 +773,26 @@ function switchChannelTab(ch, el) {
   activeChannelTab = ch;
   document.querySelectorAll('.channel-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  renderTable(getFilteredData(), ch);
+  renderTable(getOutstandingData(), ch);
 }
 
-function renderTable(data, chFilter) {
-  let rows = chFilter === 'ALL' ? data : data.filter(r=>r.channel===chFilter);
-  rows = [...rows].sort((a,b) => (b.sisaAR||0) - (a.sisaAR||0));
+function renderTable(outstanding, chFilter) {
+  let rows = chFilter === 'ALL' ? outstanding : outstanding.filter(r=>r.channel===chFilter);
+  rows = [...rows].sort((a,b) => b.total - a.total);
   const tbody = document.getElementById('tablePiutang');
+
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="12" class="empty-state">Tidak ada data</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">Tidak ada data piutang outstanding</td></tr>';
     document.getElementById('tableInfo').textContent = '0 data';
     document.getElementById('tableTotals').textContent = '';
     return;
   }
-  const statusBadge = (s) => {
-    if (s==='LUNAS') return '<span class="badge badge-lunas">✓ Lunas</span>';
-    if (s==='JATUH TEMPO') return '<span class="badge badge-tempo">⚠ Jatuh Tempo</span>';
-    return '<span class="badge badge-jatuh">● Belum Lunas</span>';
-  };
-  const chBadge = (ch) => ch==='AGEN' ? '<span class="badge badge-agen">Agen</span>' : '<span class="badge badge-grosir">Grosir</span>';
+
+  const chBadge = ch => ch==='AGEN'
+    ? '<span class="badge badge-agen">Agen</span>'
+    : '<span class="badge badge-grosir">Grosir</span>';
+  const agingColor = d => d>90?'var(--red)':d>60?'var(--orange)':d>30?'var(--yellow)':'var(--green)';
+
   tbody.innerHTML = rows.map((r,i) => `
     <tr>
       <td style="color:var(--text3)">${i+1}</td>
@@ -706,36 +800,19 @@ function renderTable(data, chFilter) {
       <td style="font-weight:600">${r.namaOutlet}</td>
       <td>${chBadge(r.channel)}</td>
       <td>${r.salesman}</td>
-      <td class="right">${fmtShort(r.total)}</td>
-      <td class="right" style="color:var(--green)">${fmtShort(r.terbayar)}</td>
-      <td class="right" style="font-weight:700;color:${(r.sisaAR||0)>0?'var(--red)':'var(--green)'}">${fmtShort(r.sisaAR)}</td>
+      <td class="right" style="font-weight:700;color:var(--red)">${fmtShort(r.total)}</td>
       <td>${fmtDate(r.tglNota)}</td>
       <td style="color:${r.isJatuhTempo?'var(--red)':'var(--text)'}">${fmtDate(r.tglTempo)}</td>
-      <td class="right"><span style="font-weight:600;color:${r.aging>90?'var(--red)':r.aging>60?'var(--orange)':r.aging>30?'var(--yellow)':'var(--green)'}">${r.aging}h</span></td>
-      <td>${statusBadge(r.status)}</td>
+      <td class="right"><span style="font-weight:600;color:${agingColor(r.aging)}">${r.aging} hari</span></td>
+      <td><span class="badge ${r.isJatuhTempo?'badge-tempo':'badge-jatuh'}">${r.isJatuhTempo?'⚠ Jatuh Tempo':'● Outstanding'}</span></td>
     </tr>
   `).join('');
-  const totalTagihan = rows.reduce((s,r)=>s+(r.total||0),0);
-  const totalBayar = rows.reduce((s,r)=>s+(r.terbayar||0),0);
-  const totalSisa = rows.reduce((s,r)=>s+(r.sisaAR||0),0);
-  document.getElementById('tableInfo').textContent = `${rows.length} data piutang`;
-  document.getElementById('tableTotals').innerHTML = `Tagihan: <span style="color:var(--text)">${fmtShort(totalTagihan)}</span> &nbsp;|&nbsp; Terbayar: <span style="color:var(--green)">${fmtShort(totalBayar)}</span> &nbsp;|&nbsp; Sisa AR: <span style="color:var(--red)">${fmtShort(totalSisa)}</span>`;
+
+  const total = rows.reduce((s,r)=>s+r.total,0);
+  document.getElementById('tableInfo').textContent = `${rows.length} nota outstanding`;
+  document.getElementById('tableTotals').innerHTML = `Total: <span style="color:var(--red);font-weight:700">${fmtShort(total)}</span>`;
 }
 
-async function exportData() {
-  const btn = document.getElementById('exportBtn');
-  btn.style.pointerEvents = 'none';
-  try {
-    const res = await fetch(CSV_URL + '&t=' + Date.now());
-    let csv = await res.text();
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `piutang_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-  } catch(e) { alert('Gagal export: ' + e.message); }
-  finally { btn.style.pointerEvents = 'auto'; }
-}
 
 ['filterFrom','filterTo','filterChannel','filterSalesman','filterStatus'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => renderAll());
