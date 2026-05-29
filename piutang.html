@@ -396,50 +396,77 @@ async function loadData() {
   document.getElementById('loadingOverlay').classList.remove('hidden');
 
   try {
-    const response = await fetch(CSV_URL + '&t=' + Date.now());
-    let csvText = await response.text();
-    if (csvText.charCodeAt(0) === 0xFEFF) csvText = csvText.slice(1);
+    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    let text = await res.text();
 
-    const parsed = Papa.parse(csvText, {
+    // Hapus BOM dan karakter aneh di awal (sama persis dengan penjualan.html)
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    text = text.replace(/^[, ]+/, '');
+
+    const parsed = Papa.parse(text, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: h => h.trim().toUpperCase()
+      transformHeader: h => {
+        // Bersihkan header dari karakter aneh di depan
+        let clean = h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase();
+        return clean;
+      }
     });
 
-    allData = [];
+    // Debug: tampilkan header yang terdeteksi
+    console.log('Headers detected:', parsed.meta.fields);
+
     const today = new Date(); today.setHours(0,0,0,0);
+    allData = [];
 
     for (const row of parsed.data) {
-      const ket = (row['KETERANGAN'] || '').toString().toUpperCase().trim();
-      // Hanya ambil TOP dan TAGIHAN
+      // Gunakan parseNum & parseDate inline persis seperti penjualan.html
+      const pNum = (val) => {
+        if (!val || val === '') return 0;
+        let cleaned = val.toString().trim().replace(/,/g, '').replace(/[^\d.-]/g, '');
+        let result = parseFloat(cleaned);
+        return isNaN(result) ? 0 : result;
+      };
+      const pDate = (s) => {
+        if (!s) return null;
+        const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
+        const parts = s.trim().split(/[\s\-\/]+/);
+        if (parts.length === 3) {
+          let d, m, y;
+          if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
+          else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
+          else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
+          if (!isNaN(d) && m !== undefined && !isNaN(y)) return new Date(y, m, d);
+        }
+        const dt = new Date(s);
+        return isNaN(dt) ? null : dt;
+      };
+
+      const ket = (row['KETERANGAN'] || '').toString().trim().toUpperCase();
       if (!['TOP','TAGIHAN'].includes(ket)) continue;
 
-      const tglInput  = parseDate(row['TANGGAL']);
-      const tglNota   = parseDate(row['TANGGAL NOTA AWAL']) || tglInput;
-      const tglTempo  = parseDate(row['TANGGAL TEMPO']);
-      const total     = parseNum(row['TOTAL']);
-      const rawStatus = (row['STATUS'] || '').toString().toUpperCase().trim();
-
-      // Aging dihitung dari TANGGAL NOTA AWAL ke hari ini
-      const aging = agingDays(tglNota);
-      // Jatuh tempo: tglTempo sudah lewat hari ini dan status bukan LUNAS
-      const isJatuhTempo = tglTempo && tglTempo < today
-        && rawStatus !== 'LUNAS' && ket === 'TOP';
+      const tglInput = pDate(row['TANGGAL']);
+      const tglNota  = pDate(row['TANGGAL NOTA AWAL']) || tglInput;
+      const tglTempo = pDate(row['TANGGAL TEMPO']);
+      const total    = pNum(row['TOTAL']);
+      const rawStatus= (row['STATUS'] || '').toString().trim().toUpperCase();
+      const aging    = tglNota ? Math.floor((today - tglNota) / 86400000) : 0;
+      const isJatuhTempo = ket === 'TOP' && tglTempo && tglTempo < today && rawStatus !== 'LUNAS';
 
       allData.push({
         tanggal:    tglInput,
         tglNota:    tglNota,
         tglTempo:   tglTempo,
-        channel:    (row['CHANNEL'] || '').toString().toUpperCase().trim(),
-        salesman:   (row['SALESMAN'] || '').toString().trim(),
-        kodeOutlet: (row['KODE OUTLET'] || '').toString().trim(),
-        namaOutlet: (row['NAMA OUTLET'] || '').toString().trim(),
-        total:      total,
+        channel:    (row['CHANNEL']      || '').toString().trim().toUpperCase(),
+        salesman:   (row['SALESMAN']     || '').toString().trim(),
+        kodeOutlet: (row['KODE OUTLET']  || '').toString().trim(),
+        namaOutlet: (row['NAMA OUTLET']  || '').toString().trim(),
+        total,
         keterangan: ket,
-        status:     rawStatus,   // OUTSTANDING, LUNAS, atau blank
-        aging:      aging,
-        isJatuhTempo: isJatuhTempo,
-        key:        (row['KEY'] || '').toString().trim(),
+        status:     rawStatus,
+        aging,
+        isJatuhTempo,
+        key: (row['KEY'] || '').toString().trim(),
       });
     }
 
@@ -447,12 +474,13 @@ async function loadData() {
     console.log('TOP rows:', allData.filter(r=>r.keterangan==='TOP').length);
     console.log('TAGIHAN rows:', allData.filter(r=>r.keterangan==='TAGIHAN').length);
     console.log('OUTSTANDING rows:', allData.filter(r=>r.keterangan==='TOP' && r.status==='OUTSTANDING').length);
+    if (allData.length > 0) console.log('Sample row:', allData[0]);
 
     populateFilters();
     renderAll();
 
   } catch(e) {
-    console.error(e);
+    console.error('Load error:', e);
     alert('Gagal memuat data: ' + e.message);
   } finally {
     btn.classList.remove('loading');
