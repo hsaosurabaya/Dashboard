@@ -805,12 +805,38 @@ function switchChannelTab(ch, el) {
 }
 
 function renderTable(outstanding, chFilter) {
-  let rows = chFilter === 'ALL' ? outstanding : outstanding.filter(r=>r.channel===chFilter);
-  rows = [...rows].sort((a,b) => b.total - a.total);
+  let data = chFilter === 'ALL' ? outstanding : outstanding.filter(r=>r.channel===chFilter);
+
+  // GROUP BY kodeOutlet + tglNota (kombinasi unik)
+  // Jika outlet A punya 2 nota berbeda → 2 baris
+  // Jika outlet A punya nota sama tapi banyak baris → digabung 1 baris, total disum
+  const grouped = {};
+  data.forEach(r => {
+    const notaKey = (r.kodeOutlet || r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
+    if (!grouped[notaKey]) {
+      grouped[notaKey] = {
+        kodeOutlet: r.kodeOutlet,
+        namaOutlet: r.namaOutlet,
+        channel:    r.channel,
+        salesman:   r.salesman,
+        tglNota:    r.tglNota,
+        tglTempo:   r.tglTempo,
+        aging:      r.aging,
+        isJatuhTempo: r.isJatuhTempo,
+        total:      0,
+      };
+    }
+    grouped[notaKey].total += r.total;
+    // Ambil aging & tempo dari baris manapun (harusnya sama untuk nota yang sama)
+    if (r.isJatuhTempo) grouped[notaKey].isJatuhTempo = true;
+  });
+
+  // Convert ke array, sort by total terbesar
+  let rows = Object.values(grouped).sort((a,b) => b.total - a.total);
   const tbody = document.getElementById('tablePiutang');
 
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">Tidak ada data piutang outstanding</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Tidak ada data piutang outstanding</td></tr>';
     document.getElementById('tableInfo').textContent = '0 data';
     document.getElementById('tableTotals').textContent = '';
     return;
@@ -836,9 +862,11 @@ function renderTable(outstanding, chFilter) {
     </tr>
   `).join('');
 
-  const total = rows.reduce((s,r)=>s+r.total,0);
-  document.getElementById('tableInfo').textContent = `${rows.length} nota outstanding`;
-  document.getElementById('tableTotals').innerHTML = `Total: <span style="color:var(--red);font-weight:700">${fmtShort(total)}</span>`;
+  const totalOutlet = new Set(rows.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+  const totalAR     = rows.reduce((s,r)=>s+r.total,0);
+  document.getElementById('tableInfo').textContent = `${rows.length} nota · ${totalOutlet} outlet`;
+  document.getElementById('tableTotals').innerHTML =
+    `Total AR: <span style="color:var(--red);font-weight:700">${fmtShort(totalAR)}</span>`;
 }
 
 
