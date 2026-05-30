@@ -1118,9 +1118,16 @@ function closeWAModal() {
 }
 
 // ==================== EVENT LISTENERS ====================
-  document.getElementById(id).addEventListener('change', () => renderAll());
-);
-  
+document.getElementById('filterFrom').addEventListener('change', () => renderAll());
+document.getElementById('filterTo').addEventListener('change', () => renderAll());
+document.getElementById('filterChannel').addEventListener('change', () => renderAll());
+document.getElementById('filterSalesman').addEventListener('change', () => renderAll());
+document.getElementById('filterStatus').addEventListener('change', () => renderAll());
+
+// Set default dates (kosongkan filter tanggal)
+setDefaultDates();
+
+// Load data
 loadData();
 </script>
 </body>
