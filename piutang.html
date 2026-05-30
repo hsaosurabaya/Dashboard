@@ -281,6 +281,17 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="alert-list" id="alertList"></div>
     </div>
+
+    <!-- REMINDER: 7 HARI KE DEPAN -->
+    <div class="alert-section" id="reminderSection" style="display:none;background:rgba(202,138,4,0.04);border-color:rgba(202,138,4,0.25)">
+      <div class="alert-header">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <div class="alert-title" style="color:var(--yellow)">Reminder — Jatuh Tempo 7 Hari Ke Depan</div>
+        <div class="alert-count" id="reminderCount" style="background:var(--yellow)">0</div>
+      </div>
+      <div class="alert-list" id="reminderList"></div>
+    </div>
+
     <div class="chart-row col-3">
       <div class="chart-card">
         <div class="chart-header"><div><div class="chart-title">Distribusi Channel</div><div class="chart-sub">Grosir vs Agen</div></div></div>
@@ -531,11 +542,27 @@ function getFilteredData() {
 }
 
 // Data piutang aktif = TOP + OUTSTANDING saja (untuk KPI & chart)
+// Outstanding = semua TOP+OUTSTANDING, TIDAK difilter tanggal
+// karena piutang outstanding tetap ada walau nota sebelum periode filter
 function getOutstandingData() {
-  const from   = document.getElementById('filterFrom').value;
-  const to     = document.getElementById('filterTo').value;
-  const ch     = document.getElementById('filterChannel').value;
-  const sales  = document.getElementById('filterSalesman').value;
+  const ch    = document.getElementById('filterChannel').value;
+  const sales = document.getElementById('filterSalesman').value;
+
+  return allData.filter(r => {
+    if (r.keterangan !== 'TOP') return false;
+    if (r.status !== 'OUTSTANDING') return false;
+    if (ch    && r.channel  !== ch)    return false;
+    if (sales && r.salesman !== sales) return false;
+    return true;
+  });
+}
+
+// Outstanding dalam periode = untuk tabel & KPI yg perlu filter tanggal nota
+function getOutstandingPeriode() {
+  const from  = document.getElementById('filterFrom').value;
+  const to    = document.getElementById('filterTo').value;
+  const ch    = document.getElementById('filterChannel').value;
+  const sales = document.getElementById('filterSalesman').value;
 
   return allData.filter(r => {
     if (r.keterangan !== 'TOP') return false;
@@ -572,28 +599,32 @@ function getPembayaranData() {
 }
 
 function renderAll() {
-  const outstanding  = getOutstandingData();   // TOP + OUTSTANDING
-  const pembayaran   = getPembayaranData();    // TAGIHAN
+  const outstanding  = getOutstandingData();     // SEMUA outstanding (tanpa filter tgl) → KPI, alert, chart, top outlet
+  const periodeData  = getOutstandingPeriode();  // Outstanding dalam periode → tabel detail
+  const pembayaran   = getPembayaranData();      // TAGIHAN dalam periode → KPI pembayaran
   renderKPI(outstanding, pembayaran);
   renderAlert(outstanding);
+  renderReminder7Hari(outstanding);
   renderChartChannel(outstanding);
   renderChartAging(outstanding);
-  renderChartStatus();
+  renderChartStatus(outstanding);
   renderChartTren(outstanding);
   renderTopOutlet(outstanding);
-  renderTable(outstanding, activeChannelTab);
-  updateSubtitle(outstanding);
+  renderTable(periodeData, activeChannelTab);
+  updateSubtitle(outstanding, pembayaran);
 }
 
-function updateSubtitle(outstanding) {
+function updateSubtitle(outstanding, pembayaran) {
   const from = document.getElementById('filterFrom').value;
   const to   = document.getElementById('filterTo').value;
   const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : null;
-  const totalAR = outstanding.reduce((s,r) => s + r.total, 0);
+  const totalAR  = outstanding.reduce((s,r) => s + r.total, 0);
+  const totalByr = pembayaran.reduce((s,r) => s + r.total, 0);
   const periodeStr = (from || to)
-    ? ((fmtD(from) || '...') + ' – ' + (fmtD(to) || '...') + ' · ')
+    ? ((fmtD(from)||'...') + ' – ' + (fmtD(to)||'...') + ' · ')
     : 'Semua periode · ';
-  document.getElementById('subtitlePeriod').textContent = periodeStr + 'Outstanding: ' + fmtShort(totalAR);
+  document.getElementById('subtitlePeriod').textContent =
+    periodeStr + 'Outstanding: ' + fmtShort(totalAR) + ' · Bayar: ' + fmtShort(totalByr);
 }
 
 function renderKPI(outstanding, pembayaran) {
@@ -674,26 +705,60 @@ function renderKPI(outstanding, pembayaran) {
 }
 
 function renderAlert(outstanding) {
-  const jatuh = outstanding.filter(r => r.isJatuhTempo);
-  const byOutlet = {};
-  jatuh.forEach(r => {
-    const k = r.kodeOutlet || r.namaOutlet;
-    if (!byOutlet[k]) byOutlet[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, aging:0, tglTempo:r.tglTempo };
-    byOutlet[k].total += r.total;
-    if (r.aging > byOutlet[k].aging) byOutlet[k].aging = r.aging;
+  // Group by kodeOutlet+tglNota untuk hindari duplikat
+  const jatuhGrouped = {};
+  outstanding.filter(r => r.isJatuhTempo).forEach(r => {
+    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
+    if (!jatuhGrouped[k]) jatuhGrouped[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, aging:r.aging, tglTempo:r.tglTempo };
+    jatuhGrouped[k].total += r.total;
+    if (r.aging > jatuhGrouped[k].aging) jatuhGrouped[k].aging = r.aging;
   });
-  const sorted = Object.values(byOutlet).sort((a,b)=>b.total-a.total).slice(0,10);
+  const sorted = Object.values(jatuhGrouped).sort((a,b)=>b.total-a.total).slice(0,10);
   const sec = document.getElementById('alertSection');
+  if (!sorted.length) { sec.style.display='none'; }
+  else {
+    sec.style.display = 'block';
+    document.getElementById('alertCount').textContent = sorted.length;
+    document.getElementById('alertList').innerHTML = sorted.map(o => `
+      <div class="alert-item">
+        <div class="alert-days">+${o.aging} hari</div>
+        <div><div class="alert-outlet">${o.nama}</div><div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div></div>
+        <div class="alert-amount">${fmtShort(o.total)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function renderReminder7Hari(outstanding) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const plus7 = new Date(today); plus7.setDate(plus7.getDate() + 7);
+
+  // Nota yang tempo-nya dalam 7 hari ke depan (belum jatuh tempo)
+  const grouped = {};
+  outstanding.filter(r => r.tglTempo && r.tglTempo >= today && r.tglTempo <= plus7).forEach(r => {
+    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
+    if (!grouped[k]) grouped[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, tglTempo:r.tglTempo, sisaHari:0 };
+    grouped[k].total += r.total;
+    grouped[k].sisaHari = Math.floor((r.tglTempo - today) / 86400000);
+  });
+
+  const sorted = Object.values(grouped).sort((a,b) => a.sisaHari - b.sisaHari);
+  const sec = document.getElementById('reminderSection');
+
   if (!sorted.length) { sec.style.display='none'; return; }
   sec.style.display = 'block';
-  document.getElementById('alertCount').textContent = sorted.length;
-  document.getElementById('alertList').innerHTML = sorted.map(o => `
-    <div class="alert-item">
-      <div class="alert-days">+${o.aging} hari</div>
-      <div><div class="alert-outlet">${o.nama}</div><div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div></div>
-      <div class="alert-amount">${fmtShort(o.total)}</div>
-    </div>
-  `).join('');
+  document.getElementById('reminderCount').textContent = sorted.length;
+  document.getElementById('reminderList').innerHTML = sorted.map(o => {
+    const urgColor = o.sisaHari <= 1 ? 'var(--red)' : o.sisaHari <= 3 ? 'var(--orange)' : 'var(--yellow)';
+    const urgLabel = o.sisaHari === 0 ? 'Hari ini!' : o.sisaHari === 1 ? 'Besok!' : o.sisaHari + ' hari lagi';
+    return `
+      <div class="alert-item" style="border-color:rgba(202,138,4,0.25)">
+        <div class="alert-days" style="background:rgba(202,138,4,0.1);color:${urgColor};min-width:72px;text-align:center">${urgLabel}</div>
+        <div><div class="alert-outlet">${o.nama}</div><div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div></div>
+        <div class="alert-amount" style="color:${urgColor}">${fmtShort(o.total)}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderChartChannel(outstanding) {
@@ -724,30 +789,43 @@ function renderChartAging(outstanding) {
   });
 }
 
-function renderChartStatus() {
+function renderChartStatus(outstanding) {
   destroyChart('chartStatus');
-  // Hitung dari allData langsung (tidak perlu filter)
+
+  // Dedup: group allData TOP by kodeOutlet+tglNota → hindari double count
   const ch    = document.getElementById('filterChannel').value;
   const sales = document.getElementById('filterSalesman').value;
-  const topData = allData.filter(r => {
+  const topRaw = allData.filter(r => {
     if (r.keterangan !== 'TOP') return false;
     if (ch    && r.channel  !== ch)    return false;
     if (sales && r.salesman !== sales) return false;
     return true;
   });
-  const outstanding = topData.filter(r=>r.status==='OUTSTANDING').reduce((s,r)=>s+r.total,0);
-  const lunas       = topData.filter(r=>r.status==='LUNAS').reduce((s,r)=>s+r.total,0);
-  const jatuh       = topData.filter(r=>r.isJatuhTempo).reduce((s,r)=>s+r.total,0);
+
+  // Group by kodeOutlet + tglNota + status
+  const grouped = {};
+  topRaw.forEach(r => {
+    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
+    if (!grouped[k]) grouped[k] = { total:0, status:r.status, isJatuhTempo:r.isJatuhTempo };
+    grouped[k].total += r.total;
+    if (r.isJatuhTempo) grouped[k].isJatuhTempo = true;
+  });
+
+  const notaList = Object.values(grouped);
+  const totalOutstanding = notaList.filter(r=>r.status==='OUTSTANDING' && !r.isJatuhTempo).reduce((s,r)=>s+r.total,0);
+  const totalLunas       = notaList.filter(r=>r.status==='LUNAS').reduce((s,r)=>s+r.total,0);
+  const totalJatuh       = notaList.filter(r=>r.isJatuhTempo).reduce((s,r)=>s+r.total,0);
+
   const ctx = document.getElementById('chartStatus').getContext('2d');
   charts['chartStatus'] = new Chart(ctx, {
     type:'doughnut',
-    data:{ labels:['Outstanding','Lunas','Jatuh Tempo'], datasets:[{ data:[outstanding,lunas,jatuh], backgroundColor:['rgba(234,112,16,0.85)','rgba(22,163,74,0.85)','rgba(220,38,38,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
+    data:{ labels:['Outstanding','Lunas','Jatuh Tempo'], datasets:[{ data:[totalOutstanding,totalLunas,totalJatuh], backgroundColor:['rgba(234,112,16,0.85)','rgba(22,163,74,0.85)','rgba(220,38,38,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
   });
   document.getElementById('legendStatus').innerHTML = [
-    {label:'Outstanding', val:outstanding, color:'rgba(234,112,16,0.85)'},
-    {label:'Lunas',       val:lunas,       color:'rgba(22,163,74,0.85)'},
-    {label:'Jatuh Tempo', val:jatuh,       color:'rgba(220,38,38,0.85)'},
+    {label:'Outstanding', val:totalOutstanding, color:'rgba(234,112,16,0.85)'},
+    {label:'Lunas',       val:totalLunas,       color:'rgba(22,163,74,0.85)'},
+    {label:'Jatuh Tempo', val:totalJatuh,       color:'rgba(220,38,38,0.85)'},
   ].map(l=>`<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
 }
 
