@@ -185,29 +185,22 @@ tbody tr:last-child td { border-bottom: none; }
 /* WHATSAPP MODAL */
 .wa-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1200; display: none; align-items: center; justify-content: center; }
 .wa-modal-overlay.active { display: flex; }
-.wa-modal { background: var(--surface); border-radius: 14px; width: 92%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+.wa-modal { background: var(--surface); border-radius: 14px; width: 92%; max-width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
 .wa-modal-header { background: #25d366; padding: 16px 20px; display: flex; align-items: center; gap: 10px; }
 .wa-modal-header svg { flex-shrink: 0; }
 .wa-modal-header-text h3 { font-size: 15px; font-weight: 700; color: #fff; }
 .wa-modal-header-text p { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
 .wa-modal-body { padding: 16px 20px; }
-.wa-preview { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 12px; color: var(--text); line-height: 1.6; max-height: 180px; overflow-y: auto; white-space: pre-wrap; font-family: inherit; }
-.wa-group-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
-.wa-group-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.wa-group-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: all .15s; }
-.wa-group-item:hover { background: #f0fdf4; border-color: #25d366; }
-.wa-group-item.selected { background: #f0fdf4; border-color: #25d366; }
-.wa-group-icon { width: 32px; height: 32px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.wa-group-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
-.wa-group-num { font-size: 11px; color: var(--text3); }
-.wa-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; transition: all .15s; }
-.wa-group-item.selected .wa-radio { border-color: #25d366; background: #25d366; }
+.wa-preview { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 12px; color: var(--text); line-height: 1.6; max-height: 220px; overflow-y: auto; white-space: pre-wrap; font-family: inherit; }
+.wa-hint { font-size: 11px; color: var(--text3); margin-bottom: 14px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.5; }
 .wa-modal-footer { display: flex; gap: 8px; padding: 0 20px 16px; }
-.wa-btn-cancel { flex: 1; padding: 9px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; font-family: inherit; transition: all .15s; }
+.wa-btn-cancel { padding: 9px 14px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; font-family: inherit; transition: all .15s; }
 .wa-btn-cancel:hover { border-color: var(--border2); }
-.wa-btn-send { flex: 2; padding: 9px; background: #25d366; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
-.wa-btn-send:hover { background: #1db954; }
-.wa-btn-send:disabled { background: var(--border); color: var(--text3); cursor: not-allowed; }
+.wa-btn-copy { flex: 1; padding: 9px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
+.wa-btn-copy:hover { background: #edf7f1; border-color: var(--accent); }
+.wa-btn-copy.copied { background: #edf7f1; border-color: var(--green); color: var(--green); }
+.wa-btn-open { flex: 1; padding: 9px; background: #25d366; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
+.wa-btn-open:hover { background: #1db954; }
 </style>
 </head>
 <body>
@@ -269,18 +262,24 @@ tbody tr:last-child td { border-bottom: none; }
       <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       <div class="wa-modal-header-text">
         <h3>Kirim Reminder ke WhatsApp</h3>
-        <p id="waModalSubtitle">Pilih grup tujuan</p>
+        <p id="waModalSubtitle">Preview pesan reminder</p>
       </div>
     </div>
     <div class="wa-modal-body">
       <div class="wa-preview" id="waPreviewText"></div>
-      <div class="wa-group-label">Pilih Grup Tujuan</div>
-      <div class="wa-group-list" id="waGroupList"></div>
+      <div class="wa-hint">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Copy pesan lalu paste ke grup WhatsApp yang kamu inginkan. Atau klik "Buka WhatsApp" untuk langsung masuk ke WA Web — pilih grup tujuan di sana.
+      </div>
     </div>
     <div class="wa-modal-footer">
-      <button class="wa-btn-cancel" onclick="closeWAModal()">Batal</button>
-      <button class="wa-btn-send" id="waBtnSend" onclick="sendWA()" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      <button class="wa-btn-cancel" onclick="closeWAModal()">Tutup</button>
+      <button class="wa-btn-copy" id="waBtnCopy" onclick="copyWAMessage()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Pesan
+      </button>
+      <button class="wa-btn-open" onclick="openWAWeb()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Buka WhatsApp
       </button>
     </div>
@@ -399,16 +398,6 @@ tbody tr:last-child td { border-bottom: none; }
 <script>
 // ==================== KONFIGURASI ====================
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=0&single=true&output=csv';
-
-// ==================== KONFIGURASI GRUP WHATSAPP ====================
-// Isi nomor HP grup (format: 628xxxxxxxxxx) atau kosongkan jika pakai link grup
-// Untuk grup WA, gunakan nomor admin grup atau nomor tujuan personal
-const WA_GROUPS = [
-  { nama: 'Tim Collection Surabaya', nomor: '6281234567890' },
-  { nama: 'Tim Collection Sidoarjo',  nomor: '6281234567891' },
-  { nama: 'Leader Sales',             nomor: '6281234567892' },
-  // Tambah grup lain di sini...
-];
 
 let allData = [];
 let activeChannelTab = 'ALL';
@@ -1014,7 +1003,56 @@ function renderTable(outstanding, chFilter) {
 
 
 // ==================== WHATSAPP ====================
-let waSelectedIndex = null;
+function openWAModal() {
+  const msg = buildWAMessage();
+  document.getElementById('waPreviewText').textContent = msg;
+  document.getElementById('waModalSubtitle').textContent =
+    document.getElementById('reminderCount').textContent + ' nota akan jatuh tempo';
+  const copyBtn = document.getElementById('waBtnCopy');
+  copyBtn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
+  copyBtn.classList.remove('copied');
+  document.getElementById('waModalOverlay').classList.add('active');
+}
+
+function copyWAMessage() {
+  const msg = buildWAMessage();
+  navigator.clipboard.writeText(msg).then(() => {
+    const btn = document.getElementById('waBtnCopy');
+    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Tersalin!`;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
+      btn.classList.remove('copied');
+    }, 2500);
+  }).catch(() => {
+    // Fallback untuk browser yang tidak support clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = msg;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('waBtnCopy');
+    btn.innerHTML = `✓ Tersalin!`;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = `Copy Pesan`;
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+
+function openWAWeb() {
+  const msg = buildWAMessage();
+  window.open('https://web.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function closeWAModal() {
+  document.getElementById('waModalOverlay').classList.remove('active');
+}
+
+// ==================== EVENT LISTENERS ====================
 
 function buildWAMessage() {
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1072,62 +1110,11 @@ function buildWAMessage() {
   return msg;
 }
 
-function openWAModal() {
-  waSelectedIndex = null;
-  const msg = buildWAMessage();
-  document.getElementById('waPreviewText').textContent = msg;
-  document.getElementById('waModalSubtitle').textContent = `${document.getElementById('reminderCount').textContent} nota akan jatuh tempo`;
-  document.getElementById('waBtnSend').disabled = true;
-
-  // Render grup list
-  document.getElementById('waGroupList').innerHTML = WA_GROUPS.map((g, i) => `
-    <div class="wa-group-item" onclick="selectWAGroup(${i}, this)">
-      <div class="wa-group-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      </div>
-      <div>
-        <div class="wa-group-name">${g.nama}</div>
-        <div class="wa-group-num">${g.nomor}</div>
-      </div>
-      <div class="wa-radio"></div>
-    </div>
-  `).join('');
-
-  document.getElementById('waModalOverlay').classList.add('active');
-}
-
-function selectWAGroup(index, el) {
-  waSelectedIndex = index;
-  document.querySelectorAll('.wa-group-item').forEach(i => i.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('waBtnSend').disabled = false;
-}
-
-function sendWA() {
-  if (waSelectedIndex === null) return;
-  const group = WA_GROUPS[waSelectedIndex];
-  const msg   = buildWAMessage();
-  const url   = `https://wa.me/${group.nomor}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-  closeWAModal();
-}
-
-function closeWAModal() {
-  document.getElementById('waModalOverlay').classList.remove('active');
-  waSelectedIndex = null;
-}
-
 // ==================== EVENT LISTENERS ====================
-document.getElementById('filterFrom').addEventListener('change', () => renderAll());
-document.getElementById('filterTo').addEventListener('change', () => renderAll());
-document.getElementById('filterChannel').addEventListener('change', () => renderAll());
-document.getElementById('filterSalesman').addEventListener('change', () => renderAll());
-document.getElementById('filterStatus').addEventListener('change', () => renderAll());
+['filterFrom','filterTo','filterChannel','filterSalesman','filterStatus'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => renderAll());
+});
 
-// Set default dates (kosongkan filter tanggal)
-setDefaultDates();
-
-// Load data
 loadData();
 </script>
 </body>
