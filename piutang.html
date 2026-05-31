@@ -1123,64 +1123,107 @@ function renderTopOutlet(outstanding) {
   `).join('') : '<div class="empty-state">Tidak ada data piutang</div>';
 }
 
-// ==================== EVENT LISTENERS ====================
-
+// ==================== WHATSAPP ====================
 function buildWAMessage() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const plus7 = new Date(today); plus7.setDate(plus7.getDate() + 7);
-  const outstanding = getOutstandingData();
+  // Pesan berdasarkan tabel jatuh tempo periode (selaras KPI Card 2)
+  const data = getPiutangJatuhTempoPeriode();
+  const from = document.getElementById('filterFrom').value;
+  const to   = document.getElementById('filterTo').value;
+  const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : '—';
 
-  const upcoming = {};
-  outstanding.filter(r => r.tglTempo && r.tglTempo >= today && r.tglTempo <= plus7).forEach(r => {
-    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
-    if (!upcoming[k]) upcoming[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, tglTempo:r.tglTempo, sisaHari:Math.floor((r.tglTempo-today)/86400000) };
-    upcoming[k].total += r.total;
+  // Group by nota
+  const grouped = {};
+  data.forEach(r => {
+    const k = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+    if (!grouped[k]) grouped[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, aging:r.aging, tglTempo:r.tglTempo, isJatuhTempo:r.isJatuhTempo };
+    grouped[k].total += r.total;
+    if (r.aging > grouped[k].aging) grouped[k].aging = r.aging;
+    if (r.isJatuhTempo) grouped[k].isJatuhTempo = true;
   });
-  const sorted = Object.values(upcoming).sort((a,b) => a.sisaHari - b.sisaHari);
 
-  const jatuh = {};
-  outstanding.filter(r => r.isJatuhTempo).forEach(r => {
-    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
-    if (!jatuh[k]) jatuh[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, aging:r.aging };
-    jatuh[k].total += r.total;
-    if (r.aging > jatuh[k].aging) jatuh[k].aging = r.aging;
+  const rows = Object.values(grouped).sort((a,b) => {
+    if (a.isJatuhTempo && !b.isJatuhTempo) return -1;
+    if (!a.isJatuhTempo && b.isJatuhTempo) return 1;
+    return b.total - a.total;
   });
-  const jatuhSorted = Object.values(jatuh).sort((a,b) => b.total - a.total).slice(0,10);
 
-  const tglHariIni = today.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
-  let msg = `🔔 *REMINDER PIUTANG HS AO SURABAYA*\n`;
-  msg += `📅 ${tglHariIni}\n`;
+  const totalNominal = rows.reduce((s,r)=>s+r.total,0);
+  const periodeStr   = from === to ? fmtD(from) : fmtD(from) + ' – ' + fmtD(to);
+  const tglHariIni   = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+
+  let msg = `🔔 *REMINDER PENAGIHAN PIUTANG*\n`;
+  msg += `🏢 HS AO Surabaya\n`;
+  msg += `📅 ${tglHariIni} | Periode JT: ${periodeStr}\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-  if (jatuhSorted.length) {
-    msg += `🔴 *SUDAH JATUH TEMPO (${jatuhSorted.length} nota)*\n`;
-    jatuhSorted.forEach((o,i) => {
-      msg += `${i+1}. ${o.nama}\n`;
-      msg += `   PIC: ${o.salesman} | +${o.aging} hari | *${fmtShort(o.total)}*\n`;
+  const lewat = rows.filter(r=>r.isJatuhTempo);
+  const akan  = rows.filter(r=>!r.isJatuhTempo);
+
+  if (lewat.length) {
+    msg += `🔴 *SUDAH LEWAT TEMPO (${lewat.length} nota)*\n`;
+    lewat.forEach((o,i) => {
+      msg += `${i+1}. *${o.nama}*\n`;
+      msg += `   PIC: ${o.salesman} | +${o.aging} hari | *${fmtFull(o.total)}*\n`;
     });
     msg += `\n`;
   }
 
-  if (sorted.length) {
-    msg += `⚠️ *AKAN JATUH TEMPO 7 HARI KE DEPAN (${sorted.length} nota)*\n`;
-    sorted.forEach((o,i) => {
-      const label = o.sisaHari === 0 ? '🔴 Hari ini' : o.sisaHari === 1 ? '🟠 Besok' : `🟡 ${o.sisaHari} hari lagi`;
-      msg += `${i+1}. ${o.nama}\n`;
-      msg += `   PIC: ${o.salesman} | ${label} (${fmtDate(o.tglTempo)}) | *${fmtShort(o.total)}*\n`;
+  if (akan.length) {
+    msg += `⚠️ *AKAN JATUH TEMPO (${akan.length} nota)*\n`;
+    akan.forEach((o,i) => {
+      const tgl = fmtDate(o.tglTempo);
+      msg += `${i+1}. *${o.nama}*\n`;
+      msg += `   PIC: ${o.salesman} | Tempo: ${tgl} | *${fmtFull(o.total)}*\n`;
     });
     msg += `\n`;
   }
 
-  const totalJatuh = jatuhSorted.reduce((s,r)=>s+r.total,0);
-  const totalUpcoming = sorted.reduce((s,r)=>s+r.total,0);
   msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `💰 Total jatuh tempo: *${fmtShort(totalJatuh)}*\n`;
-  msg += `📋 Total akan jatuh tempo: *${fmtShort(totalUpcoming)}*\n`;
+  msg += `💰 *Total tagihan: ${fmtFull(totalNominal)}*\n`;
+  msg += `📊 ${rows.length} nota · ${new Set(rows.map(r=>r.nama)).size} outlet\n`;
   msg += `\n_Pesan otomatis dari Dashboard HS AO Surabaya_`;
 
   return msg;
 }
 
+function openWAModal() {
+  const msg = buildWAMessage();
+  document.getElementById('waPreviewText').textContent = msg;
+  const count = document.getElementById('jatuhTempoCount').textContent;
+  document.getElementById('waModalSubtitle').textContent = count + ' nota dalam periode ini';
+  const btn = document.getElementById('waBtnCopy');
+  btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
+  btn.classList.remove('copied');
+  document.getElementById('waModalOverlay').classList.add('active');
+}
+
+function copyWAMessage() {
+  const msg = buildWAMessage();
+  const btn = document.getElementById('waBtnCopy');
+  navigator.clipboard.writeText(msg).then(() => {
+    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Tersalin!`;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
+      btn.classList.remove('copied');
+    }, 2500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = msg; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    btn.innerHTML = `✓ Tersalin!`; btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = `Copy Pesan`; btn.classList.remove('copied'); }, 2500);
+  });
+}
+
+function openWAWeb() {
+  const msg = buildWAMessage();
+  window.open('https://web.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function closeWAModal() {
+  document.getElementById('waModalOverlay').classList.remove('active');
+}
 // ==================== EVENT LISTENERS ====================
 ['filterFrom','filterTo','filterChannel','filterSalesman','filterStatus'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => renderAll());
