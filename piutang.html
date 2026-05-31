@@ -652,11 +652,56 @@ function getPembayaranData() {
   });
 }
 
+// KPI Card 1: Piutang BARU — TOP+OUTSTANDING, filter by tglNota dalam periode
+function getPiutangBaru() {
+  const from  = document.getElementById('filterFrom').value;
+  const to    = document.getElementById('filterTo').value;
+  const ch    = document.getElementById('filterChannel').value;
+  const sales = document.getElementById('filterSalesman').value;
+
+  return allData.filter(r => {
+    if (r.keterangan !== 'TOP') return false;
+    if (r.status !== 'OUTSTANDING') return false;
+    if (ch    && r.channel  !== ch)    return false;
+    if (sales && r.salesman !== sales) return false;
+    if (from || to) {
+      const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
+      if (from && dk < from) return false;
+      if (to   && dk > to)   return false;
+    }
+    return true;
+  });
+}
+
+// KPI Card 2: Piutang JATUH TEMPO dalam periode — TOP+OUTSTANDING, filter by tglTempo dalam periode
+function getPiutangJatuhTempoPeriode() {
+  const from  = document.getElementById('filterFrom').value;
+  const to    = document.getElementById('filterTo').value;
+  const ch    = document.getElementById('filterChannel').value;
+  const sales = document.getElementById('filterSalesman').value;
+
+  return allData.filter(r => {
+    if (r.keterangan !== 'TOP') return false;
+    if (r.status !== 'OUTSTANDING') return false;
+    if (ch    && r.channel  !== ch)    return false;
+    if (sales && r.salesman !== sales) return false;
+    if (from || to) {
+      const dk = r.tglTempo ? dateKey(r.tglTempo) : '';
+      if (!dk) return false;
+      if (from && dk < from) return false;
+      if (to   && dk > to)   return false;
+    }
+    return true;
+  });
+}
+
 function renderAll() {
-  const outstanding  = getOutstandingData();     // SEMUA outstanding (tanpa filter tgl) → KPI, alert, chart, top outlet
-  const periodeData  = getOutstandingPeriode();  // Outstanding dalam periode → tabel detail
-  const pembayaran   = getPembayaranData();      // TAGIHAN dalam periode → KPI pembayaran
-  renderKPI(outstanding, pembayaran);
+  const outstanding   = getOutstandingData();          // SEMUA outstanding global → chart, alert, top outlet
+  const periodeData   = getOutstandingPeriode();       // Outstanding by tglNota dalam periode → tabel
+  const pembayaran    = getPembayaranData();           // TAGIHAN dalam periode → KPI pembayaran
+  const piutangBaru   = getPiutangBaru();              // KPI Card 1: TOP+OUTSTANDING by tglNota
+  const jatuhTempoPeriode = getPiutangJatuhTempoPeriode(); // KPI Card 2: TOP+OUTSTANDING by tglTempo
+  renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode);
   renderAlert(outstanding);
   renderReminder7Hari(outstanding);
   renderChartChannel(outstanding);
@@ -681,78 +726,75 @@ function updateSubtitle(outstanding, pembayaran) {
     periodeStr + 'Outstanding: ' + fmtShort(totalAR) + ' · Bayar: ' + fmtShort(totalByr);
 }
 
-function renderKPI(outstanding, pembayaran) {
-  const today = new Date(); today.setHours(0,0,0,0);
-
-  const totalAR    = outstanding.reduce((s,r) => s + r.total, 0);
-  const grosirAR   = outstanding.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.total,0);
-  const agenAR     = outstanding.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.total,0);
-  const outletCount= new Set(outstanding.map(r=>r.kodeOutlet||r.namaOutlet)).size;
-  const jatuhList  = outstanding.filter(r=>r.isJatuhTempo);
-  const jatuhAR    = jatuhList.reduce((s,r)=>s+r.total,0);
-  const avgAging   = outstanding.length > 0
-    ? Math.round(outstanding.reduce((s,r)=>s+r.aging,0) / outstanding.length) : 0;
-  const totalBayar = pembayaran.reduce((s,r)=>s+r.total,0);
+function renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode) {
+  // GLOBAL
+  const totalAR     = outstanding.reduce((s,r)=>s+r.total,0);
+  const grosirAR    = outstanding.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.total,0);
+  const agenAR      = outstanding.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.total,0);
+  const outletCount = new Set(outstanding.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+  const avgAging    = outstanding.length>0 ? Math.round(outstanding.reduce((s,r)=>s+r.aging,0)/outstanding.length) : 0;
+  // PERIODE
+  const totalBayar  = pembayaran.reduce((s,r)=>s+r.total,0);
+  const totalBaru   = piutangBaru.reduce((s,r)=>s+r.total,0);
+  const outletBaru  = new Set(piutangBaru.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+  const totalJatuh  = jatuhTempoPeriode.reduce((s,r)=>s+r.total,0);
+  const outletJatuh = new Set(jatuhTempoPeriode.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+  const baruNota={}, jatuhNota={};
+  piutangBaru.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); baruNota[k]=true; });
+  jatuhTempoPeriode.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); jatuhNota[k]=true; });
+  const collRate = totalJatuh>0 ? (totalBayar/totalJatuh*100).toFixed(1) : 0;
 
   document.getElementById('kpiGrid').innerHTML = `
     <div class="kpi-row row-4">
       <div class="kpi-card" style="--kpi-color:var(--red)">
-        <div class="kpi-icon" style="background:rgba(220,38,38,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M9 14l2 2 4-4M3 6h18M3 10h18M3 14h7M3 18h7"/></svg>
-        </div>
+        <div class="kpi-icon" style="background:rgba(220,38,38,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M9 14l2 2 4-4M3 6h18M3 10h18M3 14h7M3 18h7"/></svg></div>
         <div class="kpi-label">Total Piutang Outstanding</div>
-        <div class="kpi-value md">${fmtShort(totalAR)}</div>
-        <div class="kpi-sub">${outstanding.length} nota belum lunas</div>
+        <div class="kpi-value md" style="font-size:14px">${fmtFull(totalAR)}</div>
+        <div class="kpi-sub">${outstanding.length} nota · semua periode</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--accent)">
-        <div class="kpi-icon" style="background:rgba(26,107,60,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/></svg>
-        </div>
+        <div class="kpi-icon" style="background:rgba(26,107,60,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/></svg></div>
         <div class="kpi-label">Piutang Grosir</div>
-        <div class="kpi-value md">${fmtShort(grosirAR)}</div>
-        <div class="kpi-sub">${totalAR>0?(grosirAR/totalAR*100).toFixed(1):0}% dari total</div>
+        <div class="kpi-value md" style="font-size:14px">${fmtFull(grosirAR)}</div>
+        <div class="kpi-sub">${totalAR>0?(grosirAR/totalAR*100).toFixed(1):0}% dari total outstanding</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--purple)">
-        <div class="kpi-icon" style="background:rgba(147,51,234,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#9333ea" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
+        <div class="kpi-icon" style="background:rgba(147,51,234,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#9333ea" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
         <div class="kpi-label">Piutang Agen</div>
-        <div class="kpi-value md">${fmtShort(agenAR)}</div>
-        <div class="kpi-sub">${totalAR>0?(agenAR/totalAR*100).toFixed(1):0}% dari total</div>
+        <div class="kpi-value md" style="font-size:14px">${fmtFull(agenAR)}</div>
+        <div class="kpi-sub">${totalAR>0?(agenAR/totalAR*100).toFixed(1):0}% dari total outstanding</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--cyan)">
-        <div class="kpi-icon" style="background:rgba(8,145,178,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        </div>
+        <div class="kpi-icon" style="background:rgba(8,145,178,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
         <div class="kpi-label">Outlet Berpiutang</div>
         <div class="kpi-value">${outletCount}</div>
-        <div class="kpi-sub">outlet dengan nota outstanding</div>
+        <div class="kpi-sub">Rata-rata aging ${avgAging} hari</div>
       </div>
     </div>
-    <div class="kpi-row row-3">
+    <div class="kpi-row row-4">
+      <div class="kpi-card" style="--kpi-color:#2563eb">
+        <div class="kpi-icon" style="background:rgba(37,99,235,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#2563eb" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg></div>
+        <div class="kpi-label">Piutang Baru (Tgl Nota)</div>
+        <div class="kpi-value md" style="font-size:14px;color:#2563eb">${fmtFull(totalBaru)}</div>
+        <div class="kpi-sub">${Object.keys(baruNota).length} nota · ${outletBaru} outlet</div>
+      </div>
       <div class="kpi-card" style="--kpi-color:var(--orange)">
-        <div class="kpi-icon" style="background:rgba(234,112,16,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#ea7010" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="kpi-label">Piutang Jatuh Tempo</div>
-        <div class="kpi-value md" style="color:var(--orange)">${fmtShort(jatuhAR)}</div>
-        <div class="kpi-sub">${jatuhList.length} nota lewat tempo</div>
+        <div class="kpi-icon" style="background:rgba(234,112,16,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#ea7010" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="kpi-label">Piutang Jatuh Tempo (Tgl Tempo)</div>
+        <div class="kpi-value md" style="font-size:14px;color:var(--orange)">${fmtFull(totalJatuh)}</div>
+        <div class="kpi-sub">${Object.keys(jatuhNota).length} nota · ${outletJatuh} outlet</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--green)">
-        <div class="kpi-icon" style="background:rgba(22,163,74,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        </div>
+        <div class="kpi-icon" style="background:rgba(22,163,74,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
         <div class="kpi-label">Pembayaran Diterima</div>
-        <div class="kpi-value md" style="color:var(--green)">${fmtShort(totalBayar)}</div>
-        <div class="kpi-sub">${pembayaran.length} transaksi tagihan</div>
+        <div class="kpi-value md" style="font-size:14px;color:var(--green)">${fmtFull(totalBayar)}</div>
+        <div class="kpi-sub">${pembayaran.length} transaksi dalam periode</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--yellow)">
-        <div class="kpi-icon" style="background:rgba(202,138,4,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        </div>
-        <div class="kpi-label">Rata-rata Aging</div>
-        <div class="kpi-value" style="color:var(--yellow)">${avgAging} <span style="font-size:13px;font-weight:500">hari</span></div>
-        <div class="kpi-sub">umur rata-rata piutang aktif</div>
+        <div class="kpi-icon" style="background:rgba(202,138,4,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="kpi-label">Collection Rate</div>
+        <div class="kpi-value" style="color:var(--yellow)">${collRate}<span style="font-size:13px;font-weight:500">%</span></div>
+        <div class="kpi-sub">Bayar ${fmtShort(totalBayar)} / JT ${fmtShort(totalJatuh)}</div>
       </div>
     </div>
   `;
