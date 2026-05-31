@@ -182,7 +182,13 @@ tbody tr:last-child td { border-bottom: none; }
   .chart-row.col-2 { grid-template-columns: 1fr; }
   .kpi-row .kpi-card { min-width: 160px; }
 }
-/* WHATSAPP MODAL */
+/* 7 HARI TABLE */
+.row-7hari { cursor: pointer; transition: background .15s; }
+.row-7hari:hover { background: #edf7f1 !important; }
+.row-7hari td { padding: 10px 12px; }
+.day-badge { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+.expand-icon { color: var(--text3); font-size: 14px; transition: transform .2s; }
+
 .wa-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1200; display: none; align-items: center; justify-content: center; }
 .wa-modal-overlay.active { display: flex; }
 .wa-modal { background: var(--surface); border-radius: 14px; width: 92%; max-width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
@@ -323,30 +329,99 @@ tbody tr:last-child td { border-bottom: none; }
 
   <div class="content">
     <div class="kpi-grid" id="kpiGrid"></div>
-    <div class="alert-section" id="alertSection" style="display:none">
-      <div class="alert-header">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <div class="alert-title">Piutang Jatuh Tempo</div>
-        <div class="alert-count" id="alertCount">0</div>
+    <!-- SECTION 1: TABEL DETAIL PIUTANG JATUH TEMPO (by tglTempo dalam periode) -->
+    <div class="chart-card" style="margin-bottom:12px" id="jatuhTempoSection">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title" style="display:flex;align-items:center;gap:8px">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#ea7010" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span style="color:var(--orange)">Detail Piutang Jatuh Tempo</span>
+            <span class="alert-count" id="jatuhTempoCount" style="background:var(--orange);font-size:10px;padding:2px 8px;border-radius:20px;color:#fff;font-weight:700">0</span>
+          </div>
+          <div class="chart-sub">Filter by tanggal jatuh tempo dalam periode · sesuai KPI Card 2</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="channel-tabs" style="margin-bottom:0">
+            <div class="channel-tab active" data-ch="ALL" onclick="switchChannelTab('ALL',this)">Semua</div>
+            <div class="channel-tab" data-ch="GROSIR" onclick="switchChannelTab('GROSIR',this)">Grosir</div>
+            <div class="channel-tab" data-ch="AGEN" onclick="switchChannelTab('AGEN',this)">Agen</div>
+          </div>
+          <button onclick="openWAModal()" style="display:flex;align-items:center;gap:6px;background:#25d366;border:none;color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:inherit;white-space:nowrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Kirim WA
+          </button>
+        </div>
       </div>
-      <div class="alert-list" id="alertList"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th>
+            <th class="right">Nominal</th><th>Tgl Nota</th><th>Jatuh Tempo</th>
+            <th class="right">Aging</th><th>Status</th>
+          </tr></thead>
+          <tbody id="tableJatuhTempo"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text3)" id="jatuhTempoInfo">—</div>
+        <div style="font-size:11px;font-weight:600" id="jatuhTempoTotals">—</div>
+      </div>
     </div>
 
-    <!-- REMINDER: 7 HARI KE DEPAN -->
-    <div class="alert-section" id="reminderSection" style="display:none;background:rgba(202,138,4,0.04);border-color:rgba(202,138,4,0.25)">
-      <div class="alert-header">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <div class="alert-title" style="color:var(--yellow)">Reminder — Jatuh Tempo 7 Hari Ke Depan</div>
-        <div class="alert-count" id="reminderCount" style="background:var(--yellow)">0</div>
-        <button onclick="openWAModal()" style="margin-left:auto;display:flex;align-items:center;gap:6px;background:#25d366;border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:inherit">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          Kirim WA
-        </button>
+    <!-- SECTION 2: RINGKASAN 7 HARI KE DEPAN -->
+    <div class="chart-card" style="margin-bottom:12px">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title" style="display:flex;align-items:center;gap:8px">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span style="color:var(--yellow)">Piutang Jatuh Tempo — 7 Hari Ke Depan</span>
+          </div>
+          <div class="chart-sub">Klik baris untuk melihat detail outlet</div>
+        </div>
       </div>
-      <div class="alert-list" id="reminderList"></div>
+      <div class="table-wrap">
+        <table id="table7Hari">
+          <thead><tr>
+            <th>Tanggal Jatuh Tempo</th>
+            <th class="right">Nominal</th>
+            <th class="right">Total Outlet</th>
+            <th class="right">Total Nota</th>
+            <th style="width:40px"></th>
+          </tr></thead>
+          <tbody id="tbody7Hari"></tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="chart-row col-3">
+    <!-- DRILL DOWN MODAL: DETAIL PER HARI -->
+    <div id="drillDownModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:1100;align-items:center;justify-content:center" onclick="if(event.target===this)closeDrillDown()">
+      <div style="background:var(--surface);border-radius:14px;width:92%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden">
+        <div style="background:linear-gradient(135deg,#0a2e1a,#1a6b3c);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#fff" id="drillDownTitle">Detail Outlet</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px" id="drillDownSub">—</div>
+          </div>
+          <button onclick="closeDrillDown()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;width:30px;height:30px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:16px 20px">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th>
+                <th class="right">Nominal</th><th>Tgl Nota</th><th class="right">Aging</th>
+              </tr></thead>
+              <tbody id="drillDownBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div style="padding:12px 20px;background:var(--surface2);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:11px;color:var(--text3)" id="drillDownInfo">—</div>
+          <div style="font-size:12px;font-weight:700;color:var(--orange)" id="drillDownTotal">—</div>
+        </div>
+      </div>
+    </div>
+
+        <div class="chart-row col-3">
       <div class="chart-card">
         <div class="chart-header"><div><div class="chart-title">Distribusi Channel</div><div class="chart-sub">Grosir vs Agen</div></div></div>
         <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartChannel"></canvas></div>
@@ -370,26 +445,6 @@ tbody tr:last-child td { border-bottom: none; }
       <div class="chart-card">
         <div class="chart-header"><div><div class="chart-title">Top 10 Outlet</div><div class="chart-sub">Terbesar sisa AR</div></div></div>
         <div class="top-list" id="topOutletList"></div>
-      </div>
-    </div>
-    <div class="chart-card" style="margin-bottom:12px">
-      <div class="chart-header">
-        <div><div class="chart-title">Detail Piutang per Outlet</div><div class="chart-sub">Semua data piutang sesuai filter</div></div>
-        <div class="channel-tabs">
-          <div class="channel-tab active" data-ch="ALL" onclick="switchChannelTab('ALL',this)">Semua</div>
-          <div class="channel-tab" data-ch="GROSIR" onclick="switchChannelTab('GROSIR',this)">Grosir</div>
-          <div class="channel-tab" data-ch="AGEN" onclick="switchChannelTab('AGEN',this)">Agen</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table id="piutangTable">
-          <thead><tr><th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th><th class="right">Jumlah Piutang</th><th>Tgl Nota Awal</th><th>Jatuh Tempo</th><th class="right">Aging</th><th>Status</th></tr></thead>
-          <tbody id="tablePiutang"></tbody>
-        </table>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-        <div style="font-size:11px;color:var(--text3)" id="tableInfo">—</div>
-        <div style="font-size:11px;font-weight:600;color:var(--text)" id="tableTotals">—</div>
       </div>
     </div>
   </div>
@@ -696,20 +751,18 @@ function getPiutangJatuhTempoPeriode() {
 }
 
 function renderAll() {
-  const outstanding   = getOutstandingData();          // SEMUA outstanding global → chart, alert, top outlet
-  const periodeData   = getOutstandingPeriode();       // Outstanding by tglNota dalam periode → tabel
-  const pembayaran    = getPembayaranData();           // TAGIHAN dalam periode → KPI pembayaran
-  const piutangBaru   = getPiutangBaru();              // KPI Card 1: TOP+OUTSTANDING by tglNota
-  const jatuhTempoPeriode = getPiutangJatuhTempoPeriode(); // KPI Card 2: TOP+OUTSTANDING by tglTempo
+  const outstanding        = getOutstandingData();
+  const pembayaran         = getPembayaranData();
+  const piutangBaru        = getPiutangBaru();
+  const jatuhTempoPeriode  = getPiutangJatuhTempoPeriode();
   renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode);
-  renderAlert(outstanding);
-  renderReminder7Hari(outstanding);
+  renderTableJatuhTempo(jatuhTempoPeriode, activeChannelTab);
+  renderTable7Hari(outstanding);
   renderChartChannel(outstanding);
   renderChartAging(outstanding);
   renderChartStatus(outstanding);
   renderChartTren(outstanding);
   renderTopOutlet(outstanding);
-  renderTable(periodeData, activeChannelTab);
   updateSubtitle(outstanding, pembayaran);
 }
 
@@ -800,62 +853,161 @@ function renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode) {
   `;
 }
 
-function renderAlert(outstanding) {
-  // Group by kodeOutlet+tglNota untuk hindari duplikat
-  const jatuhGrouped = {};
-  outstanding.filter(r => r.isJatuhTempo).forEach(r => {
-    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
-    if (!jatuhGrouped[k]) jatuhGrouped[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, aging:r.aging, tglTempo:r.tglTempo };
-    jatuhGrouped[k].total += r.total;
-    if (r.aging > jatuhGrouped[k].aging) jatuhGrouped[k].aging = r.aging;
+// ==================== SECTION 1: TABEL JATUH TEMPO ====================
+function renderTableJatuhTempo(jatuhTempoPeriode, chFilter) {
+  let data = chFilter === 'ALL' ? jatuhTempoPeriode : jatuhTempoPeriode.filter(r=>r.channel===chFilter);
+
+  // Group by kodeOutlet + tglNota
+  const grouped = {};
+  data.forEach(r => {
+    const k = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+    if (!grouped[k]) grouped[k] = { kodeOutlet:r.kodeOutlet, namaOutlet:r.namaOutlet, channel:r.channel, salesman:r.salesman, tglNota:r.tglNota, tglTempo:r.tglTempo, aging:r.aging, isJatuhTempo:r.isJatuhTempo, total:0 };
+    grouped[k].total += r.total;
+    if (r.isJatuhTempo) grouped[k].isJatuhTempo = true;
   });
-  const sorted = Object.values(jatuhGrouped).sort((a,b)=>b.total-a.total).slice(0,10);
-  const sec = document.getElementById('alertSection');
-  if (!sorted.length) { sec.style.display='none'; }
-  else {
-    sec.style.display = 'block';
-    document.getElementById('alertCount').textContent = sorted.length;
-    document.getElementById('alertList').innerHTML = sorted.map(o => `
-      <div class="alert-item">
-        <div class="alert-days">+${o.aging} hari</div>
-        <div><div class="alert-outlet">${o.nama}</div><div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div></div>
-        <div class="alert-amount">${fmtShort(o.total)}</div>
-      </div>
-    `).join('');
+
+  const rows = Object.values(grouped).sort((a,b) => {
+    // Sort: jatuh tempo dulu (terlama), lalu yang akan jatuh
+    if (a.isJatuhTempo && !b.isJatuhTempo) return -1;
+    if (!a.isJatuhTempo && b.isJatuhTempo) return 1;
+    return b.total - a.total;
+  });
+
+  const count = rows.length;
+  const totalNominal = rows.reduce((s,r)=>s+r.total,0);
+  const outletCount  = new Set(rows.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+
+  document.getElementById('jatuhTempoCount').textContent = count;
+
+  const tbody = document.getElementById('tableJatuhTempo');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Tidak ada piutang jatuh tempo dalam periode ini</td></tr>';
+    document.getElementById('jatuhTempoInfo').textContent = '0 nota';
+    document.getElementById('jatuhTempoTotals').textContent = '';
+    return;
   }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const chBadge = ch => ch==='AGEN'
+    ? '<span class="badge badge-agen">Agen</span>'
+    : '<span class="badge badge-grosir">Grosir</span>';
+  const agingColor = d => d>90?'var(--red)':d>60?'var(--orange)':d>30?'var(--yellow)':'var(--green)';
+
+  tbody.innerHTML = rows.map((r,i) => `
+    <tr>
+      <td style="color:var(--text3)">${i+1}</td>
+      <td style="font-family:monospace;font-size:11px">${r.kodeOutlet||'—'}</td>
+      <td style="font-weight:600">${r.namaOutlet}</td>
+      <td>${chBadge(r.channel)}</td>
+      <td>${r.salesman}</td>
+      <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(r.total)}</td>
+      <td>${fmtDate(r.tglNota)}</td>
+      <td style="color:${r.isJatuhTempo?'var(--red)':'var(--text)'};font-weight:${r.isJatuhTempo?'600':'400'}">${fmtDate(r.tglTempo)}</td>
+      <td class="right"><span style="font-weight:600;color:${agingColor(r.aging)}">${r.aging} hari</span></td>
+      <td><span class="badge ${r.isJatuhTempo?'badge-tempo':'badge-jatuh'}">${r.isJatuhTempo?'⚠ Lewat Tempo':'● Akan JT'}</span></td>
+    </tr>
+  `).join('');
+
+  document.getElementById('jatuhTempoInfo').textContent = `${count} nota · ${outletCount} outlet`;
+  document.getElementById('jatuhTempoTotals').innerHTML = `Total: <span style="color:var(--orange);font-weight:700">${fmtFull(totalNominal)}</span>`;
 }
 
-function renderReminder7Hari(outstanding) {
+// ==================== SECTION 2: RINGKASAN 7 HARI KE DEPAN ====================
+function renderTable7Hari(outstanding) {
   const today = new Date(); today.setHours(0,0,0,0);
   const plus7 = new Date(today); plus7.setDate(plus7.getDate() + 7);
 
-  // Nota yang tempo-nya dalam 7 hari ke depan (belum jatuh tempo)
-  const grouped = {};
+  // Group by tglTempo → summary per hari
+  const byDay = {};
   outstanding.filter(r => r.tglTempo && r.tglTempo >= today && r.tglTempo <= plus7).forEach(r => {
-    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
-    if (!grouped[k]) grouped[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, tglTempo:r.tglTempo, sisaHari:0 };
-    grouped[k].total += r.total;
-    grouped[k].sisaHari = Math.floor((r.tglTempo - today) / 86400000);
+    const dk = dateKey(r.tglTempo);
+    if (!byDay[dk]) byDay[dk] = { tglTempo: r.tglTempo, total: 0, outlets: new Set(), notaKeys: new Set(), rows: [] };
+    const notaKey = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+    byDay[dk].outlets.add(r.kodeOutlet||r.namaOutlet);
+    byDay[dk].notaKeys.add(notaKey);
+    // Accumulate by notaKey to avoid double count
+    const existing = byDay[dk].rows.find(x=>x.key===notaKey);
+    if (existing) { existing.total += r.total; }
+    else byDay[dk].rows.push({ key:notaKey, kodeOutlet:r.kodeOutlet, namaOutlet:r.namaOutlet, channel:r.channel, salesman:r.salesman, tglNota:r.tglNota, tglTempo:r.tglTempo, aging:r.aging, total:r.total });
+    byDay[dk].total += r.total;
   });
 
-  const sorted = Object.values(grouped).sort((a,b) => a.sisaHari - b.sisaHari);
-  const sec = document.getElementById('reminderSection');
+  const sorted = Object.entries(byDay).sort((a,b)=>a[0].localeCompare(b[0]));
+  const tbody = document.getElementById('tbody7Hari');
 
-  if (!sorted.length) { sec.style.display='none'; return; }
-  sec.style.display = 'block';
-  document.getElementById('reminderCount').textContent = sorted.length;
-  document.getElementById('reminderList').innerHTML = sorted.map(o => {
-    const urgColor = o.sisaHari <= 1 ? 'var(--red)' : o.sisaHari <= 3 ? 'var(--orange)' : 'var(--yellow)';
-    const urgLabel = o.sisaHari === 0 ? 'Hari ini!' : o.sisaHari === 1 ? 'Besok!' : o.sisaHari + ' hari lagi';
+  if (!sorted.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada piutang yang akan jatuh tempo dalam 7 hari ke depan</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(([dk, d], i) => {
+    const sisaHari = Math.floor((d.tglTempo - today) / 86400000);
+    const label = sisaHari === 0 ? 'Hari ini' : sisaHari === 1 ? 'Besok' : sisaHari + ' hari lagi';
+    const bgColor = sisaHari === 0 ? 'rgba(220,38,38,0.08)' : sisaHari === 1 ? 'rgba(234,112,16,0.08)' : sisaHari <= 3 ? 'rgba(202,138,4,0.06)' : 'transparent';
+    const labelColor = sisaHari === 0 ? 'var(--red)' : sisaHari === 1 ? 'var(--orange)' : 'var(--yellow)';
+    const tglStr = d.tglTempo.toLocaleDateString('id-ID', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
     return `
-      <div class="alert-item" style="border-color:rgba(202,138,4,0.25)">
-        <div class="alert-days" style="background:rgba(202,138,4,0.1);color:${urgColor};min-width:72px;text-align:center">${urgLabel}</div>
-        <div><div class="alert-outlet">${o.nama}</div><div class="alert-salesman">${o.salesman} · Tempo: ${fmtDate(o.tglTempo)}</div></div>
-        <div class="alert-amount" style="color:${urgColor}">${fmtShort(o.total)}</div>
-      </div>
+      <tr class="row-7hari" style="background:${bgColor}" onclick="openDrillDown('${dk}')">
+        <td>
+          <div style="font-weight:600;color:var(--text)">${tglStr}</div>
+          <div><span class="day-badge" style="background:${bgColor};color:${labelColor};margin-top:3px">${label}</span></div>
+        </td>
+        <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(d.total)}</td>
+        <td class="right" style="font-weight:600">${d.outlets.size}</td>
+        <td class="right" style="font-weight:600">${d.notaKeys.size}</td>
+        <td style="text-align:center;color:var(--text3)">›</td>
+      </tr>
     `;
   }).join('');
+
+  // Store data globally for drill down
+  window._7hariData = Object.fromEntries(sorted);
 }
+
+function openDrillDown(dk) {
+  const d = window._7hariData?.[dk];
+  if (!d) return;
+  const tglStr = d.tglTempo.toLocaleDateString('id-ID', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  document.getElementById('drillDownTitle').textContent = 'Detail Piutang — ' + tglStr;
+  document.getElementById('drillDownSub').textContent = d.rows.length + ' nota · ' + d.outlets.size + ' outlet · Total: ' + fmtFull(d.total);
+  document.getElementById('drillDownInfo').textContent = d.rows.length + ' nota outstanding';
+  document.getElementById('drillDownTotal').textContent = 'Total: ' + fmtFull(d.total);
+
+  const chBadge = ch => ch==='AGEN'
+    ? '<span class="badge badge-agen">Agen</span>'
+    : '<span class="badge badge-grosir">Grosir</span>';
+
+  document.getElementById('drillDownBody').innerHTML = d.rows
+    .sort((a,b)=>b.total-a.total)
+    .map((r,i) => `
+      <tr>
+        <td style="color:var(--text3)">${i+1}</td>
+        <td style="font-family:monospace;font-size:11px">${r.kodeOutlet||'—'}</td>
+        <td style="font-weight:600">${r.namaOutlet}</td>
+        <td>${chBadge(r.channel)}</td>
+        <td>${r.salesman}</td>
+        <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(r.total)}</td>
+        <td>${fmtDate(r.tglNota)}</td>
+        <td class="right"><span style="font-weight:600;color:var(--accent)">${r.aging} hari</span></td>
+      </tr>
+    `).join('');
+
+  const modal = document.getElementById('drillDownModal');
+  modal.style.display = 'flex';
+}
+
+function closeDrillDown() {
+  document.getElementById('drillDownModal').style.display = 'none';
+}
+
+// switchChannelTab now updates jatuh tempo table
+function switchChannelTab(ch, el) {
+  activeChannelTab = ch;
+  document.querySelectorAll('.channel-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderTableJatuhTempo(getPiutangJatuhTempoPeriode(), ch);
+}
+
 
 function renderChartChannel(outstanding) {
   destroyChart('chartChannel');
@@ -969,129 +1121,6 @@ function renderTopOutlet(outstanding) {
       <div class="top-right"><div class="top-val">${fmtShort(o.total)}</div></div>
     </div>
   `).join('') : '<div class="empty-state">Tidak ada data piutang</div>';
-}
-
-function switchChannelTab(ch, el) {
-  activeChannelTab = ch;
-  document.querySelectorAll('.channel-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  renderTable(getOutstandingData(), ch);
-}
-
-function renderTable(outstanding, chFilter) {
-  let data = chFilter === 'ALL' ? outstanding : outstanding.filter(r=>r.channel===chFilter);
-
-  // GROUP BY kodeOutlet + tglNota (kombinasi unik)
-  // Jika outlet A punya 2 nota berbeda → 2 baris
-  // Jika outlet A punya nota sama tapi banyak baris → digabung 1 baris, total disum
-  const grouped = {};
-  data.forEach(r => {
-    const notaKey = (r.kodeOutlet || r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
-    if (!grouped[notaKey]) {
-      grouped[notaKey] = {
-        kodeOutlet: r.kodeOutlet,
-        namaOutlet: r.namaOutlet,
-        channel:    r.channel,
-        salesman:   r.salesman,
-        tglNota:    r.tglNota,
-        tglTempo:   r.tglTempo,
-        aging:      r.aging,
-        isJatuhTempo: r.isJatuhTempo,
-        total:      0,
-      };
-    }
-    grouped[notaKey].total += r.total;
-    // Ambil aging & tempo dari baris manapun (harusnya sama untuk nota yang sama)
-    if (r.isJatuhTempo) grouped[notaKey].isJatuhTempo = true;
-  });
-
-  // Convert ke array, sort by total terbesar
-  let rows = Object.values(grouped).sort((a,b) => b.total - a.total);
-  const tbody = document.getElementById('tablePiutang');
-
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Tidak ada data piutang outstanding</td></tr>';
-    document.getElementById('tableInfo').textContent = '0 data';
-    document.getElementById('tableTotals').textContent = '';
-    return;
-  }
-
-  const chBadge = ch => ch==='AGEN'
-    ? '<span class="badge badge-agen">Agen</span>'
-    : '<span class="badge badge-grosir">Grosir</span>';
-  const agingColor = d => d>90?'var(--red)':d>60?'var(--orange)':d>30?'var(--yellow)':'var(--green)';
-
-  tbody.innerHTML = rows.map((r,i) => `
-    <tr>
-      <td style="color:var(--text3)">${i+1}</td>
-      <td style="font-family:monospace;font-size:11px">${r.kodeOutlet||'—'}</td>
-      <td style="font-weight:600">${r.namaOutlet}</td>
-      <td>${chBadge(r.channel)}</td>
-      <td>${r.salesman}</td>
-      <td class="right" style="font-weight:700;color:var(--red)">${fmtShort(r.total)}</td>
-      <td>${fmtDate(r.tglNota)}</td>
-      <td style="color:${r.isJatuhTempo?'var(--red)':'var(--text)'}">${fmtDate(r.tglTempo)}</td>
-      <td class="right"><span style="font-weight:600;color:${agingColor(r.aging)}">${r.aging} hari</span></td>
-      <td><span class="badge ${r.isJatuhTempo?'badge-tempo':'badge-jatuh'}">${r.isJatuhTempo?'⚠ Jatuh Tempo':'● Outstanding'}</span></td>
-    </tr>
-  `).join('');
-
-  const totalOutlet = new Set(rows.map(r=>r.kodeOutlet||r.namaOutlet)).size;
-  const totalAR     = rows.reduce((s,r)=>s+r.total,0);
-  document.getElementById('tableInfo').textContent = `${rows.length} nota · ${totalOutlet} outlet`;
-  document.getElementById('tableTotals').innerHTML =
-    `Total AR: <span style="color:var(--red);font-weight:700">${fmtShort(totalAR)}</span>`;
-}
-
-
-// ==================== WHATSAPP ====================
-function openWAModal() {
-  const msg = buildWAMessage();
-  document.getElementById('waPreviewText').textContent = msg;
-  document.getElementById('waModalSubtitle').textContent =
-    document.getElementById('reminderCount').textContent + ' nota akan jatuh tempo';
-  const copyBtn = document.getElementById('waBtnCopy');
-  copyBtn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
-  copyBtn.classList.remove('copied');
-  document.getElementById('waModalOverlay').classList.add('active');
-}
-
-function copyWAMessage() {
-  const msg = buildWAMessage();
-  navigator.clipboard.writeText(msg).then(() => {
-    const btn = document.getElementById('waBtnCopy');
-    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Tersalin!`;
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
-      btn.classList.remove('copied');
-    }, 2500);
-  }).catch(() => {
-    // Fallback untuk browser yang tidak support clipboard API
-    const ta = document.createElement('textarea');
-    ta.value = msg;
-    ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    const btn = document.getElementById('waBtnCopy');
-    btn.innerHTML = `✓ Tersalin!`;
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.innerHTML = `Copy Pesan`;
-      btn.classList.remove('copied');
-    }, 2500);
-  });
-}
-
-function openWAWeb() {
-  const msg = buildWAMessage();
-  window.open('https://web.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
-}
-
-function closeWAModal() {
-  document.getElementById('waModalOverlay').classList.remove('active');
 }
 
 // ==================== EVENT LISTENERS ====================
