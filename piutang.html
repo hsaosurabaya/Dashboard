@@ -38,7 +38,7 @@ a { color: inherit; text-decoration: none; }
 /* SIDEBAR */
 .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: linear-gradient(175deg, var(--sidebar-grad-top) 0%, var(--sidebar-grad-mid) 50%, var(--sidebar-grad-bot) 100%); z-index: 100; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(10,46,26,0.25); }
 .sidebar-logo { padding: 20px 10px 25px; display: flex; justify-content: center; align-items: center; border-bottom: none; }
-.sidebar-brand-logo { width: 220px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); transition: transform .2s; }
+.sidebar-brand-logo { width: 180px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); transition: transform .2s; }
 .sidebar-brand-logo:hover { transform: scale(1.03); }
 .sidebar-section { padding-top: 10px; padding: 10px 10px 4px; }
 .sidebar-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: .1em; padding: 0 8px; margin-bottom: 4px; }
@@ -338,7 +338,7 @@ tbody tr:last-child td { border-bottom: none; }
             <span style="color:var(--orange)">Detail Piutang Jatuh Tempo</span>
             <span class="alert-count" id="jatuhTempoCount" style="background:var(--orange);font-size:10px;padding:2px 8px;border-radius:20px;color:#fff;font-weight:700">0</span>
           </div>
-          <div class="chart-sub">Filter by tanggal jatuh tempo dalam periode · sesuai KPI Card 2</div>
+          <div class="chart-sub" id="subJatuhTempo">Filter by tanggal jatuh tempo dalam periode · sesuai KPI Card 2</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <div class="channel-tabs" style="margin-bottom:0">
@@ -735,17 +735,32 @@ function getPiutangJatuhTempoPeriode() {
   const ch    = document.getElementById('filterChannel').value;
   const sales = document.getElementById('filterSalesman').value;
 
+  // Kumpulkan semua hari (0=Min,1=Sen,...,6=Sab) dalam range filter
+  const hariDiRange = new Set();
+  if (from && to) {
+    const d = new Date(from);
+    const end = new Date(to);
+    while (d <= end) {
+      hariDiRange.add(d.getDay());
+      d.setDate(d.getDate() + 1);
+    }
+  }
+
   return allData.filter(r => {
     if (r.keterangan !== 'TOP') return false;
     if (r.status !== 'OUTSTANDING') return false;
     if (ch    && r.channel  !== ch)    return false;
     if (sales && r.salesman !== sales) return false;
+    if (!r.tglTempo) return false;
+
+    // Jika ada filter tanggal → filter by hari dalam range
     if (from || to) {
-      const dk = r.tglTempo ? dateKey(r.tglTempo) : '';
-      if (!dk) return false;
-      if (from && dk < from) return false;
-      if (to   && dk > to)   return false;
+      // Kalau range >= 7 hari → semua hari tercakup → tampil semua
+      if (hariDiRange.size >= 7) return true;
+      // Kalau range < 7 hari → cek hari tglTempo masuk dalam set hari
+      return hariDiRange.has(r.tglTempo.getDay());
     }
+
     return true;
   });
 }
@@ -773,10 +788,24 @@ function updateSubtitle(outstanding, pembayaran) {
   const totalAR  = outstanding.reduce((s,r) => s + r.total, 0);
   const totalByr = pembayaran.reduce((s,r) => s + r.total, 0);
   const periodeStr = (from || to)
-    ? ((fmtD(from)||'...') + ' – ' + (fmtD(to)||'...') + ' · ')
+    ? ((fmtD(from)||'...') + (from !== to ? ' – ' + (fmtD(to)||'...') : '') + ' · ')
     : 'Semua periode · ';
+
+  // Info hari aktif
+  let hariInfo = '';
+  if (from && to) {
+    const hariNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+    const hariDiRange = new Set();
+    const d = new Date(from); const end = new Date(to);
+    while (d <= end) { hariDiRange.add(d.getDay()); d.setDate(d.getDate()+1); }
+    if (hariDiRange.size < 7) {
+      const hariLabel = [...hariDiRange].map(h => hariNames[h]).join(', ');
+      hariInfo = ' · JT filter: ' + hariLabel;
+    }
+  }
+
   document.getElementById('subtitlePeriod').textContent =
-    periodeStr + 'Outstanding: ' + fmtShort(totalAR) + ' · Bayar: ' + fmtShort(totalByr);
+    periodeStr + 'Outstanding: ' + fmtShort(totalAR) + ' · Bayar: ' + fmtShort(totalByr) + hariInfo;
 }
 
 function renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode) {
@@ -796,6 +825,26 @@ function renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode) {
   piutangBaru.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); baruNota[k]=true; });
   jatuhTempoPeriode.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); jatuhNota[k]=true; });
   const collRate = totalJatuh>0 ? (totalBayar/totalJatuh*100).toFixed(1) : 0;
+
+  // Update label KPI Card 2 & tabel berdasarkan hari aktif
+  const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const from2 = document.getElementById('filterFrom').value;
+  const to2   = document.getElementById('filterTo').value;
+  let hariLabel = 'by Hari Jatuh Tempo';
+  if (from2 && to2) {
+    const hariSet = new Set();
+    const dd = new Date(from2); const ee = new Date(to2);
+    while (dd <= ee) { hariSet.add(dd.getDay()); dd.setDate(dd.getDate()+1); }
+    if (hariSet.size < 7) {
+      hariLabel = 'Hari: ' + [...hariSet].map(h=>hariNames[h]).join(', ');
+    } else {
+      hariLabel = 'Semua Hari';
+    }
+  }
+  const lbl = document.getElementById('labelJatuhTempo');
+  const sub = document.getElementById('subJatuhTempo');
+  if (lbl) lbl.textContent = 'Piutang JT — ' + hariLabel;
+  if (sub) sub.textContent = 'Filter by hari jatuh tempo · ' + hariLabel;
 
   document.getElementById('kpiGrid').innerHTML = `
     <div class="kpi-row row-4">
@@ -833,7 +882,7 @@ function renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode) {
       </div>
       <div class="kpi-card" style="--kpi-color:var(--orange)">
         <div class="kpi-icon" style="background:rgba(234,112,16,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#ea7010" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <div class="kpi-label">Piutang Jatuh Tempo (Tgl Tempo)</div>
+        <div class="kpi-label" id="labelJatuhTempo">Piutang Jatuh Tempo (Tgl Tempo)</div>
         <div class="kpi-value md" style="font-size:14px;color:var(--orange)">${fmtFull(totalJatuh)}</div>
         <div class="kpi-sub">${Object.keys(jatuhNota).length} nota · ${outletJatuh} outlet</div>
       </div>
