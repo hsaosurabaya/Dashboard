@@ -990,51 +990,64 @@ function renderTableJatuhTempo(jatuhTempoPeriode, chFilter) {
 
 // ==================== SECTION 2: RINGKASAN 7 HARI KE DEPAN ====================
 function renderTable7Hari(outstanding) {
-  // SELALU fixed 7 hari ke depan dari hari ini — TIDAK ikut filter tanggal
   const today = new Date(); today.setHours(0,0,0,0);
   const plus7 = new Date(today); plus7.setDate(plus7.getDate() + 7);
   const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
-  // Ambil SEMUA outstanding (getOutstandingData tanpa filter tanggal)
-  // yang tglTempo-nya dalam 7 hari ke depan
-  const allOutstanding = allData.filter(r => {
-    if (r.keterangan !== 'TOP') return false;
-    if (r.status !== 'OUTSTANDING') return false;
-    if (!r.tglTempo) return false;
-    if (r.tglTempo < today || r.tglTempo > plus7) return false;
-    return true;
-  });
+  // Bangun daftar 7 hari ke depan (tanggal exact)
+  const next7Days = [];
+  for (let i = 0; i <= 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    next7Days.push(d);
+  }
 
-  // Group by tglTempo
+  // Untuk setiap hari dalam 7 hari ke depan,
+  // tampilkan SEMUA outstanding yang tglTempo-nya pada hari-hari (day-of-week) tersebut
+  // Ini konsisten dengan tabel detail yang juga pakai day-of-week
   const byDay = {};
-  allOutstanding.forEach(r => {
-    const dk = dateKey(r.tglTempo);
-    if (!byDay[dk]) byDay[dk] = { tglTempo:r.tglTempo, total:0, outlets:new Set(), notaKeys:new Set(), rows:[] };
-    const notaKey = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
-    byDay[dk].outlets.add(r.kodeOutlet||r.namaOutlet);
-    byDay[dk].notaKeys.add(notaKey);
-    const existing = byDay[dk].rows.find(x=>x.key===notaKey);
-    if (existing) { existing.total += r.total; }
-    else byDay[dk].rows.push({ key:notaKey, kodeOutlet:r.kodeOutlet, namaOutlet:r.namaOutlet, channel:r.channel, salesman:r.salesman, tglNota:r.tglNota, tglTempo:r.tglTempo, aging:r.aging, total:r.total });
-    byDay[dk].total += r.total;
+  next7Days.forEach(tglHari => {
+    const dk = dateKey(tglHari);
+    const dow = tglHari.getDay(); // 0=Min, 1=Sen, dst
+
+    // Kumpulkan semua outstanding yang tglTempo.getDay() === dow
+    allData.filter(r => {
+      if (r.keterangan !== 'TOP') return false;
+      if (r.status !== 'OUTSTANDING') return false;
+      if (!r.tglTempo) return false;
+      return r.tglTempo.getDay() === dow;
+    }).forEach(r => {
+      if (!byDay[dk]) byDay[dk] = { tglHari, dow, total:0, outlets:new Set(), notaKeys:new Set(), rows:[] };
+      const notaKey = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+      byDay[dk].outlets.add(r.kodeOutlet||r.namaOutlet);
+      byDay[dk].notaKeys.add(notaKey);
+      const existing = byDay[dk].rows.find(x=>x.key===notaKey);
+      if (existing) { existing.total += r.total; }
+      else byDay[dk].rows.push({ key:notaKey, kodeOutlet:r.kodeOutlet, namaOutlet:r.namaOutlet, channel:r.channel, salesman:r.salesman, tglNota:r.tglNota, tglTempo:r.tglTempo, aging:r.aging, total:r.total });
+      byDay[dk].total += r.total;
+    });
   });
 
-  const sorted = Object.entries(byDay).sort((a,b)=>a[0].localeCompare(b[0]));
+  // Hanya tampilkan hari yang ada datanya
+  const sorted = Object.entries(byDay)
+    .filter(([,d]) => d.total > 0)
+    .sort((a,b) => a[0].localeCompare(b[0]));
+
   const tbody = document.getElementById('tbody7Hari');
 
   if (!sorted.length) {
     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada piutang yang akan jatuh tempo dalam 7 hari ke depan</td></tr>';
-    renderChart7HariBar([], []);
+    renderChart7HariBar([], [], []);
     return;
   }
 
   tbody.innerHTML = sorted.map(([dk, d]) => {
-    const sisaHari = Math.floor((d.tglTempo - today) / 86400000);
+    const sisaHari = Math.floor((d.tglHari - today) / 86400000);
     const label    = sisaHari === 0 ? 'Hari ini' : sisaHari === 1 ? 'Besok' : sisaHari + ' hari lagi';
     const bgColor  = sisaHari === 0 ? 'rgba(220,38,38,0.06)' : sisaHari === 1 ? 'rgba(234,112,16,0.06)' : sisaHari <= 3 ? 'rgba(202,138,4,0.04)' : 'transparent';
     const lblColor = sisaHari === 0 ? 'var(--red)' : sisaHari === 1 ? 'var(--orange)' : 'var(--yellow)';
-    const hariStr  = hariNames[d.tglTempo.getDay()];
-    const tglStr   = d.tglTempo.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+    const hariStr  = hariNames[d.dow];
+    const tglStr   = d.tglHari.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
     return `
       <tr class="row-7hari" style="background:${bgColor}" onclick="openDrillDown('${dk}')">
         <td>
@@ -1051,11 +1064,11 @@ function renderTable7Hari(outstanding) {
   window._7hariData = Object.fromEntries(sorted);
 
   // Bar chart
-  const labels = sorted.map(([dk, d]) => {
-    const sisaHari = Math.floor((d.tglTempo - today) / 86400000);
-    return hariNames[d.tglTempo.getDay()] + (sisaHari===0?' (Hari ini)':sisaHari===1?' (Besok)':'');
+  const labels = sorted.map(([,d]) => {
+    const sisa = Math.floor((d.tglHari - today) / 86400000);
+    return hariNames[d.dow] + (sisa===0?' (Hari ini)':sisa===1?' (Besok)':'');
   });
-  const vals   = sorted.map(([,d]) => d.total);
+  const vals = sorted.map(([,d]) => d.total);
   renderChart7HariBar(labels, vals, sorted);
 }
 
@@ -1086,9 +1099,15 @@ function openDrillDown(dk) {
   const d = window._7hariData?.[dk];
   if (!d) return;
   const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  const tglStr = hariNames[d.tglTempo.getDay()] + ', ' + d.tglTempo.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  const tglRef   = d.tglHari || d.tglTempo;
+  const dow      = d.dow !== undefined ? d.dow : tglRef.getDay();
+  const tglStr   = hariNames[dow] + ', ' + tglRef.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  const today    = new Date(); today.setHours(0,0,0,0);
+  const sisaHari = Math.floor((tglRef - today) / 86400000);
+  const hariInfo = sisaHari === 0 ? ' · Hari ini' : sisaHari === 1 ? ' · Besok' : sisaHari > 0 ? ` · ${sisaHari} hari lagi` : ` · ${Math.abs(sisaHari)} hari lewat`;
+
   document.getElementById('drillDownTitle').textContent = 'Detail Piutang — ' + tglStr;
-  document.getElementById('drillDownSub').textContent   = d.rows.length + ' nota · ' + d.outlets.size + ' outlet · Total: ' + fmtFull(d.total);
+  document.getElementById('drillDownSub').textContent   = d.rows.length + ' nota · ' + d.outlets.size + ' outlet · Total: ' + fmtFull(d.total) + hariInfo;
   document.getElementById('drillDownInfo').textContent  = d.rows.length + ' nota outstanding';
   document.getElementById('drillDownTotal').textContent = 'Total: ' + fmtFull(d.total);
 
