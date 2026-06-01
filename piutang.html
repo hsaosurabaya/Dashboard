@@ -38,7 +38,7 @@ a { color: inherit; text-decoration: none; }
 /* SIDEBAR */
 .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: linear-gradient(175deg, var(--sidebar-grad-top) 0%, var(--sidebar-grad-mid) 50%, var(--sidebar-grad-bot) 100%); z-index: 100; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(10,46,26,0.25); }
 .sidebar-logo { padding: 20px 10px 25px; display: flex; justify-content: center; align-items: center; border-bottom: none; }
-.sidebar-brand-logo { width: 220px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); transition: transform .2s; }
+.sidebar-brand-logo { width: 180px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); transition: transform .2s; }
 .sidebar-brand-logo:hover { transform: scale(1.03); }
 .sidebar-section { padding-top: 10px; padding: 10px 10px 4px; }
 .sidebar-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: .1em; padding: 0 8px; margin-bottom: 4px; }
@@ -369,27 +369,38 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
 
     <!-- SECTION 2: RINGKASAN 7 HARI KE DEPAN -->
-    <div class="chart-card" style="margin-bottom:12px">
-      <div class="chart-header">
-        <div>
-          <div class="chart-title" style="display:flex;align-items:center;gap:8px">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            <span style="color:var(--yellow)">Piutang Jatuh Tempo — 7 Hari Ke Depan</span>
+    <div class="chart-row col-2" style="margin-bottom:12px">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title" style="display:flex;align-items:center;gap:8px">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span style="color:var(--yellow)">Piutang Jatuh Tempo — 7 Hari Ke Depan</span>
+            </div>
+            <div class="chart-sub">Klik baris untuk melihat detail outlet</div>
           </div>
-          <div class="chart-sub">Klik baris untuk melihat detail outlet</div>
+        </div>
+        <div class="table-wrap">
+          <table id="table7Hari">
+            <thead><tr>
+              <th>Tanggal Jatuh Tempo</th>
+              <th class="right">Nominal</th>
+              <th class="right">Outlet</th>
+              <th class="right">Nota</th>
+              <th style="width:30px"></th>
+            </tr></thead>
+            <tbody id="tbody7Hari"></tbody>
+          </table>
         </div>
       </div>
-      <div class="table-wrap">
-        <table id="table7Hari">
-          <thead><tr>
-            <th>Tanggal Jatuh Tempo</th>
-            <th class="right">Nominal</th>
-            <th class="right">Total Outlet</th>
-            <th class="right">Total Nota</th>
-            <th style="width:40px"></th>
-          </tr></thead>
-          <tbody id="tbody7Hari"></tbody>
-        </table>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Beban Penagihan per Hari</div>
+            <div class="chart-sub">Nominal outstanding by hari jatuh tempo</div>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:220px"><canvas id="chart7HariBar"></canvas></div>
       </div>
     </div>
 
@@ -966,15 +977,35 @@ function renderTable7Hari(outstanding) {
   const today = new Date(); today.setHours(0,0,0,0);
   const plus7 = new Date(today); plus7.setDate(plus7.getDate() + 7);
 
-  // Group by tglTempo → summary per hari
+  // Ambil hari-hari dari filter (sama dengan getPiutangJatuhTempoPeriode)
+  const from2 = document.getElementById('filterFrom').value;
+  const to2   = document.getElementById('filterTo').value;
+  const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+  const hariDiRange = new Set();
+  if (from2 && to2) {
+    const dd = new Date(from2); const ee = new Date(to2);
+    while (dd <= ee) { hariDiRange.add(dd.getDay()); dd.setDate(dd.getDate()+1); }
+  }
+
+  // Filter outstanding: tglTempo dalam 7 hari ke depan DAN harinya masuk filter
+  const relevant = outstanding.filter(r => {
+    if (!r.tglTempo) return false;
+    if (r.tglTempo < today || r.tglTempo > plus7) return false;
+    if (hariDiRange.size > 0 && hariDiRange.size < 7) {
+      return hariDiRange.has(r.tglTempo.getDay());
+    }
+    return true;
+  });
+
+  // Group by tglTempo
   const byDay = {};
-  outstanding.filter(r => r.tglTempo && r.tglTempo >= today && r.tglTempo <= plus7).forEach(r => {
+  relevant.forEach(r => {
     const dk = dateKey(r.tglTempo);
-    if (!byDay[dk]) byDay[dk] = { tglTempo: r.tglTempo, total: 0, outlets: new Set(), notaKeys: new Set(), rows: [] };
+    if (!byDay[dk]) byDay[dk] = { tglTempo:r.tglTempo, total:0, outlets:new Set(), notaKeys:new Set(), rows:[] };
     const notaKey = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
     byDay[dk].outlets.add(r.kodeOutlet||r.namaOutlet);
     byDay[dk].notaKeys.add(notaKey);
-    // Accumulate by notaKey to avoid double count
     const existing = byDay[dk].rows.find(x=>x.key===notaKey);
     if (existing) { existing.total += r.total; }
     else byDay[dk].rows.push({ key:notaKey, kodeOutlet:r.kodeOutlet, namaOutlet:r.namaOutlet, channel:r.channel, salesman:r.salesman, tglNota:r.tglNota, tglTempo:r.tglTempo, aging:r.aging, total:r.total });
@@ -986,31 +1017,64 @@ function renderTable7Hari(outstanding) {
 
   if (!sorted.length) {
     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada piutang yang akan jatuh tempo dalam 7 hari ke depan</td></tr>';
+    renderChart7HariBar([], []);
     return;
   }
 
-  tbody.innerHTML = sorted.map(([dk, d], i) => {
+  tbody.innerHTML = sorted.map(([dk, d]) => {
     const sisaHari = Math.floor((d.tglTempo - today) / 86400000);
-    const label = sisaHari === 0 ? 'Hari ini' : sisaHari === 1 ? 'Besok' : sisaHari + ' hari lagi';
-    const bgColor = sisaHari === 0 ? 'rgba(220,38,38,0.08)' : sisaHari === 1 ? 'rgba(234,112,16,0.08)' : sisaHari <= 3 ? 'rgba(202,138,4,0.06)' : 'transparent';
-    const labelColor = sisaHari === 0 ? 'var(--red)' : sisaHari === 1 ? 'var(--orange)' : 'var(--yellow)';
-    const tglStr = d.tglTempo.toLocaleDateString('id-ID', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+    const label    = sisaHari === 0 ? 'Hari ini' : sisaHari === 1 ? 'Besok' : sisaHari + ' hari lagi';
+    const bgColor  = sisaHari === 0 ? 'rgba(220,38,38,0.06)' : sisaHari === 1 ? 'rgba(234,112,16,0.06)' : sisaHari <= 3 ? 'rgba(202,138,4,0.04)' : 'transparent';
+    const lblColor = sisaHari === 0 ? 'var(--red)' : sisaHari === 1 ? 'var(--orange)' : 'var(--yellow)';
+    const hariStr  = hariNames[d.tglTempo.getDay()];
+    const tglStr   = d.tglTempo.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
     return `
       <tr class="row-7hari" style="background:${bgColor}" onclick="openDrillDown('${dk}')">
         <td>
-          <div style="font-weight:600;color:var(--text)">${tglStr}</div>
-          <div><span class="day-badge" style="background:${bgColor};color:${labelColor};margin-top:3px">${label}</span></div>
+          <div style="font-weight:600;color:var(--text)">${hariStr}, ${tglStr}</div>
+          <span class="day-badge" style="background:${bgColor||'rgba(202,138,4,0.06)'};color:${lblColor};margin-top:3px;font-size:9px;padding:1px 7px;border-radius:20px;font-weight:700">${label}</span>
         </td>
         <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(d.total)}</td>
         <td class="right" style="font-weight:600">${d.outlets.size}</td>
         <td class="right" style="font-weight:600">${d.notaKeys.size}</td>
-        <td style="text-align:center;color:var(--text3)">›</td>
-      </tr>
-    `;
+        <td style="text-align:center;color:var(--text3);font-size:16px">›</td>
+      </tr>`;
   }).join('');
 
-  // Store data globally for drill down
+  // Store for drill down
   window._7hariData = Object.fromEntries(sorted);
+
+  // Render bar chart
+  const labels = sorted.map(([dk, d]) => {
+    const sisaHari = Math.floor((d.tglTempo - today) / 86400000);
+    return hariNames[d.tglTempo.getDay()] + (sisaHari===0?' (Hari ini)':sisaHari===1?' (Besok)':'');
+  });
+  const vals = sorted.map(([,d]) => d.total);
+  renderChart7HariBar(labels, vals);
+}
+
+function renderChart7HariBar(labels, vals) {
+  destroyChart('chart7HariBar');
+  if (!labels.length) return;
+  const ctx = document.getElementById('chart7HariBar').getContext('2d');
+  const colors = vals.map((_, i) => {
+    const day = Object.values(window._7hariData||{})[i];
+    if (!day) return 'rgba(234,112,16,0.7)';
+    const sisa = Math.floor((day.tglTempo - new Date().setHours(0,0,0,0)) / 86400000);
+    return sisa === 0 ? 'rgba(220,38,38,0.8)' : sisa === 1 ? 'rgba(234,112,16,0.8)' : sisa <= 3 ? 'rgba(202,138,4,0.75)' : 'rgba(26,107,60,0.7)';
+  });
+  charts['chart7HariBar'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderRadius: 6, borderSkipped: false }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + fmtFull(ctx.parsed.y) } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: '#e0ece4' }, ticks: { callback: v => fmtShort(v), font: { size: 10 } } }
+      }
+    }
+  });
 }
 
 function openDrillDown(dk) {
@@ -1230,7 +1294,7 @@ function buildWAMessage() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
   msg += `💰 *Total tagihan: ${fmtFull(totalNominal)}*\n`;
   msg += `📊 ${rows.length} nota · ${new Set(rows.map(r=>r.nama)).size} outlet\n`;
-  msg += `\n_Pesan otomatis dari Finance HS AO Surabaya_`;
+  msg += `\n_Pesan otomatis dari Dashboard HS AO Surabaya_`;
 
   return msg;
 }
