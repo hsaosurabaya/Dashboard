@@ -990,33 +990,24 @@ function renderTableJatuhTempo(jatuhTempoPeriode, chFilter) {
 
 // ==================== SECTION 2: RINGKASAN 7 HARI KE DEPAN ====================
 function renderTable7Hari(outstanding) {
+  // SELALU fixed 7 hari ke depan dari hari ini — TIDAK ikut filter tanggal
   const today = new Date(); today.setHours(0,0,0,0);
   const plus7 = new Date(today); plus7.setDate(plus7.getDate() + 7);
-
-  // Ambil hari-hari dari filter (sama dengan getPiutangJatuhTempoPeriode)
-  const from2 = document.getElementById('filterFrom').value;
-  const to2   = document.getElementById('filterTo').value;
   const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
-  const hariDiRange = new Set();
-  if (from2 && to2) {
-    const dd = new Date(from2); const ee = new Date(to2);
-    while (dd <= ee) { hariDiRange.add(dd.getDay()); dd.setDate(dd.getDate()+1); }
-  }
-
-  // Filter outstanding: tglTempo dalam 7 hari ke depan DAN harinya masuk filter
-  const relevant = outstanding.filter(r => {
+  // Ambil SEMUA outstanding (getOutstandingData tanpa filter tanggal)
+  // yang tglTempo-nya dalam 7 hari ke depan
+  const allOutstanding = allData.filter(r => {
+    if (r.keterangan !== 'TOP') return false;
+    if (r.status !== 'OUTSTANDING') return false;
     if (!r.tglTempo) return false;
     if (r.tglTempo < today || r.tglTempo > plus7) return false;
-    if (hariDiRange.size > 0 && hariDiRange.size < 7) {
-      return hariDiRange.has(r.tglTempo.getDay());
-    }
     return true;
   });
 
   // Group by tglTempo
   const byDay = {};
-  relevant.forEach(r => {
+  allOutstanding.forEach(r => {
     const dk = dateKey(r.tglTempo);
     if (!byDay[dk]) byDay[dk] = { tglTempo:r.tglTempo, total:0, outlets:new Set(), notaKeys:new Set(), rows:[] };
     const notaKey = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
@@ -1057,26 +1048,24 @@ function renderTable7Hari(outstanding) {
       </tr>`;
   }).join('');
 
-  // Store for drill down
   window._7hariData = Object.fromEntries(sorted);
 
-  // Render bar chart
+  // Bar chart
   const labels = sorted.map(([dk, d]) => {
     const sisaHari = Math.floor((d.tglTempo - today) / 86400000);
     return hariNames[d.tglTempo.getDay()] + (sisaHari===0?' (Hari ini)':sisaHari===1?' (Besok)':'');
   });
-  const vals = sorted.map(([,d]) => d.total);
-  renderChart7HariBar(labels, vals);
+  const vals   = sorted.map(([,d]) => d.total);
+  renderChart7HariBar(labels, vals, sorted);
 }
 
-function renderChart7HariBar(labels, vals) {
+function renderChart7HariBar(labels, vals, sorted) {
   destroyChart('chart7HariBar');
   if (!labels.length) return;
   const ctx = document.getElementById('chart7HariBar').getContext('2d');
-  const colors = vals.map((_, i) => {
-    const day = Object.values(window._7hariData||{})[i];
-    if (!day) return 'rgba(234,112,16,0.7)';
-    const sisa = Math.floor((day.tglTempo - new Date().setHours(0,0,0,0)) / 86400000);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const colors = (sorted||[]).map(([,d]) => {
+    const sisa = Math.floor((d.tglTempo - today) / 86400000);
     return sisa === 0 ? 'rgba(220,38,38,0.8)' : sisa === 1 ? 'rgba(234,112,16,0.8)' : sisa <= 3 ? 'rgba(202,138,4,0.75)' : 'rgba(26,107,60,0.7)';
   });
   charts['chart7HariBar'] = new Chart(ctx, {
@@ -1313,7 +1302,7 @@ function buildWAMessage() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
   msg += `💰 *Total tagihan: ${fmtFull(totalNominal)}*\n`;
   msg += `📊 ${rows.length} nota · ${new Set(rows.map(r=>r.nama)).size} outlet\n`;
-  msg += `\n_Pesan otomatis dari Finance HS AO Surabaya_`;
+  msg += `\n_Pesan otomatis dari Dashboard HS AO Surabaya_`;
 
   return msg;
 }
