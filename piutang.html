@@ -474,6 +474,121 @@ tbody tr:last-child td { border-bottom: none; }
         <div class="top-list" id="topOutletList"></div>
       </div>
     </div>
+
+    <!-- ==================== FASE 2 ==================== -->
+    <!-- DIVIDER -->
+    <div style="display:flex;align-items:center;gap:12px;margin:24px 0 16px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;padding:4px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px">Collection Analysis</div>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <!-- COLLECTION RATE KPI -->
+    <div class="kpi-row row-4" style="margin-bottom:12px">
+      <div class="kpi-card" style="--kpi-color:var(--green)">
+        <div class="kpi-icon" style="background:rgba(22,163,74,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="kpi-label" id="labelCR1">Collection Rate (Bayar ÷ JT by Hari)</div>
+        <div class="kpi-value" id="valCR1" style="color:var(--green)">—%</div>
+        <div class="kpi-sub" id="subCR1">—</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color:var(--cyan)">
+        <div class="kpi-icon" style="background:rgba(8,145,178,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="kpi-label">Collection Rate (Bayar ÷ Total Outstanding)</div>
+        <div class="kpi-value" id="valCR2" style="color:var(--cyan)">—%</div>
+        <div class="kpi-sub" id="subCR2">—</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color:var(--accent)">
+        <div class="kpi-icon" style="background:rgba(26,107,60,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg>
+        </div>
+        <div class="kpi-label">Total Terbayar (Periode)</div>
+        <div class="kpi-value md" id="valTotalBayar" style="font-size:14px;color:var(--accent)">—</div>
+        <div class="kpi-sub" id="subTotalBayar">—</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color:var(--red)">
+        <div class="kpi-icon" style="background:rgba(220,38,38,.08)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="kpi-label">Sisa Belum Tertagih (JT by Hari)</div>
+        <div class="kpi-value md" id="valSisaBelum" style="font-size:14px;color:var(--red)">—</div>
+        <div class="kpi-sub" id="subSisaBelum">—</div>
+      </div>
+    </div>
+
+    <!-- COLLECTION TREND -->
+    <div class="chart-card" style="margin-bottom:12px">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Collection Trend</div>
+          <div class="chart-sub">Tren pembayaran masuk (TAGIHAN) vs piutang outstanding per hari</div>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap" style="height:220px"><canvas id="chartCollectionTrend"></canvas></div>
+    </div>
+
+    <!-- BY SALESMAN + BY DEPO -->
+    <div class="chart-row col-2" style="margin-bottom:12px">
+      <!-- BY SALESMAN -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Piutang & Collection by Salesman</div>
+            <div class="chart-sub">Outstanding, JT by hari & collection rate per salesman</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Salesman</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Outstanding</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">JT by Hari</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Terbayar</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">CR%</th>
+            </tr></thead>
+            <tbody id="tableBySalesman"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BY DEPO -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Piutang & Collection by Depo</div>
+            <div class="chart-sub">Outstanding, JT by hari & collection rate per depo</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Depo</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Outstanding</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">JT by Hari</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Terbayar</th>
+              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">CR%</th>
+            </tr></thead>
+            <tbody id="tableByDepo"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAR CHARTS BY SALESMAN + DEPO -->
+    <div class="chart-row col-2" style="margin-bottom:12px">
+      <div class="chart-card">
+        <div class="chart-header"><div><div class="chart-title">Collection Rate by Salesman</div><div class="chart-sub">Persentase tertagih per salesman</div></div></div>
+        <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartCRSalesman"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div><div class="chart-title">Collection Rate by Depo</div><div class="chart-sub">Persentase tertagih per depo</div></div></div>
+        <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartCRDepo"></canvas></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -606,6 +721,7 @@ async function loadData() {
         tglTempo:   tglTempo,
         channel:    (row['CHANNEL']      || '').toString().trim().toUpperCase(),
         salesman:   (row['SALESMAN']     || '').toString().trim(),
+        depo:       (row['DEPO']         || '').toString().trim(),
         kodeOutlet: (row['KODE OUTLET']  || '').toString().trim(),
         namaOutlet: (row['NAMA OUTLET']  || '').toString().trim(),
         total,
@@ -805,6 +921,11 @@ function renderAll() {
   renderChartStatus(outstanding);
   renderChartTren(outstanding);
   renderTopOutlet(outstanding);
+  // Fase 2
+  renderCollectionRate(outstanding, jatuhTempoPeriode, pembayaran);
+  renderCollectionTrend();
+  renderBySalesman(outstanding, jatuhTempoPeriode, pembayaran);
+  renderByDepo(outstanding, jatuhTempoPeriode, pembayaran);
   updateSubtitle(outstanding, pembayaran);
 }
 
@@ -1263,6 +1384,192 @@ function renderTopOutlet(outstanding) {
   `).join('') : '<div class="empty-state">Tidak ada data piutang</div>';
 }
 
+// ==================== FASE 2: COLLECTION ANALYSIS ====================
+
+function renderCollectionRate(outstanding, jatuhTempoPeriode, pembayaran) {
+  const totalAR      = outstanding.reduce((s,r)=>s+r.total,0);
+  const totalJT      = jatuhTempoPeriode.reduce((s,r)=>s+r.total,0);
+  const totalBayar   = pembayaran.reduce((s,r)=>s+r.total,0);
+  const cr1          = totalJT > 0 ? (totalBayar/totalJT*100).toFixed(1) : 0;
+  const cr2          = totalAR > 0 ? (totalBayar/totalAR*100).toFixed(1) : 0;
+  const sisa         = Math.max(0, totalJT - totalBayar);
+
+  // Collection Rate 1: Bayar ÷ JT by Hari
+  const cr1Color = cr1 >= 80 ? 'var(--green)' : cr1 >= 50 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('valCR1').textContent   = cr1 + '%';
+  document.getElementById('valCR1').style.color   = cr1Color;
+  document.getElementById('subCR1').textContent   = `${fmtShort(totalBayar)} dari ${fmtShort(totalJT)} JT by hari`;
+
+  // Update label dengan info hari aktif
+  const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const from2 = document.getElementById('filterFrom').value;
+  const to2   = document.getElementById('filterTo').value;
+  let hariLabel = 'by Hari JT';
+  if (from2 && to2) {
+    const hariSet = new Set();
+    const dd = new Date(from2); const ee = new Date(to2);
+    while (dd <= ee) { hariSet.add(dd.getDay()); dd.setDate(dd.getDate()+1); }
+    if (hariSet.size < 7) hariLabel = [...hariSet].map(h=>hariNames[h]).join(', ');
+  }
+  document.getElementById('labelCR1').textContent = `CR (Bayar ÷ JT: ${hariLabel})`;
+
+  // Collection Rate 2: Bayar ÷ Total Outstanding
+  const cr2Color = cr2 >= 20 ? 'var(--cyan)' : cr2 >= 10 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('valCR2').textContent   = cr2 + '%';
+  document.getElementById('valCR2').style.color   = cr2Color;
+  document.getElementById('subCR2').textContent   = `${fmtShort(totalBayar)} dari ${fmtShort(totalAR)} total outstanding`;
+
+  // Total Terbayar
+  document.getElementById('valTotalBayar').textContent = fmtFull(totalBayar);
+  document.getElementById('subTotalBayar').textContent = `${pembayaran.length} transaksi TAGIHAN dalam periode`;
+
+  // Sisa Belum Tertagih
+  document.getElementById('valSisaBelum').textContent = fmtFull(sisa);
+  document.getElementById('subSisaBelum').textContent = `${fmtShort(totalJT)} JT by hari - ${fmtShort(totalBayar)} terbayar`;
+}
+
+function renderCollectionTrend() {
+  destroyChart('chartCollectionTrend');
+
+  // Ambil semua data TAGIHAN per hari (tanpa filter)
+  const byDayBayar = {};
+  allData.filter(r => r.keterangan === 'TAGIHAN').forEach(r => {
+    const dk = r.tanggal ? dateKey(r.tanggal) : '';
+    if (!dk) return;
+    byDayBayar[dk] = (byDayBayar[dk]||0) + r.total;
+  });
+
+  // Ambil outstanding per hari (by tglNota)
+  const byDayOutstanding = {};
+  allData.filter(r => r.keterangan === 'TOP' && r.status === 'OUTSTANDING').forEach(r => {
+    const dk = r.tglNota ? dateKey(r.tglNota) : '';
+    if (!dk) return;
+    byDayOutstanding[dk] = (byDayOutstanding[dk]||0) + r.total;
+  });
+
+  // Gabungkan semua tanggal, sort, ambil 30 hari terakhir
+  const allDates = [...new Set([...Object.keys(byDayBayar), ...Object.keys(byDayOutstanding)])].sort().slice(-30);
+
+  const labels  = allDates.map(dk => new Date(dk).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
+  const bayar   = allDates.map(dk => byDayBayar[dk]||0);
+  const osData  = allDates.map(dk => byDayOutstanding[dk]||0);
+
+  const ctx = document.getElementById('chartCollectionTrend').getContext('2d');
+  charts['chartCollectionTrend'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Pembayaran Masuk', data: bayar, borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.08)', tension: .35, fill: true, pointRadius: 3, pointBackgroundColor: '#16a34a' },
+      { label: 'Piutang Baru', data: osData, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.06)', tension: .35, fill: true, pointRadius: 3, pointBackgroundColor: '#dc2626' }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode:'index', intersect:false },
+      plugins: { legend: { position:'top', labels:{ boxWidth:10, font:{size:11} } }, tooltip: { callbacks: { label: ctx => ' '+fmtShort(ctx.parsed.y) } } },
+      scales: { x: { grid:{color:'#e0ece4'}, ticks:{font:{size:10}} }, y: { grid:{color:'#e0ece4'}, ticks:{callback:v=>fmtShort(v),font:{size:10}} } }
+    }
+  });
+}
+
+function renderBySalesman(outstanding, jatuhTempoPeriode, pembayaran) {
+  // Group outstanding by salesman
+  const bySales = {};
+  outstanding.forEach(r => {
+    if (!bySales[r.salesman]) bySales[r.salesman] = { outstanding:0, jt:0, bayar:0 };
+    bySales[r.salesman].outstanding += r.total;
+  });
+  // Group JT by salesman
+  jatuhTempoPeriode.forEach(r => {
+    if (!bySales[r.salesman]) bySales[r.salesman] = { outstanding:0, jt:0, bayar:0 };
+    bySales[r.salesman].jt += r.total;
+  });
+  // Group pembayaran by salesman
+  pembayaran.forEach(r => {
+    if (!bySales[r.salesman]) bySales[r.salesman] = { outstanding:0, jt:0, bayar:0 };
+    bySales[r.salesman].bayar += r.total;
+  });
+
+  const sorted = Object.entries(bySales).sort((a,b)=>b[1].outstanding-a[1].outstanding);
+  const tdS = 'padding:9px 10px;border-bottom:1px solid var(--border);';
+
+  document.getElementById('tableBySalesman').innerHTML = sorted.map(([name, v]) => {
+    const cr  = v.jt > 0 ? (v.bayar/v.jt*100).toFixed(1) : 0;
+    const crColor = cr >= 80 ? 'var(--green)' : cr >= 50 ? 'var(--yellow)' : cr > 0 ? 'var(--red)' : 'var(--text3)';
+    return `<tr onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+      <td style="${tdS}font-weight:600">${name}</td>
+      <td style="${tdS}text-align:right;color:var(--red)">${fmtShort(v.outstanding)}</td>
+      <td style="${tdS}text-align:right;color:var(--orange)">${fmtShort(v.jt)}</td>
+      <td style="${tdS}text-align:right;color:var(--green)">${fmtShort(v.bayar)}</td>
+      <td style="${tdS}text-align:right;font-weight:700;color:${crColor}">${cr}%</td>
+    </tr>`;
+  }).join('');
+
+  // Bar chart CR by salesman
+  destroyChart('chartCRSalesman');
+  const ctx = document.getElementById('chartCRSalesman').getContext('2d');
+  const crVals = sorted.map(([,v]) => v.jt > 0 ? parseFloat((v.bayar/v.jt*100).toFixed(1)) : 0);
+  const crColors = crVals.map(v => v >= 80 ? 'rgba(22,163,74,0.8)' : v >= 50 ? 'rgba(202,138,4,0.8)' : v > 0 ? 'rgba(220,38,38,0.8)' : 'rgba(200,200,200,0.5)');
+  charts['chartCRSalesman'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: sorted.map(([n])=>n), datasets: [{ data: crVals, backgroundColor: crColors, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+ctx.parsed.y+'%' } } },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:10}} },
+        y: { max: 100, grid:{color:'#e0ece4'}, ticks:{ callback: v=>v+'%', font:{size:10} } }
+      }
+    }
+  });
+}
+
+function renderByDepo(outstanding, jatuhTempoPeriode, pembayaran) {
+  const byDepo = {};
+  outstanding.forEach(r => {
+    const d = r.depo || 'Tidak Diketahui';
+    if (!byDepo[d]) byDepo[d] = { outstanding:0, jt:0, bayar:0 };
+    byDepo[d].outstanding += r.total;
+  });
+  jatuhTempoPeriode.forEach(r => {
+    const d = r.depo || 'Tidak Diketahui';
+    if (!byDepo[d]) byDepo[d] = { outstanding:0, jt:0, bayar:0 };
+    byDepo[d].jt += r.total;
+  });
+  pembayaran.forEach(r => {
+    const d = r.depo || 'Tidak Diketahui';
+    if (!byDepo[d]) byDepo[d] = { outstanding:0, jt:0, bayar:0 };
+    byDepo[d].bayar += r.total;
+  });
+
+  const sorted = Object.entries(byDepo).sort((a,b)=>b[1].outstanding-a[1].outstanding);
+  const tdS = 'padding:9px 10px;border-bottom:1px solid var(--border);';
+  const depoColors = ['rgba(26,107,60,0.8)','rgba(147,51,234,0.8)','rgba(8,145,178,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)'];
+
+  document.getElementById('tableByDepo').innerHTML = sorted.map(([name, v], i) => {
+    const cr = v.jt > 0 ? (v.bayar/v.jt*100).toFixed(1) : 0;
+    const crColor = cr >= 80 ? 'var(--green)' : cr >= 50 ? 'var(--yellow)' : cr > 0 ? 'var(--red)' : 'var(--text3)';
+    return `<tr onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+      <td style="${tdS}font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${depoColors[i%depoColors.length]};margin-right:6px"></span>${name}</td>
+      <td style="${tdS}text-align:right;color:var(--red)">${fmtShort(v.outstanding)}</td>
+      <td style="${tdS}text-align:right;color:var(--orange)">${fmtShort(v.jt)}</td>
+      <td style="${tdS}text-align:right;color:var(--green)">${fmtShort(v.bayar)}</td>
+      <td style="${tdS}text-align:right;font-weight:700;color:${crColor}">${cr}%</td>
+    </tr>`;
+  }).join('');
+
+  // Bar chart CR by depo
+  destroyChart('chartCRDepo');
+  const ctx = document.getElementById('chartCRDepo').getContext('2d');
+  const crVals = sorted.map(([,v]) => v.jt > 0 ? parseFloat((v.bayar/v.jt*100).toFixed(1)) : 0);
+  charts['chartCRDepo'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: sorted.map(([n])=>n), datasets: [{ data: crVals, backgroundColor: depoColors.slice(0,sorted.length), borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+ctx.parsed.y+'%' } } },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:10}} },
+        y: { max: 100, grid:{color:'#e0ece4'}, ticks:{ callback: v=>v+'%', font:{size:10} } }
+      }
+    }
+  });
+}
+
 // ==================== WHATSAPP ====================
 function buildWAMessage() {
   // Pesan berdasarkan tabel jatuh tempo periode (selaras KPI Card 2)
@@ -1321,7 +1628,7 @@ function buildWAMessage() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
   msg += `💰 *Total tagihan: ${fmtFull(totalNominal)}*\n`;
   msg += `📊 ${rows.length} nota · ${new Set(rows.map(r=>r.nama)).size} outlet\n`;
-  msg += `\n_Pesan otomatis dari Dashboard HS AO Surabaya_`;
+  msg += `\n_Pesan otomatis dari Finance HS AO Surabaya_`;
 
   return msg;
 }
