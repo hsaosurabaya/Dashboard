@@ -1153,7 +1153,7 @@ function buildWAMessage(){
 🏢 HS AO Surabaya
 📅 ${tglHariIni}
 `;
-  msg+=`━━━━━━━━━━━━━━━━━━━━━━
+  msg+=`------------------------
 
 `;
   const lewat=rows.filter(r=>r.isJatuhTempo), akan=rows.filter(r=>!r.isJatuhTempo);
@@ -1167,7 +1167,7 @@ function buildWAMessage(){
    PIC: ${o.salesman} | Tempo: ${fmtDate(o.tglTempo)} | *${fmtFull(o.total)}*
 `; }); msg+='
 '; }
-  msg+=`━━━━━━━━━━━━━━━━━━━━━━
+  msg+=`------------------------
 💰 *Total: ${fmtFull(totalNominal)}*
 _Pesan otomatis dari Dashboard HS AO Surabaya_`;
   return msg;
