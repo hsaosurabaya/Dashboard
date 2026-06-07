@@ -1140,42 +1140,110 @@ function updateSubtitle(outstanding,pembayaran){
 }
 
 // ==================== WHATSAPP ====================
-function buildWAMessage(){
-  const data=getPiutangJatuhTempoPeriode();
-  const {from,to}=getFilter();
-  const fmtD=v=>v?new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'—';
-  const grouped={};
-  data.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); if(!grouped[k]) grouped[k]={nama:r.namaOutlet,salesman:r.salesman,total:0,aging:r.aging,tglTempo:r.tglTempo,isJatuhTempo:r.isJatuhTempo}; grouped[k].total+=r.total; });
-  const rows=Object.values(grouped).sort((a,b)=>a.isJatuhTempo===b.isJatuhTempo?b.total-a.total:a.isJatuhTempo?-1:1);
-  const totalNominal=rows.reduce((s,r)=>s+r.total,0);
-  const tglHariIni=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-  let msg=`🔔 *REMINDER PENAGIHAN PIUTANG*
+function buildWAMessage() {
+  const data = getPiutangJatuhTempoPeriode();
+  const grouped = {};
+  
+  data.forEach(r => {
+    const k = (r.kodeOutlet || r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
+    if (!grouped[k]) {
+      grouped[k] = {
+        nama: r.namaOutlet,
+        salesman: r.salesman,
+        total: 0,
+        aging: r.aging,
+        tglTempo: r.tglTempo,
+        isJatuhTempo: r.isJatuhTempo
+      };
+    }
+    grouped[k].total += r.total;
+  });
+  
+  const rows = Object.values(grouped).sort((a, b) => {
+    if (a.isJatuhTempo === b.isJatuhTempo) return b.total - a.total;
+    return a.isJatuhTempo ? -1 : 1;
+  });
+  
+  const totalNominal = rows.reduce((s, r) => s + r.total, 0);
+  const tglHariIni = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+  
+  let msg = `🔔 *REMINDER PENAGIHAN PIUTANG*
 🏢 HS AO Surabaya
 📅 ${tglHariIni}
-`;
-  msg+=`------------------------
+------------------------
 
 `;
-  const lewat=rows.filter(r=>r.isJatuhTempo), akan=rows.filter(r=>!r.isJatuhTempo);
-  if(lewat.length){ msg+=`🔴 *LEWAT TEMPO (${lewat.length} nota)*
-`; lewat.forEach((o,i)=>{ msg+=`${i+1}. *${o.nama}*
-   PIC: ${o.salesman} | +${o.aging} hari | *${fmtFull(o.total)}*
-`; }); msg+='
-'; }
-  if(akan.length){ msg+=`⚠️ *AKAN JT (${akan.length} nota)*
-`; akan.forEach((o,i)=>{ msg+=`${i+1}. *${o.nama}*
-   PIC: ${o.salesman} | Tempo: ${fmtDate(o.tglTempo)} | *${fmtFull(o.total)}*
-`; }); msg+='
-'; }
-  msg+=`------------------------
+  
+  const lewat = rows.filter(r => r.isJatuhTempo);
+  const akan = rows.filter(r => !r.isJatuhTempo);
+  
+  if (lewat.length) {
+    msg += `🔴 *LEWAT TEMPO (${lewat.length} nota)*\n`;
+    lewat.forEach((o, i) => {
+      msg += `${i+1}. *${o.nama}*\n   PIC: ${o.salesman} | +${o.aging} hari | *${fmtFull(o.total)}*\n`;
+    });
+    msg += '\n';
+  }
+  
+  if (akan.length) {
+    msg += `⚠️ *AKAN JT (${akan.length} nota)*\n`;
+    akan.forEach((o, i) => {
+      msg += `${i+1}. *${o.nama}*\n   PIC: ${o.salesman} | Tempo: ${fmtDate(o.tglTempo)} | *${fmtFull(o.total)}*\n`;
+    });
+    msg += '\n';
+  }
+  
+  msg += `------------------------
 💰 *Total: ${fmtFull(totalNominal)}*
 _Pesan otomatis dari Dashboard HS AO Surabaya_`;
+  
   return msg;
 }
-function openWAModal(){ const msg=buildWAMessage(); document.getElementById('waPreviewText').textContent=msg; document.getElementById('waModalSubtitle').textContent=document.getElementById('jatuhTempoCount').textContent+' nota'; const btn=document.getElementById('waBtnCopy'); btn.innerHTML='<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan'; btn.classList.remove('copied'); document.getElementById('waModalOverlay').classList.add('active'); }
-function copyWAMessage(){ const msg=buildWAMessage(); const btn=document.getElementById('waBtnCopy'); navigator.clipboard.writeText(msg).then(()=>{ btn.innerHTML='✓ Tersalin!'; btn.classList.add('copied'); setTimeout(()=>{ btn.innerHTML='Copy Pesan'; btn.classList.remove('copied'); },2500); }).catch(()=>{ const ta=document.createElement('textarea'); ta.value=msg; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); btn.innerHTML='✓ Tersalin!'; btn.classList.add('copied'); setTimeout(()=>{ btn.innerHTML='Copy Pesan'; btn.classList.remove('copied'); },2500); }); }
-function openWAWeb(){ window.open('https://web.whatsapp.com/send?text='+encodeURIComponent(buildWAMessage()),'_blank'); }
-function closeWAModal(){ document.getElementById('waModalOverlay').classList.remove('active'); }
+function openWAModal() {
+  const msg = buildWAMessage();
+  document.getElementById('waPreviewText').textContent = msg;
+  document.getElementById('waModalSubtitle').textContent = document.getElementById('jatuhTempoCount').textContent + ' nota';
+  const btn = document.getElementById('waBtnCopy');
+  btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan';
+  btn.classList.remove('copied');
+  document.getElementById('waModalOverlay').classList.add('active');
+}
+
+function copyWAMessage() {
+  const msg = buildWAMessage();
+  const btn = document.getElementById('waBtnCopy');
+  navigator.clipboard.writeText(msg).then(() => {
+    btn.innerHTML = '✓ Tersalin!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan';
+      btn.classList.remove('copied');
+    }, 2500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = msg;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.innerHTML = '✓ Tersalin!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+
+function openWAWeb() {
+  window.open('https://web.whatsapp.com/send?text=' + encodeURIComponent(buildWAMessage()), '_blank');
+}
+
+function closeWAModal() {
+  document.getElementById('waModalOverlay').classList.remove('active');
+}
 
 // ==================== EVENT LISTENERS ====================
 ['filterFrom','filterTo','filterChannel','filterSalesman','filterStatus'].forEach(id=>{
