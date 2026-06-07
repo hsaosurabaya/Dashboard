@@ -38,7 +38,7 @@ a { color: inherit; text-decoration: none; }
 /* SIDEBAR */
 .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: linear-gradient(175deg, var(--sidebar-grad-top) 0%, var(--sidebar-grad-mid) 50%, var(--sidebar-grad-bot) 100%); z-index: 100; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(10,46,26,0.25); }
 .sidebar-logo { padding: 20px 10px 25px; display: flex; justify-content: center; align-items: center; border-bottom: none; }
-.sidebar-brand-logo { width: 250px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); transition: transform .2s; }
+.sidebar-brand-logo { width: 180px; height: auto; display: block; margin: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,.25)); transition: transform .2s; }
 .sidebar-brand-logo:hover { transform: scale(1.03); }
 .sidebar-section { padding-top: 10px; padding: 10px 10px 4px; }
 .sidebar-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: .1em; padding: 0 8px; margin-bottom: 4px; }
@@ -182,31 +182,51 @@ tbody tr:last-child td { border-bottom: none; }
   .chart-row.col-2 { grid-template-columns: 1fr; }
   .kpi-row .kpi-card { min-width: 160px; }
 }
-/* 7 HARI TABLE */
-.row-7hari { cursor: pointer; transition: background .15s; }
-.row-7hari:hover { background: #edf7f1 !important; }
-.row-7hari td { padding: 10px 12px; }
-.day-badge { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
-.expand-icon { color: var(--text3); font-size: 14px; transition: transform .2s; }
 
-.wa-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1200; display: none; align-items: center; justify-content: center; }
-.wa-modal-overlay.active { display: flex; }
-.wa-modal { background: var(--surface); border-radius: 14px; width: 92%; max-width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
-.wa-modal-header { background: #25d366; padding: 16px 20px; display: flex; align-items: center; gap: 10px; }
-.wa-modal-header svg { flex-shrink: 0; }
-.wa-modal-header-text h3 { font-size: 15px; font-weight: 700; color: #fff; }
-.wa-modal-header-text p { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
-.wa-modal-body { padding: 16px 20px; }
-.wa-preview { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 12px; color: var(--text); line-height: 1.6; max-height: 220px; overflow-y: auto; white-space: pre-wrap; font-family: inherit; }
-.wa-hint { font-size: 11px; color: var(--text3); margin-bottom: 14px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.5; }
-.wa-modal-footer { display: flex; gap: 8px; padding: 0 20px 16px; }
-.wa-btn-cancel { padding: 9px 14px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; font-family: inherit; transition: all .15s; }
-.wa-btn-cancel:hover { border-color: var(--border2); }
-.wa-btn-copy { flex: 1; padding: 9px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
-.wa-btn-copy:hover { background: #edf7f1; border-color: var(--accent); }
-.wa-btn-copy.copied { background: #edf7f1; border-color: var(--green); color: var(--green); }
-.wa-btn-open { flex: 1; padding: 9px; background: #25d366; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
-.wa-btn-open:hover { background: #1db954; }
+/* KPI MODAL */
+.kpi-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:1100;display:none;align-items:center;justify-content:center}
+.kpi-modal-overlay.active{display:flex}
+.kpi-modal{background:var(--surface);border-radius:14px;width:92%;max-width:620px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden}
+.kpi-modal-hdr{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:linear-gradient(135deg,#0a2e1a,#1a6b3c)}
+.kpi-modal-hdr h3{font-size:15px;font-weight:700;color:#fff}
+.kpi-modal-hdr p{font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px}
+.kpi-modal-x{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;width:28px;height:28px;border-radius:7px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.kpi-modal-body{flex:1;overflow-y:auto;padding:16px 20px}
+.ch-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.ch-card{background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid var(--border)}
+.ch-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.ch-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--text)}
+.ch-row span:last-child{font-weight:600}
+.aging-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.aging-card{background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid var(--border)}
+.aging-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.aging-val{font-size:16px;font-weight:800;font-family:'Sora',sans-serif;margin-bottom:2px}
+.aging-sub{font-size:11px;color:var(--text2)}
+.pbar-wrap{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-top:3px}
+.pbar-fill{height:100%;border-radius:3px;background:var(--green);transition:width .5s}
+.outlet-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);margin-bottom:6px}
+.outlet-row:hover{background:#edf7f1;border-color:var(--border2)}
+.outlet-name{flex:1;font-size:12px;font-weight:600;color:var(--text)}
+.outlet-sub{font-size:10px;color:var(--text2)}
+.outlet-val{font-size:12px;font-weight:700;font-family:'Sora',sans-serif;flex-shrink:0}
+.badge-lunas2{background:rgba(22,163,74,0.1);color:var(--green);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.badge-outstanding2{background:rgba(234,112,16,0.1);color:var(--orange);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+/* WA MODAL */
+.wa-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:1200;display:none;align-items:center;justify-content:center}
+.wa-modal-overlay.active{display:flex}
+.wa-modal{background:var(--surface);border-radius:14px;width:92%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden}
+.wa-modal-header{background:#25d366;padding:16px 20px;display:flex;align-items:center;gap:10px}
+.wa-modal-header-text h3{font-size:15px;font-weight:700;color:#fff}
+.wa-modal-header-text p{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px}
+.wa-modal-body{padding:16px 20px}
+.wa-preview{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text);line-height:1.6;max-height:220px;overflow-y:auto;white-space:pre-wrap;font-family:inherit}
+.wa-hint{font-size:11px;color:var(--text3);margin-bottom:14px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.wa-modal-footer{display:flex;gap:8px;padding:0 20px 16px}
+.wa-btn-cancel{padding:9px 14px;border:1px solid var(--border);background:var(--surface);border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s}
+.wa-btn-copy{flex:1;padding:9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.wa-btn-copy.copied{background:#edf7f1;border-color:var(--green);color:var(--green)}
+.wa-btn-open{flex:1;padding:9px;background:#25d366;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.wa-btn-open:hover{background:#1db954}
 </style>
 </head>
 <body>
@@ -261,33 +281,96 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
 </div>
 
-<!-- WHATSAPP MODAL -->
+
+<!-- KPI MODAL: TOTAL PIUTANG BREAKDOWN -->
+<div id="modalPiutang" class="kpi-modal-overlay" onclick="if(event.target===this)closeKpiModal('modalPiutang')">
+  <div class="kpi-modal">
+    <div class="kpi-modal-hdr">
+      <div><h3>Rincian Total Piutang Outstanding</h3><p>Distribusi per channel & outlet</p></div>
+      <button class="kpi-modal-x" onclick="closeKpiModal('modalPiutang')">✕</button>
+    </div>
+    <div class="kpi-modal-body" id="bodyModalPiutang"></div>
+  </div>
+</div>
+
+<!-- KPI MODAL: COLLECTION ACHIEVEMENT -->
+<div id="modalCA" class="kpi-modal-overlay" onclick="if(event.target===this)closeKpiModal('modalCA')">
+  <div class="kpi-modal">
+    <div class="kpi-modal-hdr" style="background:linear-gradient(135deg,#1a3a1a,#16a34a)">
+      <div><h3 id="modalCATitle">Collection Achievement</h3><p id="modalCASub">Outlet overdue & progress penagihan</p></div>
+      <button class="kpi-modal-x" onclick="closeKpiModal('modalCA')">✕</button>
+    </div>
+    <div class="kpi-modal-body" id="bodyModalCA"></div>
+  </div>
+</div>
+
+<!-- KPI MODAL: AGING DETAIL -->
+<div id="modalAging" class="kpi-modal-overlay" onclick="if(event.target===this)closeKpiModal('modalAging')">
+  <div class="kpi-modal">
+    <div class="kpi-modal-hdr" style="background:linear-gradient(135deg,#1a1a00,#ca8a04)">
+      <div><h3>Aging Piutang Outstanding</h3><p>Distribusi umur piutang per bucket</p></div>
+      <button class="kpi-modal-x" onclick="closeKpiModal('modalAging')">✕</button>
+    </div>
+    <div class="kpi-modal-body" id="bodyModalAging"></div>
+  </div>
+</div>
+
+<!-- KPI MODAL: SALESMAN DRILL DOWN -->
+<div id="modalSalesman" class="kpi-modal-overlay" onclick="if(event.target===this)closeKpiModal('modalSalesman')">
+  <div class="kpi-modal" style="max-width:750px">
+    <div class="kpi-modal-hdr">
+      <div><h3 id="modalSalesmanTitle">Detail Outlet Salesman</h3><p id="modalSalesmanSub">Progress penagihan hari ini</p></div>
+      <button class="kpi-modal-x" onclick="closeKpiModal('modalSalesman')">✕</button>
+    </div>
+    <div class="kpi-modal-body" id="bodyModalSalesman"></div>
+  </div>
+</div>
+
+<!-- WA MODAL -->
 <div id="waModalOverlay" class="wa-modal-overlay" onclick="if(event.target===this)closeWAModal()">
   <div class="wa-modal">
     <div class="wa-modal-header">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      <div class="wa-modal-header-text">
-        <h3>Kirim Reminder ke WhatsApp</h3>
-        <p id="waModalSubtitle">Preview pesan reminder</p>
-      </div>
+      <div class="wa-modal-header-text"><h3>Kirim Reminder ke WhatsApp</h3><p id="waModalSubtitle">Preview pesan reminder</p></div>
     </div>
     <div class="wa-modal-body">
       <div class="wa-preview" id="waPreviewText"></div>
-      <div class="wa-hint">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-        Copy pesan lalu paste ke grup WhatsApp yang kamu inginkan. Atau klik "Buka WhatsApp" untuk langsung masuk ke WA Web — pilih grup tujuan di sana.
-      </div>
+      <div class="wa-hint"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Copy pesan lalu paste ke grup WA, atau klik "Buka WhatsApp" untuk pilih grup di sana.</div>
     </div>
     <div class="wa-modal-footer">
       <button class="wa-btn-cancel" onclick="closeWAModal()">Tutup</button>
-      <button class="wa-btn-copy" id="waBtnCopy" onclick="copyWAMessage()">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-        Copy Pesan
-      </button>
-      <button class="wa-btn-open" onclick="openWAWeb()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Buka WhatsApp
-      </button>
+      <button class="wa-btn-copy" id="waBtnCopy" onclick="copyWAMessage()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy Pesan</button>
+      <button class="wa-btn-open" onclick="openWAWeb()"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Buka WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRILL DOWN 7 HARI -->
+<div id="drillDownModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:1100;align-items:center;justify-content:center" onclick="if(event.target===this)closeDrillDown()">
+  <div style="background:var(--surface);border-radius:14px;width:95%;max-width:900px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden">
+    <div style="background:linear-gradient(135deg,#0a2e1a,#1a6b3c);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div><div style="font-size:15px;font-weight:700;color:#fff" id="drillDownTitle">Detail Outlet</div><div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px" id="drillDownSub">—</div></div>
+      <button onclick="closeDrillDown()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;width:30px;height:30px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 20px">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
+        <colgroup><col style="width:36px"><col style="width:110px"><col style="width:auto"><col style="width:72px"><col style="width:100px"><col style="width:130px"><col style="width:110px"><col style="width:70px"></colgroup>
+        <thead><tr>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">#</th>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Kode</th>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Nama Outlet</th>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Channel</th>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Salesman</th>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Nominal</th>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Tgl Nota</th>
+          <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Aging</th>
+        </tr></thead>
+        <tbody id="drillDownBody"></tbody>
+      </table>
+    </div>
+    <div style="padding:12px 20px;background:var(--surface2);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div style="font-size:11px;color:var(--text3)" id="drillDownInfo">—</div>
+      <div style="font-size:13px;font-weight:700;color:var(--orange)" id="drillDownTotal">—</div>
     </div>
   </div>
 </div>
@@ -328,8 +411,51 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
 
   <div class="content">
+    <!-- KPI GRID - rendered by JS -->
     <div class="kpi-grid" id="kpiGrid"></div>
-    <!-- SECTION 1: TABEL DETAIL PIUTANG JATUH TEMPO (by tglTempo dalam periode) -->
+
+    <!-- COLLECTION ANALYSIS (dipindah ke atas) -->
+    <div style="display:flex;align-items:center;gap:12px;margin:4px 0 12px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;padding:4px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px">Collection Analysis</div>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <!-- BY SALESMAN + BY DEPO -->
+    <div class="chart-row col-2" style="margin-bottom:12px">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div><div class="chart-title">Collection by Salesman</div><div class="chart-sub">Outstanding · JT by Hari · Terbayar · CR% — klik baris untuk detail outlet</div></div>
+        </div>
+        <div class="table-wrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Salesman</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Outstanding</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">JT by Hari</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Terbayar</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">CR%</th>
+          </tr></thead>
+          <tbody id="tableBySalesman"></tbody>
+        </table></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div><div class="chart-title">Collection by Depo</div><div class="chart-sub">Outstanding · JT by Hari · Terbayar · CR%</div></div>
+        </div>
+        <div class="table-wrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Depo</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Outstanding</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">JT by Hari</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Terbayar</th>
+            <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">CR%</th>
+          </tr></thead>
+          <tbody id="tableByDepo"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- SECTION 1: TABEL DETAIL PIUTANG JATUH TEMPO -->
     <div class="chart-card" style="margin-bottom:12px" id="jatuhTempoSection">
       <div class="chart-header">
         <div>
@@ -338,7 +464,7 @@ tbody tr:last-child td { border-bottom: none; }
             <span style="color:var(--orange)">Detail Piutang Jatuh Tempo</span>
             <span class="alert-count" id="jatuhTempoCount" style="background:var(--orange);font-size:10px;padding:2px 8px;border-radius:20px;color:#fff;font-weight:700">0</span>
           </div>
-          <div class="chart-sub" id="subJatuhTempo">Filter by tanggal jatuh tempo dalam periode · sesuai KPI Card 2</div>
+          <div class="chart-sub" id="subJatuhTempo">Filter by hari jatuh tempo dalam periode</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <div class="channel-tabs" style="margin-bottom:0">
@@ -353,14 +479,11 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
       </div>
       <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th>
-            <th class="right">Nominal</th><th>Tgl Nota</th><th>Jatuh Tempo</th>
-            <th class="right">Aging</th><th>Status</th>
-          </tr></thead>
-          <tbody id="tableJatuhTempo"></tbody>
-        </table>
+        <table><thead><tr>
+          <th>#</th><th>Kode Outlet</th><th>Nama Outlet</th><th>Channel</th><th>Salesman</th>
+          <th class="right">Nominal</th><th>Tgl Nota</th><th>Jatuh Tempo</th>
+          <th class="right">Aging</th><th>Status</th>
+        </tr></thead><tbody id="tableJatuhTempo"></tbody></table>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
         <div style="font-size:11px;color:var(--text3)" id="jatuhTempoInfo">—</div>
@@ -381,211 +504,31 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
         <div class="table-wrap">
-          <table id="table7Hari">
-            <thead><tr>
-              <th>Tanggal Jatuh Tempo</th>
-              <th class="right">Nominal</th>
-              <th class="right">Outlet</th>
-              <th class="right">Nota</th>
-              <th style="width:30px"></th>
-            </tr></thead>
-            <tbody id="tbody7Hari"></tbody>
-          </table>
+          <table><thead><tr>
+            <th>Tanggal Jatuh Tempo</th>
+            <th class="right">Nominal</th><th class="right">Outlet</th><th class="right">Nota</th>
+            <th style="width:30px"></th>
+          </tr></thead><tbody id="tbody7Hari"></tbody></table>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Beban Penagihan per Hari</div>
-            <div class="chart-sub">Nominal outstanding by hari jatuh tempo</div>
-          </div>
-        </div>
+        <div class="chart-header"><div><div class="chart-title">Beban Penagihan per Hari</div><div class="chart-sub">Nominal outstanding by hari jatuh tempo</div></div></div>
         <div class="chart-canvas-wrap" style="height:220px"><canvas id="chart7HariBar"></canvas></div>
       </div>
     </div>
 
-    <!-- DRILL DOWN MODAL: DETAIL PER HARI -->
-    <div id="drillDownModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:1100;align-items:center;justify-content:center" onclick="if(event.target===this)closeDrillDown()">
-      <div style="background:var(--surface);border-radius:14px;width:95%;max-width:900px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden">
-        <div style="background:linear-gradient(135deg,#0a2e1a,#1a6b3c);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-          <div>
-            <div style="font-size:15px;font-weight:700;color:#fff" id="drillDownTitle">Detail Outlet</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px" id="drillDownSub">—</div>
-          </div>
-          <button onclick="closeDrillDown()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;width:30px;height:30px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
-        </div>
-        <div style="flex:1;overflow-y:auto;padding:16px 20px">
-          <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
-            <colgroup>
-              <col style="width:36px">
-              <col style="width:110px">
-              <col style="width:auto">
-              <col style="width:72px">
-              <col style="width:100px">
-              <col style="width:130px">
-              <col style="width:110px">
-              <col style="width:70px">
-            </colgroup>
-            <thead>
-              <tr>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">#</th>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Kode</th>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Nama Outlet</th>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Channel</th>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Salesman</th>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Nominal</th>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Tgl Nota</th>
-                <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Aging</th>
-              </tr>
-            </thead>
-            <tbody id="drillDownBody"></tbody>
-          </table>
-        </div>
-        <div style="padding:12px 20px;background:var(--surface2);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-          <div style="font-size:11px;color:var(--text3)" id="drillDownInfo">—</div>
-          <div style="font-size:13px;font-weight:700;color:var(--orange)" id="drillDownTotal">—</div>
-        </div>
-      </div>
-    </div>
-
-        <div class="chart-row col-3">
+    <!-- COMBINED CHART: PENJUALAN VS PIUTANG VS PENAGIHAN -->
+    <div class="chart-row col-2-1" style="margin-bottom:12px">
       <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Distribusi Channel</div><div class="chart-sub">Grosir vs Agen</div></div></div>
-        <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartChannel"></canvas></div>
-        <div class="legend-wrap" id="legendChannel"></div>
+        <div class="chart-header"><div>
+          <div class="chart-title">Tren Penjualan vs Piutang vs Penagihan</div>
+          <div class="chart-sub">Nominal harian berdasarkan tanggal transaksi · 30 hari terakhir</div>
+        </div></div>
+        <div class="chart-canvas-wrap" style="height:220px"><canvas id="chartCombined"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Aging Piutang</div><div class="chart-sub">Distribusi umur piutang</div></div></div>
-        <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartAging"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Status Piutang</div><div class="chart-sub">Lunas vs Belum Lunas</div></div></div>
-        <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartStatus"></canvas></div>
-        <div class="legend-wrap" id="legendStatus"></div>
-      </div>
-    </div>
-    <div class="chart-row col-2-1">
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Tren Piutang Harian</div><div class="chart-sub">Nominal piutang outstanding per tanggal nota</div></div></div>
-        <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartTren"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Top 10 Outlet</div><div class="chart-sub">Terbesar sisa AR</div></div></div>
+        <div class="chart-header"><div><div class="chart-title">Top 10 Outlet</div><div class="chart-sub">Terbesar outstanding</div></div></div>
         <div class="top-list" id="topOutletList"></div>
-      </div>
-    </div>
-
-    <!-- ==================== FASE 2 ==================== -->
-    <!-- DIVIDER -->
-    <div style="display:flex;align-items:center;gap:12px;margin:24px 0 16px">
-      <div style="flex:1;height:1px;background:var(--border)"></div>
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;padding:4px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px">Collection Analysis</div>
-      <div style="flex:1;height:1px;background:var(--border)"></div>
-    </div>
-
-    <!-- COLLECTION RATE KPI -->
-    <div class="kpi-row row-4" style="margin-bottom:12px">
-      <div class="kpi-card" style="--kpi-color:var(--green)">
-        <div class="kpi-icon" style="background:rgba(22,163,74,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <div class="kpi-label" id="labelCR1">Collection Rate (Bayar ÷ JT by Hari)</div>
-        <div class="kpi-value" id="valCR1" style="color:var(--green)">—%</div>
-        <div class="kpi-sub" id="subCR1">—</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--cyan)">
-        <div class="kpi-icon" style="background:rgba(8,145,178,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div class="kpi-label">Collection Rate (Bayar ÷ Total Outstanding)</div>
-        <div class="kpi-value" id="valCR2" style="color:var(--cyan)">—%</div>
-        <div class="kpi-sub" id="subCR2">—</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--accent)">
-        <div class="kpi-icon" style="background:rgba(26,107,60,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg>
-        </div>
-        <div class="kpi-label">Total Terbayar (Periode)</div>
-        <div class="kpi-value md" id="valTotalBayar" style="font-size:14px;color:var(--accent)">—</div>
-        <div class="kpi-sub" id="subTotalBayar">—</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--red)">
-        <div class="kpi-icon" style="background:rgba(220,38,38,.08)">
-          <svg fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="kpi-label">Sisa Belum Tertagih (JT by Hari)</div>
-        <div class="kpi-value md" id="valSisaBelum" style="font-size:14px;color:var(--red)">—</div>
-        <div class="kpi-sub" id="subSisaBelum">—</div>
-      </div>
-    </div>
-
-    <!-- COLLECTION TREND -->
-    <div class="chart-card" style="margin-bottom:12px">
-      <div class="chart-header">
-        <div>
-          <div class="chart-title">Collection Trend</div>
-          <div class="chart-sub">Tren pembayaran masuk (TAGIHAN) vs piutang outstanding per hari</div>
-        </div>
-      </div>
-      <div class="chart-canvas-wrap" style="height:220px"><canvas id="chartCollectionTrend"></canvas></div>
-    </div>
-
-    <!-- BY SALESMAN + BY DEPO -->
-    <div class="chart-row col-2" style="margin-bottom:12px">
-      <!-- BY SALESMAN -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Piutang & Collection by Salesman</div>
-            <div class="chart-sub">Outstanding, JT by hari & collection rate per salesman</div>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
-            <thead><tr>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Salesman</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Outstanding</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">JT by Hari</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Terbayar</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">CR%</th>
-            </tr></thead>
-            <tbody id="tableBySalesman"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- BY DEPO -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Piutang & Collection by Depo</div>
-            <div class="chart-sub">Outstanding, JT by hari & collection rate per depo</div>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
-            <thead><tr>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)">Depo</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Outstanding</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">JT by Hari</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">Terbayar</th>
-              <th style="background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)">CR%</th>
-            </tr></thead>
-            <tbody id="tableByDepo"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- BAR CHARTS BY SALESMAN + DEPO -->
-    <div class="chart-row col-2" style="margin-bottom:12px">
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Collection Rate by Salesman</div><div class="chart-sub">Persentase tertagih per salesman</div></div></div>
-        <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartCRSalesman"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Collection Rate by Depo</div><div class="chart-sub">Persentase tertagih per depo</div></div></div>
-        <div class="chart-canvas-wrap" style="height:200px"><canvas id="chartCRDepo"></canvas></div>
       </div>
     </div>
 
@@ -593,7 +536,6 @@ tbody tr:last-child td { border-bottom: none; }
 </div>
 
 <script>
-// ==================== KONFIGURASI ====================
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=0&single=true&output=csv';
 
 let allData = [];
@@ -601,438 +543,236 @@ let activeChannelTab = 'ALL';
 let charts = {};
 
 // ==================== HELPERS ====================
+function fmtFull(n) { if(!n||isNaN(n)) return 'Rp 0'; return 'Rp '+Math.round(n).toLocaleString('id-ID'); }
 function fmtShort(n) {
-  if (!n || isNaN(n)) return 'Rp 0';
-  const abs = Math.abs(n);
-  if (abs >= 1e9) return 'Rp ' + (n/1e9).toFixed(1) + ' M';
-  if (abs >= 1e6) return 'Rp ' + (n/1e6).toFixed(1) + ' Jt';
-  if (abs >= 1e3) return 'Rp ' + (n/1e3).toFixed(0) + ' Rb';
-  return 'Rp ' + n.toLocaleString('id-ID');
+  if(!n||isNaN(n)) return 'Rp 0';
+  const a=Math.abs(n);
+  if(a>=1e9) return 'Rp '+(n/1e9).toFixed(1)+' M';
+  if(a>=1e6) return 'Rp '+(n/1e6).toFixed(1)+' Jt';
+  if(a>=1e3) return 'Rp '+(n/1e3).toFixed(0)+' Rb';
+  return 'Rp '+n.toLocaleString('id-ID');
 }
-function fmtFull(n) {
-  if (!n || isNaN(n)) return 'Rp 0';
-  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
-}
-function parseNum(s) {
-  if (!s || s === '') return 0;
-  let cleaned = s.toString().replace(/,/g, '');
-  let result = parseFloat(cleaned);
-  return isNaN(result) ? 0 : result;
-}
-function parseDate(s) {
-  if (!s) return null;
-  const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
-  const parts = s.toString().trim().split(/[\s\-\/]+/);
-  if (parts.length === 3) {
-    let d, m, y;
-    if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
-    else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
-    else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
-    if (!isNaN(d) && m!==undefined && !isNaN(y) && y>1900) return new Date(y,m,d);
+function parseNum(s){ if(!s) return 0; return parseFloat(String(s).replace(/[^\d.-]/g,''))||0; }
+function parseDate(s){
+  if(!s) return null;
+  const months={jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
+  const parts=s.trim().split(/[\s\-\/]+/);
+  if(parts.length===3){
+    let d,m,y;
+    if(isNaN(parts[1])){ d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
+    else if(isNaN(parts[0])){ m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
+    else{ y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
+    if(!isNaN(d)&&m!==undefined&&!isNaN(y)) return new Date(y,m,d);
   }
-  const dt = new Date(s);
-  return isNaN(dt.getTime()) ? null : dt;
+  const dt=new Date(s); return isNaN(dt)?null:dt;
 }
-function fmtDate(d) { return d ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) : '-'; }
-function dateKey(d) { return d ? d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') : ''; }
-function agingDays(tglNota) {
-  if (!tglNota) return 0;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const nota = new Date(tglNota); nota.setHours(0,0,0,0);
-  return Math.floor((today - nota) / 86400000);
-}
-function agingBucket(days) {
-  if (days <= 30) return '0–30 hari';
-  if (days <= 60) return '31–60 hari';
-  if (days <= 90) return '61–90 hari';
-  return '>90 hari';
-}
-function destroyChart(id) {
-  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
-}
+function dateKey(d){ if(!d) return ''; return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtDate(d){ if(!d) return '—'; return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+function agingBucket(days){ if(days<7) return '<7 hari'; if(days<14) return '7-14 hari'; if(days<30) return '14-30 hari'; return '>30 hari'; }
 
-// ==================== LOAD DATA (Gunakan PapaParse seperti index.html) ====================
-async function loadData() {
-  const btn = document.getElementById('btnRefresh');
+// ==================== LOAD DATA ====================
+async function loadData(){
+  const btn=document.getElementById('btnRefresh');
   btn.classList.add('loading');
   document.getElementById('loadingOverlay').classList.remove('hidden');
-
-  try {
-    const res = await fetch(CSV_URL + '&t=' + Date.now());
-    let text = await res.text();
-
-    // Hapus BOM dan karakter aneh di awal (sama persis dengan penjualan.html)
-    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-    text = text.replace(/^[, ]+/, '');
-
-    const parsed = Papa.parse(text, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: h => {
-        // Bersihkan header dari karakter aneh di depan
-        let clean = h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase();
-        return clean;
-      }
-    });
-
-    // Debug: tampilkan header yang terdeteksi
-    console.log('Headers detected:', parsed.meta.fields);
-
-    const today = new Date(); today.setHours(0,0,0,0);
-    allData = [];
-
-    for (const row of parsed.data) {
-      // Gunakan parseNum & parseDate inline persis seperti penjualan.html
-      const pNum = (val) => {
-        if (!val || val === '') return 0;
-        let cleaned = val.toString().trim().replace(/,/g, '').replace(/[^\d.-]/g, '');
-        let result = parseFloat(cleaned);
-        return isNaN(result) ? 0 : result;
-      };
-      const pDate = (s) => {
-        if (!s) return null;
-        const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
-        const parts = s.trim().split(/[\s\-\/]+/);
-        if (parts.length === 3) {
-          let d, m, y;
-          if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
-          else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
-          else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
-          if (!isNaN(d) && m !== undefined && !isNaN(y)) return new Date(y, m, d);
-        }
-        const dt = new Date(s);
-        return isNaN(dt) ? null : dt;
-      };
-
-      const ket = (row['KETERANGAN'] || '').toString().trim().toUpperCase();
-      if (!['TOP','TAGIHAN'].includes(ket)) continue;
-
-      const tglInput = pDate(row['TANGGAL']);
-      const tglNota  = pDate(row['TANGGAL NOTA AWAL']) || tglInput;
-      const tglTempo = pDate(row['TANGGAL TEMPO']);
-      const total    = pNum(row['TOTAL']);
-      const rawStatus= (row['STATUS'] || '').toString().trim().toUpperCase();
-      const aging    = tglNota ? Math.floor((today - tglNota) / 86400000) : 0;
-      const isJatuhTempo = ket === 'TOP' && tglTempo && tglTempo < today && rawStatus !== 'LUNAS';
-
+  try{
+    const res=await fetch(CSV_URL+'&t='+Date.now());
+    let text=await res.text();
+    if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
+    text=text.replace(/^[, ]+/,'');
+    const parsed=Papa.parse(text,{header:true,skipEmptyLines:true,transformHeader:h=>h.trim().replace(/^[^a-zA-Z]+/,'').toUpperCase()});
+    const today=new Date(); today.setHours(0,0,0,0);
+    allData=[];
+    for(const row of parsed.data){
+      const ket=(row['KETERANGAN']||'').toString().trim().toUpperCase();
+      if(!['TOP','TAGIHAN','CASH'].includes(ket)) continue;
+      const tglInput=parseDate(row['TANGGAL']);
+      const tglNota=parseDate(row['TANGGAL NOTA AWAL'])||tglInput;
+      const tglTempo=parseDate(row['TANGGAL TEMPO']);
+      const total=parseNum(row['TOTAL']);
+      const rawStatus=(row['STATUS']||'').toString().trim().toUpperCase();
+      const aging=tglNota?Math.floor((today-tglNota)/86400000):0;
+      const isJatuhTempo=ket==='TOP'&&tglTempo&&tglTempo<today&&rawStatus!=='LUNAS';
       allData.push({
-        tanggal:    tglInput,
-        tglNota:    tglNota,
-        tglTempo:   tglTempo,
-        channel:    (row['CHANNEL']      || '').toString().trim().toUpperCase(),
-        salesman:   (row['SALESMAN']     || '').toString().trim(),
-        depo:       (row['DEPO']         || '').toString().trim(),
-        kodeOutlet: (row['KODE OUTLET']  || '').toString().trim(),
-        namaOutlet: (row['NAMA OUTLET']  || '').toString().trim(),
-        total,
-        keterangan: ket,
-        status:     rawStatus,
-        aging,
-        isJatuhTempo,
-        key: (row['KEY'] || '').toString().trim(),
+        tanggal:tglInput, tglNota, tglTempo,
+        channel:(row['CHANNEL']||'').toString().trim().toUpperCase(),
+        salesman:(row['SALESMAN']||'').toString().trim(),
+        depo:(row['DEPO']||'').toString().trim(),
+        kodeOutlet:(row['KODE OUTLET']||'').toString().trim(),
+        namaOutlet:(row['NAMA OUTLET']||'').toString().trim(),
+        total, keterangan:ket, status:rawStatus, aging, isJatuhTempo,
       });
     }
-
-    console.log('Total rows loaded:', allData.length);
-    console.log('TOP rows:', allData.filter(r=>r.keterangan==='TOP').length);
-    console.log('TAGIHAN rows:', allData.filter(r=>r.keterangan==='TAGIHAN').length);
-    console.log('OUTSTANDING rows:', allData.filter(r=>r.keterangan==='TOP' && r.status==='OUTSTANDING').length);
-    if (allData.length > 0) console.log('Sample row:', allData[0]);
-
+    console.log('Loaded:',allData.length,'TOP:',allData.filter(r=>r.keterangan==='TOP').length);
     populateFilters();
+    setDefaultDates();
     renderAll();
-
-  } catch(e) {
-    console.error('Load error:', e);
-    alert('Gagal memuat data: ' + e.message);
-  } finally {
-    btn.classList.remove('loading');
-    document.getElementById('loadingOverlay').classList.add('hidden');
-  }
+  }catch(e){ console.error(e); alert('Gagal memuat data: '+e.message); }
+  finally{ btn.classList.remove('loading'); document.getElementById('loadingOverlay').classList.add('hidden'); }
 }
 
-function setDefaultDates() {
-  // Kosongkan filter tanggal by default → tampilkan semua piutang outstanding
-  document.getElementById('filterFrom').value = '';
-  document.getElementById('filterTo').value   = '';
+function populateFilters(){
+  const sales=[...new Set(allData.map(r=>r.salesman))].filter(Boolean).sort();
+  const sel=document.getElementById('filterSalesman');
+  sel.innerHTML='<option value="">Semua Salesman</option>';
+  sales.forEach(s=>sel.innerHTML+=`<option value="${s}">${s}</option>`);
 }
 
-function populateFilters() {
-  const sales = [...new Set(allData.map(r => r.salesman))].filter(Boolean).sort();
-  const sel = document.getElementById('filterSalesman');
-  sel.innerHTML = '<option value="">Semua Salesman</option>';
-  sales.forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`);
+// ==================== DATA SOURCES ====================
+function getHariDiRange(){
+  const from=document.getElementById('filterFrom').value;
+  const to=document.getElementById('filterTo').value;
+  const hariSet=new Set();
+  if(from&&to){ const d=new Date(from),e=new Date(to); while(d<=e){ hariSet.add(d.getDay()); d.setDate(d.getDate()+1); } }
+  return hariSet;
 }
+function getFilter(){ return { from:document.getElementById('filterFrom').value, to:document.getElementById('filterTo').value, ch:document.getElementById('filterChannel').value, sales:document.getElementById('filterSalesman').value }; }
 
-function getFilteredData() {
-  const from   = document.getElementById('filterFrom').value;
-  const to     = document.getElementById('filterTo').value;
-  const ch     = document.getElementById('filterChannel').value;
-  const sales  = document.getElementById('filterSalesman').value;
-  const status = document.getElementById('filterStatus').value;
-
-  return allData.filter(r => {
-    // Filter channel & salesman berlaku untuk semua
-    if (ch    && r.channel  !== ch)    return false;
-    if (sales && r.salesman !== sales) return false;
-
-    // Filter status: map ke nilai STATUS di data
-    // "OUTSTANDING" = belum lunas, "LUNAS" = lunas
-    if (status === 'OUTSTANDING' && r.status !== 'OUTSTANDING') return false;
-    if (status === 'LUNAS'       && r.status !== 'LUNAS')       return false;
-    if (status === 'JATUH TEMPO' && !r.isJatuhTempo)            return false;
-
-    // Filter tanggal berdasarkan TANGGAL NOTA AWAL (hanya jika diisi)
-    if (from || to) {
-      const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
-      if (from && dk < from) return false;
-      if (to   && dk > to)   return false;
-    }
-
+// Global outstanding (no date filter)
+function getOutstandingData(){
+  const {ch,sales}=getFilter();
+  return allData.filter(r=>{ if(r.keterangan!=='TOP') return false; if(r.status!=='OUTSTANDING') return false; if(ch&&r.channel!==ch) return false; if(sales&&r.salesman!==sales) return false; return true; });
+}
+// Piutang baru by tglNota dalam periode
+function getPiutangBaru(){
+  const {from,to,ch,sales}=getFilter();
+  return allData.filter(r=>{
+    if(r.keterangan!=='TOP') return false; if(r.status!=='OUTSTANDING') return false;
+    if(ch&&r.channel!==ch) return false; if(sales&&r.salesman!==sales) return false;
+    if(from||to){ const dk=r.tglNota?dateKey(r.tglNota):''; if(from&&dk<from) return false; if(to&&dk>to) return false; }
     return true;
   });
 }
-
-// Data piutang aktif = TOP + OUTSTANDING saja (untuk KPI & chart)
-// Outstanding = semua TOP+OUTSTANDING, TIDAK difilter tanggal
-// karena piutang outstanding tetap ada walau nota sebelum periode filter
-function getOutstandingData() {
-  const ch    = document.getElementById('filterChannel').value;
-  const sales = document.getElementById('filterSalesman').value;
-
-  return allData.filter(r => {
-    if (r.keterangan !== 'TOP') return false;
-    if (r.status !== 'OUTSTANDING') return false;
-    if (ch    && r.channel  !== ch)    return false;
-    if (sales && r.salesman !== sales) return false;
+// JT by hari (day-of-week filter)
+function getPiutangJatuhTempoPeriode(){
+  const {ch,sales}=getFilter();
+  const hariSet=getHariDiRange();
+  return allData.filter(r=>{
+    if(r.keterangan!=='TOP') return false; if(r.status!=='OUTSTANDING') return false;
+    if(ch&&r.channel!==ch) return false; if(sales&&r.salesman!==sales) return false;
+    if(!r.tglTempo) return false;
+    if(hariSet.size>0&&hariSet.size<7) return hariSet.has(r.tglTempo.getDay());
     return true;
   });
 }
-
-// Outstanding dalam periode = untuk tabel & KPI yg perlu filter tanggal nota
-function getOutstandingPeriode() {
-  const from  = document.getElementById('filterFrom').value;
-  const to    = document.getElementById('filterTo').value;
-  const ch    = document.getElementById('filterChannel').value;
-  const sales = document.getElementById('filterSalesman').value;
-
-  return allData.filter(r => {
-    if (r.keterangan !== 'TOP') return false;
-    if (r.status !== 'OUTSTANDING') return false;
-    if (ch    && r.channel  !== ch)    return false;
-    if (sales && r.salesman !== sales) return false;
-    if (from || to) {
-      const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
-      if (from && dk < from) return false;
-      if (to   && dk > to)   return false;
-    }
+// Pembayaran dalam periode (TAGIHAN by tanggal)
+function getPembayaranData(){
+  const {from,to,ch,sales}=getFilter();
+  return allData.filter(r=>{
+    if(r.keterangan!=='TAGIHAN') return false;
+    if(ch&&r.channel!==ch) return false; if(sales&&r.salesman!==sales) return false;
+    if(from||to){ const dk=r.tanggal?dateKey(r.tanggal):''; if(from&&dk<from) return false; if(to&&dk>to) return false; }
     return true;
   });
 }
-
-// Data pembayaran = TAGIHAN saja (untuk KPI pembayaran)
-function getPembayaranData() {
-  const from  = document.getElementById('filterFrom').value;
-  const to    = document.getElementById('filterTo').value;
-  const ch    = document.getElementById('filterChannel').value;
-  const sales = document.getElementById('filterSalesman').value;
-
-  return allData.filter(r => {
-    if (r.keterangan !== 'TAGIHAN') return false;
-    if (ch    && r.channel  !== ch)    return false;
-    if (sales && r.salesman !== sales) return false;
-    if (from || to) {
-      const dk = r.tanggal ? dateKey(r.tanggal) : '';
-      if (from && dk < from) return false;
-      if (to   && dk > to)   return false;
-    }
+// Penjualan dalam periode (CASH+TOP by tanggal)
+function getPenjualanData(){
+  const {from,to,ch,sales}=getFilter();
+  return allData.filter(r=>{
+    if(!['CASH','TOP'].includes(r.keterangan)) return false;
+    if(ch&&r.channel!==ch) return false; if(sales&&r.salesman!==sales) return false;
+    if(from||to){ const dk=r.tanggal?dateKey(r.tanggal):''; if(from&&dk<from) return false; if(to&&dk>to) return false; }
     return true;
   });
 }
-
-// KPI Card 1: Piutang BARU — TOP+OUTSTANDING, filter by tglNota dalam periode
-function getPiutangBaru() {
-  const from  = document.getElementById('filterFrom').value;
-  const to    = document.getElementById('filterTo').value;
-  const ch    = document.getElementById('filterChannel').value;
-  const sales = document.getElementById('filterSalesman').value;
-
-  return allData.filter(r => {
-    if (r.keterangan !== 'TOP') return false;
-    if (r.status !== 'OUTSTANDING') return false;
-    if (ch    && r.channel  !== ch)    return false;
-    if (sales && r.salesman !== sales) return false;
-    if (from || to) {
-      const dk = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
-      if (from && dk < from) return false;
-      if (to   && dk > to)   return false;
-    }
-    return true;
-  });
+// Dedup by notaKey helper
+function dedupByNota(data){
+  const map={};
+  data.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); if(!map[k]) map[k]={...r,total:0}; map[k].total+=r.total; });
+  return Object.values(map);
 }
 
-// KPI Card 2: Piutang JATUH TEMPO dalam periode — TOP+OUTSTANDING, filter by tglTempo dalam periode
-function getPiutangJatuhTempoPeriode() {
-  const from  = document.getElementById('filterFrom').value;
-  const to    = document.getElementById('filterTo').value;
-  const ch    = document.getElementById('filterChannel').value;
-  const sales = document.getElementById('filterSalesman').value;
-
-  // Kumpulkan semua hari (0=Min,1=Sen,...,6=Sab) dalam range filter
-  const hariDiRange = new Set();
-  if (from && to) {
-    const d = new Date(from);
-    const end = new Date(to);
-    while (d <= end) {
-      hariDiRange.add(d.getDay());
-      d.setDate(d.getDate() + 1);
-    }
-  }
-
-  return allData.filter(r => {
-    if (r.keterangan !== 'TOP') return false;
-    if (r.status !== 'OUTSTANDING') return false;
-    if (ch    && r.channel  !== ch)    return false;
-    if (sales && r.salesman !== sales) return false;
-    if (!r.tglTempo) return false;
-
-    // Jika ada filter tanggal → filter by hari dalam range
-    if (from || to) {
-      // Kalau range >= 7 hari → semua hari tercakup → tampil semua
-      if (hariDiRange.size >= 7) return true;
-      // Kalau range < 7 hari → cek hari tglTempo masuk dalam set hari
-      return hariDiRange.has(r.tglTempo.getDay());
-    }
-
-    return true;
-  });
-}
-
-function renderAll() {
-  const outstanding        = getOutstandingData();
-  const pembayaran         = getPembayaranData();
-  const piutangBaru        = getPiutangBaru();
-  const jatuhTempoPeriode  = getPiutangJatuhTempoPeriode();
-  renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode);
-  renderTableJatuhTempo(jatuhTempoPeriode, activeChannelTab);
+// ==================== RENDER ALL ====================
+function renderAll(){
+  const outstanding=getOutstandingData();
+  const piutangBaru=getPiutangBaru();
+  const jtPeriode=getPiutangJatuhTempoPeriode();
+  const pembayaran=getPembayaranData();
+  renderKPI(outstanding,piutangBaru,jtPeriode,pembayaran);
+  renderBySalesman(outstanding,jtPeriode,pembayaran);
+  renderByDepo(outstanding,jtPeriode,pembayaran);
+  renderTableJatuhTempo(jtPeriode,activeChannelTab);
   renderTable7Hari(outstanding);
-  renderChartChannel(outstanding);
-  renderChartAging(outstanding);
-  renderChartStatus(outstanding);
-  renderChartTren(outstanding);
+  renderChartCombined();
   renderTopOutlet(outstanding);
-  // Fase 2
-  renderCollectionRate(outstanding, jatuhTempoPeriode, pembayaran);
-  renderCollectionTrend();
-  renderBySalesman(outstanding, jatuhTempoPeriode, pembayaran);
-  renderByDepo(outstanding, jatuhTempoPeriode, pembayaran);
-  updateSubtitle(outstanding, pembayaran);
+  updateSubtitle(outstanding,pembayaran);
 }
 
-function updateSubtitle(outstanding, pembayaran) {
-  const from = document.getElementById('filterFrom').value;
-  const to   = document.getElementById('filterTo').value;
-  const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : null;
-  const totalAR  = outstanding.reduce((s,r) => s + r.total, 0);
-  const totalByr = pembayaran.reduce((s,r) => s + r.total, 0);
-  const periodeStr = (from || to)
-    ? ((fmtD(from)||'...') + (from !== to ? ' – ' + (fmtD(to)||'...') : '') + ' · ')
-    : 'Semua periode · ';
+// ==================== KPI ====================
+function renderKPI(outstanding,piutangBaru,jtPeriode,pembayaran){
+  const hariNames=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const hariSet=getHariDiRange();
+  let hariLabel=hariSet.size>0&&hariSet.size<7?[...hariSet].map(h=>hariNames[h]).join(', '):'Semua Hari';
 
-  // Info hari aktif
-  let hariInfo = '';
-  if (from && to) {
-    const hariNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-    const hariDiRange = new Set();
-    const d = new Date(from); const end = new Date(to);
-    while (d <= end) { hariDiRange.add(d.getDay()); d.setDate(d.getDate()+1); }
-    if (hariDiRange.size < 7) {
-      const hariLabel = [...hariDiRange].map(h => hariNames[h]).join(', ');
-      hariInfo = ' · JT filter: ' + hariLabel;
-    }
-  }
+  // Global KPIs
+  const totalAR=outstanding.reduce((s,r)=>s+r.total,0);
+  const avgAging=outstanding.length>0?Math.round(outstanding.reduce((s,r)=>s+r.aging,0)/outstanding.length):0;
 
-  document.getElementById('subtitlePeriod').textContent =
-    periodeStr + 'Outstanding: ' + fmtShort(totalAR) + ' · Bayar: ' + fmtShort(totalByr) + hariInfo;
-}
+  // Aging buckets
+  const dedupOS=dedupByNota(outstanding);
+  const agingBuckets={'<7 hari':{total:0,count:0},'7-14 hari':{total:0,count:0},'14-30 hari':{total:0,count:0},'>30 hari':{total:0,count:0}};
+  dedupOS.forEach(r=>{ const b=agingBucket(r.aging); agingBuckets[b].total+=r.total; agingBuckets[b].count++; });
 
-function renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode) {
-  // GLOBAL
-  const totalAR     = outstanding.reduce((s,r)=>s+r.total,0);
-  const grosirAR    = outstanding.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.total,0);
-  const agenAR      = outstanding.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.total,0);
-  const outletCount = new Set(outstanding.map(r=>r.kodeOutlet||r.namaOutlet)).size;
-  const avgAging    = outstanding.length>0 ? Math.round(outstanding.reduce((s,r)=>s+r.aging,0)/outstanding.length) : 0;
-  // PERIODE
-  const totalBayar  = pembayaran.reduce((s,r)=>s+r.total,0);
-  const totalBaru   = piutangBaru.reduce((s,r)=>s+r.total,0);
-  const outletBaru  = new Set(piutangBaru.map(r=>r.kodeOutlet||r.namaOutlet)).size;
-  const totalJatuh  = jatuhTempoPeriode.reduce((s,r)=>s+r.total,0);
-  const outletJatuh = new Set(jatuhTempoPeriode.map(r=>r.kodeOutlet||r.namaOutlet)).size;
-  const baruNota={}, jatuhNota={};
-  piutangBaru.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); baruNota[k]=true; });
-  jatuhTempoPeriode.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); jatuhNota[k]=true; });
-  const collRate = totalJatuh>0 ? (totalBayar/totalJatuh*100).toFixed(1) : 0;
+  // Collection Achievement: semua overdue (isJatuhTempo), check LUNAS
+  const overdue=allData.filter(r=>r.keterangan==='TOP'&&r.isJatuhTempo);
+  const overdueDedup=dedupByNota(overdue);
+  // Match payments: TAGIHAN dengan tglNota sama & kodeOutlet sama → LUNAS
+  const paidKeys=new Set();
+  allData.filter(r=>r.keterangan==='TAGIHAN').forEach(r=>{
+    const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); paidKeys.add(k);
+  });
+  const overdueCount=overdueDedup.length;
+  const paidCount=overdueDedup.filter(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); return paidKeys.has(k)||r.status==='LUNAS'; }).length;
+  const caRate=overdueCount>0?(paidCount/overdueCount*100).toFixed(0):0;
+  const caColor=caRate>=80?'var(--green)':caRate>=50?'var(--yellow)':'var(--red)';
 
-  // Update label KPI Card 2 & tabel berdasarkan hari aktif
-  const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  const from2 = document.getElementById('filterFrom').value;
-  const to2   = document.getElementById('filterTo').value;
-  let hariLabel = 'by Hari Jatuh Tempo';
-  if (from2 && to2) {
-    const hariSet = new Set();
-    const dd = new Date(from2); const ee = new Date(to2);
-    while (dd <= ee) { hariSet.add(dd.getDay()); dd.setDate(dd.getDate()+1); }
-    if (hariSet.size < 7) {
-      hariLabel = 'Hari: ' + [...hariSet].map(h=>hariNames[h]).join(', ');
-    } else {
-      hariLabel = 'Semua Hari';
-    }
-  }
-  const lbl = document.getElementById('labelJatuhTempo');
-  const sub = document.getElementById('subJatuhTempo');
-  if (lbl) lbl.textContent = 'Piutang JT — ' + hariLabel;
-  if (sub) sub.textContent = 'Filter by hari jatuh tempo · ' + hariLabel;
+  // Periode KPIs
+  const totalBaru=piutangBaru.reduce((s,r)=>s+r.total,0);
+  const totalJT=jtPeriode.reduce((s,r)=>s+r.total,0);
+  const totalBayar=pembayaran.reduce((s,r)=>s+r.total,0);
+  const crPct=totalJT>0?(totalBayar/totalJT*100).toFixed(1):0;
+  const crColor=crPct>=80?'var(--green)':crPct>=50?'var(--yellow)':'var(--red)';
 
-  document.getElementById('kpiGrid').innerHTML = `
-    <div class="kpi-row row-4">
-      <div class="kpi-card" style="--kpi-color:var(--red)">
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi-row row-4" style="margin-bottom:10px">
+      <div class="kpi-card" style="--kpi-color:var(--red);cursor:pointer" onclick="openModalPiutang()">
         <div class="kpi-icon" style="background:rgba(220,38,38,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2"><path d="M9 14l2 2 4-4M3 6h18M3 10h18M3 14h7M3 18h7"/></svg></div>
-        <div class="kpi-label">Total Piutang Outstanding</div>
+        <div class="kpi-label">Total Piutang Outstanding <span style="font-size:9px;color:var(--red)">▶ detail</span></div>
         <div class="kpi-value md" style="font-size:14px">${fmtFull(totalAR)}</div>
-        <div class="kpi-sub">${outstanding.length} nota · semua periode</div>
+        <div class="kpi-sub">${outstanding.length} nota · klik untuk rincian</div>
       </div>
-      <div class="kpi-card" style="--kpi-color:var(--accent)">
-        <div class="kpi-icon" style="background:rgba(26,107,60,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/></svg></div>
-        <div class="kpi-label">Piutang Grosir</div>
-        <div class="kpi-value md" style="font-size:14px">${fmtFull(grosirAR)}</div>
-        <div class="kpi-sub">${totalAR>0?(grosirAR/totalAR*100).toFixed(1):0}% dari total outstanding</div>
+      <div class="kpi-card" style="--kpi-color:var(--green);cursor:pointer" onclick="openModalCA()">
+        <div class="kpi-icon" style="background:rgba(22,163,74,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="kpi-label">Collection Achievement <span style="font-size:9px;color:var(--green)">▶ detail</span></div>
+        <div class="kpi-value" style="color:${caColor}">${caRate}<span style="font-size:13px;font-weight:500">%</span></div>
+        <div class="kpi-sub">${paidCount} / ${overdueCount} overdue terbayar</div>
       </div>
-      <div class="kpi-card" style="--kpi-color:var(--purple)">
-        <div class="kpi-icon" style="background:rgba(147,51,234,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#9333ea" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
-        <div class="kpi-label">Piutang Agen</div>
-        <div class="kpi-value md" style="font-size:14px">${fmtFull(agenAR)}</div>
-        <div class="kpi-sub">${totalAR>0?(agenAR/totalAR*100).toFixed(1):0}% dari total outstanding</div>
+      <div class="kpi-card" style="--kpi-color:var(--yellow);cursor:pointer" onclick="openModalAging()">
+        <div class="kpi-icon" style="background:rgba(202,138,4,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="kpi-label">Aging Overview <span style="font-size:9px;color:var(--yellow)">▶ detail</span></div>
+        <div class="kpi-value" style="color:var(--yellow)">${avgAging}<span style="font-size:13px;font-weight:500"> hari</span></div>
+        <div class="kpi-sub">rata-rata · ${dedupOS.length} nota outstanding</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--cyan)">
-        <div class="kpi-icon" style="background:rgba(8,145,178,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+        <div class="kpi-icon" style="background:rgba(8,145,178,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#0891b2" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
         <div class="kpi-label">Outlet Berpiutang</div>
-        <div class="kpi-value">${outletCount}</div>
-        <div class="kpi-sub">Rata-rata aging ${avgAging} hari</div>
+        <div class="kpi-value">${new Set(outstanding.map(r=>r.kodeOutlet||r.namaOutlet)).size}</div>
+        <div class="kpi-sub">outlet aktif outstanding</div>
       </div>
     </div>
-    <div class="kpi-row row-4">
+    <div class="kpi-row row-4" style="margin-bottom:12px">
       <div class="kpi-card" style="--kpi-color:#2563eb">
         <div class="kpi-icon" style="background:rgba(37,99,235,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#2563eb" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg></div>
-        <div class="kpi-label">Piutang Baru (Tgl Nota)</div>
+        <div class="kpi-label">Piutang Baru (by Tgl Nota)</div>
         <div class="kpi-value md" style="font-size:14px;color:#2563eb">${fmtFull(totalBaru)}</div>
-        <div class="kpi-sub">${Object.keys(baruNota).length} nota · ${outletBaru} outlet</div>
+        <div class="kpi-sub">${dedupByNota(piutangBaru).length} nota dalam periode</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--orange)">
         <div class="kpi-icon" style="background:rgba(234,112,16,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#ea7010" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <div class="kpi-label" id="labelJatuhTempo">Piutang Jatuh Tempo (Tgl Tempo)</div>
-        <div class="kpi-value md" style="font-size:14px;color:var(--orange)">${fmtFull(totalJatuh)}</div>
-        <div class="kpi-sub">${Object.keys(jatuhNota).length} nota · ${outletJatuh} outlet</div>
+        <div class="kpi-label" id="labelJatuhTempo">Piutang JT (${hariLabel})</div>
+        <div class="kpi-value md" style="font-size:14px;color:var(--orange)">${fmtFull(totalJT)}</div>
+        <div class="kpi-sub">${dedupByNota(jtPeriode).length} nota jatuh tempo</div>
       </div>
       <div class="kpi-card" style="--kpi-color:var(--green)">
         <div class="kpi-icon" style="background:rgba(22,163,74,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
@@ -1040,641 +780,432 @@ function renderKPI(outstanding, pembayaran, piutangBaru, jatuhTempoPeriode) {
         <div class="kpi-value md" style="font-size:14px;color:var(--green)">${fmtFull(totalBayar)}</div>
         <div class="kpi-sub">${pembayaran.length} transaksi dalam periode</div>
       </div>
-      <div class="kpi-card" style="--kpi-color:var(--yellow)">
-        <div class="kpi-icon" style="background:rgba(202,138,4,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        <div class="kpi-label">Collection Rate</div>
-        <div class="kpi-value" style="color:var(--yellow)">${collRate}<span style="font-size:13px;font-weight:500">%</span></div>
-        <div class="kpi-sub">Bayar ${fmtShort(totalBayar)} / JT ${fmtShort(totalJatuh)}</div>
+      <div class="kpi-card" style="--kpi-color:var(--accent)">
+        <div class="kpi-icon" style="background:rgba(26,107,60,.08)"><svg fill="none" viewBox="0 0 24 24" stroke="#1a6b3c" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="kpi-label">Collection Rate (Bayar÷JT)</div>
+        <div class="kpi-value" style="color:${crColor}">${crPct}<span style="font-size:13px;font-weight:500">%</span></div>
+        <div class="kpi-sub">${fmtShort(totalBayar)} dari ${fmtShort(totalJT)}</div>
       </div>
     </div>
   `;
 }
 
-// ==================== SECTION 1: TABEL JATUH TEMPO ====================
-function renderTableJatuhTempo(jatuhTempoPeriode, chFilter) {
-  let data = chFilter === 'ALL' ? jatuhTempoPeriode : jatuhTempoPeriode.filter(r=>r.channel===chFilter);
-
-  // Group by kodeOutlet + tglNota
-  const grouped = {};
-  data.forEach(r => {
-    const k = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
-    if (!grouped[k]) grouped[k] = { kodeOutlet:r.kodeOutlet, namaOutlet:r.namaOutlet, channel:r.channel, salesman:r.salesman, tglNota:r.tglNota, tglTempo:r.tglTempo, aging:r.aging, isJatuhTempo:r.isJatuhTempo, total:0 };
-    grouped[k].total += r.total;
-    if (r.isJatuhTempo) grouped[k].isJatuhTempo = true;
-  });
-
-  const rows = Object.values(grouped).sort((a,b) => {
-    // Sort: jatuh tempo dulu (terlama), lalu yang akan jatuh
-    if (a.isJatuhTempo && !b.isJatuhTempo) return -1;
-    if (!a.isJatuhTempo && b.isJatuhTempo) return 1;
-    return b.total - a.total;
-  });
-
-  const count = rows.length;
-  const totalNominal = rows.reduce((s,r)=>s+r.total,0);
-  const outletCount  = new Set(rows.map(r=>r.kodeOutlet||r.namaOutlet)).size;
-
-  document.getElementById('jatuhTempoCount').textContent = count;
-
-  const tbody = document.getElementById('tableJatuhTempo');
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Tidak ada piutang jatuh tempo dalam periode ini</td></tr>';
-    document.getElementById('jatuhTempoInfo').textContent = '0 nota';
-    document.getElementById('jatuhTempoTotals').textContent = '';
-    return;
-  }
-
-  const today = new Date(); today.setHours(0,0,0,0);
-  const chBadge = ch => ch==='AGEN'
-    ? '<span class="badge badge-agen">Agen</span>'
-    : '<span class="badge badge-grosir">Grosir</span>';
-  const agingColor = d => d>90?'var(--red)':d>60?'var(--orange)':d>30?'var(--yellow)':'var(--green)';
-
-  tbody.innerHTML = rows.map((r,i) => `
-    <tr>
-      <td style="color:var(--text3)">${i+1}</td>
-      <td style="font-family:monospace;font-size:11px">${r.kodeOutlet||'—'}</td>
-      <td style="font-weight:600">${r.namaOutlet}</td>
-      <td>${chBadge(r.channel)}</td>
-      <td>${r.salesman}</td>
-      <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(r.total)}</td>
-      <td>${fmtDate(r.tglNota)}</td>
-      <td style="color:${r.isJatuhTempo?'var(--red)':'var(--text)'};font-weight:${r.isJatuhTempo?'600':'400'}">${fmtDate(r.tglTempo)}</td>
-      <td class="right"><span style="font-weight:600;color:${agingColor(r.aging)}">${r.aging} hari</span></td>
-      <td><span class="badge ${r.isJatuhTempo?'badge-tempo':'badge-jatuh'}">${r.isJatuhTempo?'⚠ Lewat Tempo':'● Akan JT'}</span></td>
-    </tr>
-  `).join('');
-
-  document.getElementById('jatuhTempoInfo').textContent = `${count} nota · ${outletCount} outlet`;
-  document.getElementById('jatuhTempoTotals').innerHTML = `Total: <span style="color:var(--orange);font-weight:700">${fmtFull(totalNominal)}</span>`;
+// ==================== KPI MODALS ====================
+function openModalPiutang(){
+  const os=getOutstandingData();
+  const grosir=os.filter(r=>r.channel==='GROSIR');
+  const agen=os.filter(r=>r.channel==='AGEN');
+  const gTotal=grosir.reduce((s,r)=>s+r.total,0);
+  const aTotal=agen.reduce((s,r)=>s+r.total,0);
+  const gOutlet=new Set(grosir.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+  const aOutlet=new Set(agen.map(r=>r.kodeOutlet||r.namaOutlet)).size;
+  const totalAR=os.reduce((s,r)=>s+r.total,0);
+  document.getElementById('bodyModalPiutang').innerHTML=`
+    <div class="ch-grid">
+      <div class="ch-card" style="border-top:3px solid var(--accent)">
+        <div class="ch-lbl" style="color:var(--accent)">🏪 Grosir</div>
+        <div class="ch-row"><span>Total Piutang</span><span style="color:var(--accent)">${fmtFull(gTotal)}</span></div>
+        <div class="ch-row"><span>Porsi</span><span>${totalAR>0?(gTotal/totalAR*100).toFixed(1):0}%</span></div>
+        <div class="ch-row"><span>Outlet</span><span>${gOutlet} outlet</span></div>
+        <div class="ch-row"><span>Nota</span><span>${dedupByNota(grosir).length} nota</span></div>
+        <div class="pbar-wrap"><div class="pbar-fill" style="width:${totalAR>0?(gTotal/totalAR*100).toFixed(1):0}%"></div></div>
+      </div>
+      <div class="ch-card" style="border-top:3px solid var(--purple)">
+        <div class="ch-lbl" style="color:var(--purple)">👥 Agen</div>
+        <div class="ch-row"><span>Total Piutang</span><span style="color:var(--purple)">${fmtFull(aTotal)}</span></div>
+        <div class="ch-row"><span>Porsi</span><span>${totalAR>0?(aTotal/totalAR*100).toFixed(1):0}%</span></div>
+        <div class="ch-row"><span>Outlet</span><span>${aOutlet} outlet</span></div>
+        <div class="ch-row"><span>Nota</span><span>${dedupByNota(agen).length} nota</span></div>
+        <div class="pbar-wrap"><div class="pbar-fill" style="width:${totalAR>0?(aTotal/totalAR*100).toFixed(1):0}%;background:var(--purple)"></div></div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Total Outlet Berpiutang</span><span style="font-weight:700">${gOutlet+aOutlet} outlet</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Total Outstanding</span><span style="font-weight:700;color:var(--red)">${fmtFull(totalAR)}</span></div>
+    </div>`;
+  openKpiModal('modalPiutang');
 }
 
-// ==================== SECTION 2: RINGKASAN 7 HARI KE DEPAN ====================
-function renderTable7Hari(outstanding) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const plus7 = new Date(today); plus7.setDate(plus7.getDate() + 7);
-  const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-
-  // Bangun daftar 7 hari ke depan (tanggal exact)
-  const next7Days = [];
-  for (let i = 0; i <= 7; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() + i);
-    next7Days.push(d);
-  }
-
-  // Untuk setiap hari dalam 7 hari ke depan,
-  // tampilkan SEMUA outstanding yang tglTempo-nya pada hari-hari (day-of-week) tersebut
-  // Ini konsisten dengan tabel detail yang juga pakai day-of-week
-  const byDay = {};
-  next7Days.forEach(tglHari => {
-    const dk = dateKey(tglHari);
-    const dow = tglHari.getDay(); // 0=Min, 1=Sen, dst
-
-    // Kumpulkan semua outstanding yang tglTempo.getDay() === dow
-    allData.filter(r => {
-      if (r.keterangan !== 'TOP') return false;
-      if (r.status !== 'OUTSTANDING') return false;
-      if (!r.tglTempo) return false;
-      return r.tglTempo.getDay() === dow;
-    }).forEach(r => {
-      if (!byDay[dk]) byDay[dk] = { tglHari, dow, total:0, outlets:new Set(), notaKeys:new Set(), rows:[] };
-      const notaKey = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
-      byDay[dk].outlets.add(r.kodeOutlet||r.namaOutlet);
-      byDay[dk].notaKeys.add(notaKey);
-      const existing = byDay[dk].rows.find(x=>x.key===notaKey);
-      if (existing) { existing.total += r.total; }
-      else byDay[dk].rows.push({ key:notaKey, kodeOutlet:r.kodeOutlet, namaOutlet:r.namaOutlet, channel:r.channel, salesman:r.salesman, tglNota:r.tglNota, tglTempo:r.tglTempo, aging:r.aging, total:r.total });
-      byDay[dk].total += r.total;
-    });
+function openModalCA(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const overdue=allData.filter(r=>r.keterangan==='TOP'&&r.isJatuhTempo);
+  const dedupOD=dedupByNota(overdue);
+  const paidKeys=new Set();
+  allData.filter(r=>r.keterangan==='TAGIHAN').forEach(r=>{
+    const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); paidKeys.add(k);
   });
+  const rows=dedupOD.map(r=>{
+    const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+    const lunas=paidKeys.has(k)||r.status==='LUNAS';
+    return {...r,lunas};
+  }).sort((a,b)=>a.lunas-b.lunas||b.total-a.total);
 
-  // Hanya tampilkan hari yang ada datanya
-  const sorted = Object.entries(byDay)
-    .filter(([,d]) => d.total > 0)
-    .sort((a,b) => a[0].localeCompare(b[0]));
+  const lunasCnt=rows.filter(r=>r.lunas).length;
+  const cr=rows.length>0?(lunasCnt/rows.length*100).toFixed(0):0;
+  document.getElementById('modalCATitle').textContent=`Collection Achievement — ${cr}%`;
+  document.getElementById('modalCASub').textContent=`${lunasCnt} dari ${rows.length} overdue terbayar`;
+  document.getElementById('bodyModalCA').innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span>Progress</span><span style="font-weight:700">${lunasCnt}/${rows.length} (${cr}%)</span>
+      </div>
+      <div class="pbar-wrap" style="height:10px"><div class="pbar-fill" style="width:${cr}%;background:${cr>=80?'var(--green)':cr>=50?'var(--yellow)':'var(--red)'}"></div></div>
+    </div>
+    ${rows.map(r=>`
+      <div class="outlet-row">
+        <div style="flex:1;min-width:0">
+          <div class="outlet-name">${r.namaOutlet}</div>
+          <div class="outlet-sub">${r.salesman} · Nota: ${fmtDate(r.tglNota)} · +${r.aging} hari</div>
+        </div>
+        <div class="outlet-val" style="color:${r.lunas?'var(--green)':'var(--orange)'};margin-right:8px">${fmtFull(r.total)}</div>
+        <span class="${r.lunas?'badge-lunas2':'badge-outstanding2'}">${r.lunas?'✓ Lunas':'● Outstanding'}</span>
+      </div>`).join('')}`;
+  openKpiModal('modalCA');
+}
 
-  const tbody = document.getElementById('tbody7Hari');
+function openModalAging(){
+  const os=getOutstandingData();
+  const dedup=dedupByNota(os);
+  const buckets={'<7 hari':{total:0,count:0,color:'var(--green)'},'7-14 hari':{total:0,count:0,color:'var(--yellow)'},'14-30 hari':{total:0,count:0,color:'var(--orange)'},'>30 hari':{total:0,count:0,color:'var(--red)'}};
+  dedup.forEach(r=>{ const b=agingBucket(r.aging); buckets[b].total+=r.total; buckets[b].count++; });
+  const totalAR=dedup.reduce((s,r)=>s+r.total,0);
+  document.getElementById('bodyModalAging').innerHTML=`
+    <div class="aging-grid">
+      ${Object.entries(buckets).map(([label,b])=>`
+        <div class="aging-card" style="border-top:3px solid ${b.color}">
+          <div class="aging-lbl" style="color:${b.color}">${label}</div>
+          <div class="aging-val" style="color:${b.color}">${fmtFull(b.total)}</div>
+          <div class="aging-sub">${b.count} nota · ${totalAR>0?(b.total/totalAR*100).toFixed(1):0}% dari total</div>
+          <div class="pbar-wrap" style="margin-top:8px"><div class="pbar-fill" style="width:${totalAR>0?(b.total/totalAR*100).toFixed(1):0}%;background:${b.color}"></div></div>
+        </div>`).join('')}
+    </div>`;
+  openKpiModal('modalAging');
+}
 
-  if (!sorted.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada piutang yang akan jatuh tempo dalam 7 hari ke depan</td></tr>';
-    renderChart7HariBar([], [], []);
-    return;
-  }
+function openKpiModal(id){ document.getElementById(id).classList.add('active'); }
+function closeKpiModal(id){ document.getElementById(id).classList.remove('active'); }
 
-  tbody.innerHTML = sorted.map(([dk, d]) => {
-    const sisaHari = Math.floor((d.tglHari - today) / 86400000);
-    const label    = sisaHari === 0 ? 'Hari ini' : sisaHari === 1 ? 'Besok' : sisaHari + ' hari lagi';
-    const bgColor  = sisaHari === 0 ? 'rgba(220,38,38,0.06)' : sisaHari === 1 ? 'rgba(234,112,16,0.06)' : sisaHari <= 3 ? 'rgba(202,138,4,0.04)' : 'transparent';
-    const lblColor = sisaHari === 0 ? 'var(--red)' : sisaHari === 1 ? 'var(--orange)' : 'var(--yellow)';
-    const hariStr  = hariNames[d.dow];
-    const tglStr   = d.tglHari.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
-    return `
-      <tr class="row-7hari" style="background:${bgColor}" onclick="openDrillDown('${dk}')">
-        <td>
-          <div style="font-weight:600;color:var(--text)">${hariStr}, ${tglStr}</div>
-          <span class="day-badge" style="background:${bgColor||'rgba(202,138,4,0.06)'};color:${lblColor};margin-top:3px;font-size:9px;padding:1px 7px;border-radius:20px;font-weight:700">${label}</span>
-        </td>
-        <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(d.total)}</td>
-        <td class="right" style="font-weight:600">${d.outlets.size}</td>
-        <td class="right" style="font-weight:600">${d.notaKeys.size}</td>
-        <td style="text-align:center;color:var(--text3);font-size:16px">›</td>
-      </tr>`;
+// ==================== BY SALESMAN ====================
+function renderBySalesman(outstanding,jtPeriode,pembayaran){
+  const bySales={};
+  outstanding.forEach(r=>{ if(!bySales[r.salesman]) bySales[r.salesman]={os:0,jt:0,bayar:0}; bySales[r.salesman].os+=r.total; });
+  jtPeriode.forEach(r=>{ if(!bySales[r.salesman]) bySales[r.salesman]={os:0,jt:0,bayar:0}; bySales[r.salesman].jt+=r.total; });
+  pembayaran.forEach(r=>{ if(!bySales[r.salesman]) bySales[r.salesman]={os:0,jt:0,bayar:0}; bySales[r.salesman].bayar+=r.total; });
+  const sorted=Object.entries(bySales).sort((a,b)=>b[1].os-a[1].os);
+  const td='padding:9px 10px;border-bottom:1px solid var(--border);';
+  document.getElementById('tableBySalesman').innerHTML=sorted.map(([name,v])=>{
+    const cr=v.jt>0?(v.bayar/v.jt*100).toFixed(1):0;
+    const crColor=cr>=80?'var(--green)':cr>=50?'var(--yellow)':cr>0?'var(--red)':'var(--text3)';
+    return `<tr style="cursor:pointer" onclick="openModalSalesman('${name}')" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+      <td style="${td}font-weight:600">${name} <span style="font-size:9px;color:var(--accent)">▶</span></td>
+      <td style="${td}text-align:right;color:var(--red)">${fmtShort(v.os)}</td>
+      <td style="${td}text-align:right;color:var(--orange)">${fmtShort(v.jt)}</td>
+      <td style="${td}text-align:right;color:var(--green)">${fmtShort(v.bayar)}</td>
+      <td style="${td}text-align:right;font-weight:700;color:${crColor}">${cr}%</td></tr>`;
   }).join('');
-
-  window._7hariData = Object.fromEntries(sorted);
-
-  // Bar chart
-  const labels = sorted.map(([,d]) => {
-    const sisa = Math.floor((d.tglHari - today) / 86400000);
-    return hariNames[d.dow] + (sisa===0?' (Hari ini)':sisa===1?' (Besok)':'');
-  });
-  const vals = sorted.map(([,d]) => d.total);
-  renderChart7HariBar(labels, vals, sorted);
 }
 
-function renderChart7HariBar(labels, vals, sorted) {
-  destroyChart('chart7HariBar');
-  if (!labels.length) return;
-  const ctx = document.getElementById('chart7HariBar').getContext('2d');
-  const today = new Date(); today.setHours(0,0,0,0);
-  const colors = (sorted||[]).map(([,d]) => {
-    const sisa = Math.floor((d.tglTempo - today) / 86400000);
-    return sisa === 0 ? 'rgba(220,38,38,0.8)' : sisa === 1 ? 'rgba(234,112,16,0.8)' : sisa <= 3 ? 'rgba(202,138,4,0.75)' : 'rgba(26,107,60,0.7)';
-  });
-  charts['chart7HariBar'] = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderRadius: 6, borderSkipped: false }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + fmtFull(ctx.parsed.y) } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-        y: { grid: { color: '#e0ece4' }, ticks: { callback: v => fmtShort(v), font: { size: 10 } } }
-      }
-    }
-  });
-}
-
-function openDrillDown(dk) {
-  const d = window._7hariData?.[dk];
-  if (!d) return;
-  const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  const tglRef   = d.tglHari || d.tglTempo;
-  const dow      = d.dow !== undefined ? d.dow : tglRef.getDay();
-  const tglStr   = hariNames[dow] + ', ' + tglRef.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-  const today    = new Date(); today.setHours(0,0,0,0);
-  const sisaHari = Math.floor((tglRef - today) / 86400000);
-  const hariInfo = sisaHari === 0 ? ' · Hari ini' : sisaHari === 1 ? ' · Besok' : sisaHari > 0 ? ` · ${sisaHari} hari lagi` : ` · ${Math.abs(sisaHari)} hari lewat`;
-
-  document.getElementById('drillDownTitle').textContent = 'Detail Piutang — ' + tglStr;
-  document.getElementById('drillDownSub').textContent   = d.rows.length + ' nota · ' + d.outlets.size + ' outlet · Total: ' + fmtFull(d.total) + hariInfo;
-  document.getElementById('drillDownInfo').textContent  = d.rows.length + ' nota outstanding';
-  document.getElementById('drillDownTotal').textContent = 'Total: ' + fmtFull(d.total);
-
-  const chBadge = ch => ch==='AGEN'
-    ? '<span class="badge badge-agen">Agen</span>'
-    : '<span class="badge badge-grosir">Grosir</span>';
-  const tdBase  = 'padding:9px 10px;border-bottom:1px solid var(--border);';
-  const tdRight = tdBase + 'text-align:right;';
-
-  document.getElementById('drillDownBody').innerHTML = d.rows
-    .sort((a,b) => b.total - a.total)
-    .map((r,i) => `
-      <tr style="transition:background .1s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-        <td style="${tdBase}color:var(--text3)">${i+1}</td>
-        <td style="${tdBase}font-family:monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis">${r.kodeOutlet||'—'}</td>
-        <td style="${tdBase}font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.namaOutlet}</td>
-        <td style="${tdBase}">${chBadge(r.channel)}</td>
-        <td style="${tdBase}overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.salesman}</td>
-        <td style="${tdRight}font-weight:700;color:var(--orange)">${fmtFull(r.total)}</td>
-        <td style="${tdBase}white-space:nowrap">${fmtDate(r.tglNota)}</td>
-        <td style="${tdRight}font-weight:600;color:var(--accent)">${r.aging} hari</td>
-      </tr>
-    `).join('');
-
-  const modal = document.getElementById('drillDownModal');
-  modal.style.display = 'flex';
-}
-
-function closeDrillDown() {
-  document.getElementById('drillDownModal').style.display = 'none';
-}
-
-// switchChannelTab now updates jatuh tempo table
-function switchChannelTab(ch, el) {
-  activeChannelTab = ch;
-  document.querySelectorAll('.channel-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  renderTableJatuhTempo(getPiutangJatuhTempoPeriode(), ch);
-}
-
-
-function renderChartChannel(outstanding) {
-  destroyChart('chartChannel');
-  const grosir = outstanding.filter(r=>r.channel==='GROSIR').reduce((s,r)=>s+r.total,0);
-  const agen   = outstanding.filter(r=>r.channel==='AGEN').reduce((s,r)=>s+r.total,0);
-  const ctx = document.getElementById('chartChannel').getContext('2d');
-  charts['chartChannel'] = new Chart(ctx, {
-    type:'doughnut',
-    data:{ labels:['Grosir','Agen'], datasets:[{ data:[grosir,agen], backgroundColor:['rgba(26,107,60,0.85)','rgba(147,51,234,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
-  });
-  document.getElementById('legendChannel').innerHTML = [
-    {label:'Grosir', val:grosir, color:'rgba(26,107,60,0.85)'},
-    {label:'Agen',   val:agen,   color:'rgba(147,51,234,0.85)'},
-  ].map(l=>`<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
-}
-
-function renderChartAging(outstanding) {
-  destroyChart('chartAging');
-  const buckets = {'0–30 hari':0,'31–60 hari':0,'61–90 hari':0,'>90 hari':0};
-  outstanding.forEach(r => { buckets[agingBucket(r.aging)] += r.total; });
-  const ctx = document.getElementById('chartAging').getContext('2d');
-  charts['chartAging'] = new Chart(ctx, {
-    type:'bar',
-    data:{ labels:Object.keys(buckets), datasets:[{ data:Object.values(buckets), backgroundColor:['rgba(22,163,74,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)','rgba(127,0,0,0.8)'], borderRadius:6, borderSkipped:false }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{display:false},ticks:{font:{size:10}}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}} } }
-  });
-}
-
-function renderChartStatus(outstanding) {
-  destroyChart('chartStatus');
-
-  // Dedup: group allData TOP by kodeOutlet+tglNota → hindari double count
-  const ch    = document.getElementById('filterChannel').value;
-  const sales = document.getElementById('filterSalesman').value;
-  const topRaw = allData.filter(r => {
-    if (r.keterangan !== 'TOP') return false;
-    if (ch    && r.channel  !== ch)    return false;
-    if (sales && r.salesman !== sales) return false;
+function openModalSalesman(salesName){
+  const {from,to}=getFilter();
+  const hariSet=getHariDiRange();
+  // Outlet JT by hari untuk salesman ini (filter)
+  const jtSales=allData.filter(r=>{
+    if(r.keterangan!=='TOP') return false; if(r.status!=='OUTSTANDING') return false;
+    if(r.salesman!==salesName) return false; if(!r.tglTempo) return false;
+    if(hariSet.size>0&&hariSet.size<7) return hariSet.has(r.tglTempo.getDay());
     return true;
   });
-
-  // Group by kodeOutlet + tglNota + status
-  const grouped = {};
-  topRaw.forEach(r => {
-    const k = (r.kodeOutlet||r.namaOutlet) + '||' + (r.tglNota ? dateKey(r.tglNota) : '');
-    if (!grouped[k]) grouped[k] = { total:0, status:r.status, isJatuhTempo:r.isJatuhTempo };
-    grouped[k].total += r.total;
-    if (r.isJatuhTempo) grouped[k].isJatuhTempo = true;
+  const dedupJT=dedupByNota(jtSales);
+  // Payment match
+  const paidKeys=new Set();
+  allData.filter(r=>r.keterangan==='TAGIHAN'&&r.salesman===salesName).forEach(r=>{
+    const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); paidKeys.add(k);
   });
+  const rows=dedupJT.map(r=>{
+    const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+    return {...r, lunas:paidKeys.has(k)||r.status==='LUNAS'};
+  }).sort((a,b)=>a.lunas-b.lunas||b.total-a.total);
 
-  const notaList = Object.values(grouped);
-  const totalOutstanding = notaList.filter(r=>r.status==='OUTSTANDING' && !r.isJatuhTempo).reduce((s,r)=>s+r.total,0);
-  const totalLunas       = notaList.filter(r=>r.status==='LUNAS').reduce((s,r)=>s+r.total,0);
-  const totalJatuh       = notaList.filter(r=>r.isJatuhTempo).reduce((s,r)=>s+r.total,0);
+  const lunas=rows.filter(r=>r.lunas).length;
+  const cr=rows.length>0?(lunas/rows.length*100).toFixed(0):0;
+  const hariLabel=hariSet.size>0&&hariSet.size<7?[...hariSet].map(h=>['Min','Sen','Sel','Rab','Kam','Jum','Sab'][h]).join(', '):'Semua Hari';
 
-  const ctx = document.getElementById('chartStatus').getContext('2d');
-  charts['chartStatus'] = new Chart(ctx, {
-    type:'doughnut',
-    data:{ labels:['Outstanding','Lunas','Jatuh Tempo'], datasets:[{ data:[totalOutstanding,totalLunas,totalJatuh], backgroundColor:['rgba(234,112,16,0.85)','rgba(22,163,74,0.85)','rgba(220,38,38,0.85)'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed) } } }, cutout:'65%' }
-  });
-  document.getElementById('legendStatus').innerHTML = [
-    {label:'Outstanding', val:totalOutstanding, color:'rgba(234,112,16,0.85)'},
-    {label:'Lunas',       val:totalLunas,       color:'rgba(22,163,74,0.85)'},
-    {label:'Jatuh Tempo', val:totalJatuh,       color:'rgba(220,38,38,0.85)'},
-  ].map(l=>`<div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${l.label}<span class="legend-val">${fmtShort(l.val)}</span></div>`).join('');
-}
-
-function renderChartTren(outstanding) {
-  destroyChart('chartTren');
-  const byDay = {};
-  outstanding.forEach(r => {
-    const k = r.tglNota ? dateKey(r.tglNota) : (r.tanggal ? dateKey(r.tanggal) : '');
-    if (!k) return;
-    byDay[k] = (byDay[k]||0) + r.total;
-  });
-  const sorted = Object.entries(byDay).sort((a,b)=>a[0].localeCompare(b[0]));
-  const labels = sorted.map(([d]) => new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
-  const vals   = sorted.map(([,v]) => v);
-  const ctx = document.getElementById('chartTren').getContext('2d');
-  charts['chartTren'] = new Chart(ctx, {
-    type:'line',
-    data:{ labels, datasets:[{ label:'Piutang Outstanding', data:vals, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.08)', tension:.35, fill:true, pointRadius:4, pointBackgroundColor:'#dc2626' }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>' '+fmtShort(ctx.parsed.y) } } }, scales:{ x:{grid:{color:'#e0ece4'},ticks:{font:{size:10}}}, y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}} } }
-  });
-}
-
-function renderTopOutlet(outstanding) {
-  const byOutlet = {};
-  outstanding.forEach(r => {
-    const k = r.kodeOutlet || r.namaOutlet;
-    if (!byOutlet[k]) byOutlet[k] = { nama:r.namaOutlet, total:0, aging:0, channel:r.channel };
-    byOutlet[k].total += r.total;
-    if (r.aging > byOutlet[k].aging) byOutlet[k].aging = r.aging;
-  });
-  const sorted = Object.values(byOutlet).sort((a,b)=>b.total-a.total).slice(0,10);
-  const maxVal = sorted[0]?.total || 1;
-  const rankBg  = ['#fef9c3','#f1f5f1','#fef3c7'];
-  const rankClr = ['#ca8a04','#4a7260','#d97706'];
-  document.getElementById('topOutletList').innerHTML = sorted.length ? sorted.map((o,i)=>`
-    <div class="top-item">
-      <div class="top-rank ${i<3?'':'rn'}" style="${i<3?`background:${rankBg[i]};color:${rankClr[i]}`:''}">
-        ${i+1}
+  document.getElementById('modalSalesmanTitle').textContent=`${salesName} — Collection Progress`;
+  document.getElementById('modalSalesmanSub').textContent=`Filter JT: ${hariLabel} · ${lunas}/${rows.length} terbayar (${cr}%)`;
+  document.getElementById('bodyModalSalesman').innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span>Progress Penagihan</span><span style="font-weight:700">${lunas}/${rows.length} outlet (${cr}%)</span>
       </div>
-      <div class="top-info">
-        <div class="top-name">${o.nama}</div>
-        <div class="top-sub">${o.channel} · Aging ${o.aging} hari</div>
-        <div class="bar-progress"><div class="bar-fill" style="width:${(o.total/maxVal*100).toFixed(1)}%"></div></div>
-      </div>
-      <div class="top-right"><div class="top-val">${fmtShort(o.total)}</div></div>
+      <div class="pbar-wrap" style="height:10px"><div class="pbar-fill" style="width:${cr}%;background:${cr>=80?'var(--green)':cr>=50?'var(--yellow)':'var(--red)'}"></div></div>
     </div>
-  `).join('') : '<div class="empty-state">Tidak ada data piutang</div>';
+    ${rows.length===0?'<div class="empty-state">Tidak ada outlet JT untuk filter ini</div>':rows.map(r=>`
+      <div class="outlet-row">
+        <div style="flex:1;min-width:0">
+          <div class="outlet-name">${r.namaOutlet} <span style="font-size:10px;color:var(--text3);font-family:monospace">${r.kodeOutlet}</span></div>
+          <div class="outlet-sub">Nota: ${fmtDate(r.tglNota)} · Tempo: ${fmtDate(r.tglTempo)} · ${r.aging} hari</div>
+        </div>
+        <div class="outlet-val" style="color:${r.lunas?'var(--green)':'var(--orange)'};margin-right:8px">${fmtFull(r.total)}</div>
+        <span class="${r.lunas?'badge-lunas2':'badge-outstanding2'}">${r.lunas?'✓ Lunas':'● Belum'}</span>
+      </div>`).join('')}`;
+  openKpiModal('modalSalesman');
 }
 
-// ==================== FASE 2: COLLECTION ANALYSIS ====================
-
-function renderCollectionRate(outstanding, jatuhTempoPeriode, pembayaran) {
-  const totalAR      = outstanding.reduce((s,r)=>s+r.total,0);
-  const totalJT      = jatuhTempoPeriode.reduce((s,r)=>s+r.total,0);
-  const totalBayar   = pembayaran.reduce((s,r)=>s+r.total,0);
-  const cr1          = totalJT > 0 ? (totalBayar/totalJT*100).toFixed(1) : 0;
-  const cr2          = totalAR > 0 ? (totalBayar/totalAR*100).toFixed(1) : 0;
-  const sisa         = Math.max(0, totalJT - totalBayar);
-
-  // Collection Rate 1: Bayar ÷ JT by Hari
-  const cr1Color = cr1 >= 80 ? 'var(--green)' : cr1 >= 50 ? 'var(--yellow)' : 'var(--red)';
-  document.getElementById('valCR1').textContent   = cr1 + '%';
-  document.getElementById('valCR1').style.color   = cr1Color;
-  document.getElementById('subCR1').textContent   = `${fmtShort(totalBayar)} dari ${fmtShort(totalJT)} JT by hari`;
-
-  // Update label dengan info hari aktif
-  const hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  const from2 = document.getElementById('filterFrom').value;
-  const to2   = document.getElementById('filterTo').value;
-  let hariLabel = 'by Hari JT';
-  if (from2 && to2) {
-    const hariSet = new Set();
-    const dd = new Date(from2); const ee = new Date(to2);
-    while (dd <= ee) { hariSet.add(dd.getDay()); dd.setDate(dd.getDate()+1); }
-    if (hariSet.size < 7) hariLabel = [...hariSet].map(h=>hariNames[h]).join(', ');
-  }
-  document.getElementById('labelCR1').textContent = `CR (Bayar ÷ JT: ${hariLabel})`;
-
-  // Collection Rate 2: Bayar ÷ Total Outstanding
-  const cr2Color = cr2 >= 20 ? 'var(--cyan)' : cr2 >= 10 ? 'var(--yellow)' : 'var(--red)';
-  document.getElementById('valCR2').textContent   = cr2 + '%';
-  document.getElementById('valCR2').style.color   = cr2Color;
-  document.getElementById('subCR2').textContent   = `${fmtShort(totalBayar)} dari ${fmtShort(totalAR)} total outstanding`;
-
-  // Total Terbayar
-  document.getElementById('valTotalBayar').textContent = fmtFull(totalBayar);
-  document.getElementById('subTotalBayar').textContent = `${pembayaran.length} transaksi TAGIHAN dalam periode`;
-
-  // Sisa Belum Tertagih
-  document.getElementById('valSisaBelum').textContent = fmtFull(sisa);
-  document.getElementById('subSisaBelum').textContent = `${fmtShort(totalJT)} JT by hari - ${fmtShort(totalBayar)} terbayar`;
-}
-
-function renderCollectionTrend() {
-  destroyChart('chartCollectionTrend');
-
-  // Ambil semua data TAGIHAN per hari (tanpa filter)
-  const byDayBayar = {};
-  allData.filter(r => r.keterangan === 'TAGIHAN').forEach(r => {
-    const dk = r.tanggal ? dateKey(r.tanggal) : '';
-    if (!dk) return;
-    byDayBayar[dk] = (byDayBayar[dk]||0) + r.total;
-  });
-
-  // Ambil outstanding per hari (by tglNota)
-  const byDayOutstanding = {};
-  allData.filter(r => r.keterangan === 'TOP' && r.status === 'OUTSTANDING').forEach(r => {
-    const dk = r.tglNota ? dateKey(r.tglNota) : '';
-    if (!dk) return;
-    byDayOutstanding[dk] = (byDayOutstanding[dk]||0) + r.total;
-  });
-
-  // Gabungkan semua tanggal, sort, ambil 30 hari terakhir
-  const allDates = [...new Set([...Object.keys(byDayBayar), ...Object.keys(byDayOutstanding)])].sort().slice(-30);
-
-  const labels  = allDates.map(dk => new Date(dk).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
-  const bayar   = allDates.map(dk => byDayBayar[dk]||0);
-  const osData  = allDates.map(dk => byDayOutstanding[dk]||0);
-
-  const ctx = document.getElementById('chartCollectionTrend').getContext('2d');
-  charts['chartCollectionTrend'] = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets: [
-      { label: 'Pembayaran Masuk', data: bayar, borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.08)', tension: .35, fill: true, pointRadius: 3, pointBackgroundColor: '#16a34a' },
-      { label: 'Piutang Baru', data: osData, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.06)', tension: .35, fill: true, pointRadius: 3, pointBackgroundColor: '#dc2626' }
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, interaction: { mode:'index', intersect:false },
-      plugins: { legend: { position:'top', labels:{ boxWidth:10, font:{size:11} } }, tooltip: { callbacks: { label: ctx => ' '+fmtShort(ctx.parsed.y) } } },
-      scales: { x: { grid:{color:'#e0ece4'}, ticks:{font:{size:10}} }, y: { grid:{color:'#e0ece4'}, ticks:{callback:v=>fmtShort(v),font:{size:10}} } }
-    }
-  });
-}
-
-function renderBySalesman(outstanding, jatuhTempoPeriode, pembayaran) {
-  // Group outstanding by salesman
-  const bySales = {};
-  outstanding.forEach(r => {
-    if (!bySales[r.salesman]) bySales[r.salesman] = { outstanding:0, jt:0, bayar:0 };
-    bySales[r.salesman].outstanding += r.total;
-  });
-  // Group JT by salesman
-  jatuhTempoPeriode.forEach(r => {
-    if (!bySales[r.salesman]) bySales[r.salesman] = { outstanding:0, jt:0, bayar:0 };
-    bySales[r.salesman].jt += r.total;
-  });
-  // Group pembayaran by salesman
-  pembayaran.forEach(r => {
-    if (!bySales[r.salesman]) bySales[r.salesman] = { outstanding:0, jt:0, bayar:0 };
-    bySales[r.salesman].bayar += r.total;
-  });
-
-  const sorted = Object.entries(bySales).sort((a,b)=>b[1].outstanding-a[1].outstanding);
-  const tdS = 'padding:9px 10px;border-bottom:1px solid var(--border);';
-
-  document.getElementById('tableBySalesman').innerHTML = sorted.map(([name, v]) => {
-    const cr  = v.jt > 0 ? (v.bayar/v.jt*100).toFixed(1) : 0;
-    const crColor = cr >= 80 ? 'var(--green)' : cr >= 50 ? 'var(--yellow)' : cr > 0 ? 'var(--red)' : 'var(--text3)';
+// ==================== BY DEPO ====================
+function renderByDepo(outstanding,jtPeriode,pembayaran){
+  const byDepo={};
+  outstanding.forEach(r=>{ const d=r.depo||'—'; if(!byDepo[d]) byDepo[d]={os:0,jt:0,bayar:0}; byDepo[d].os+=r.total; });
+  jtPeriode.forEach(r=>{ const d=r.depo||'—'; if(!byDepo[d]) byDepo[d]={os:0,jt:0,bayar:0}; byDepo[d].jt+=r.total; });
+  pembayaran.forEach(r=>{ const d=r.depo||'—'; if(!byDepo[d]) byDepo[d]={os:0,jt:0,bayar:0}; byDepo[d].bayar+=r.total; });
+  const sorted=Object.entries(byDepo).sort((a,b)=>b[1].os-a[1].os);
+  const colors=['rgba(26,107,60,0.8)','rgba(147,51,234,0.8)','rgba(8,145,178,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)'];
+  const td='padding:9px 10px;border-bottom:1px solid var(--border);';
+  document.getElementById('tableByDepo').innerHTML=sorted.map(([name,v],i)=>{
+    const cr=v.jt>0?(v.bayar/v.jt*100).toFixed(1):0;
+    const crColor=cr>=80?'var(--green)':cr>=50?'var(--yellow)':cr>0?'var(--red)':'var(--text3)';
     return `<tr onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-      <td style="${tdS}font-weight:600">${name}</td>
-      <td style="${tdS}text-align:right;color:var(--red)">${fmtShort(v.outstanding)}</td>
-      <td style="${tdS}text-align:right;color:var(--orange)">${fmtShort(v.jt)}</td>
-      <td style="${tdS}text-align:right;color:var(--green)">${fmtShort(v.bayar)}</td>
-      <td style="${tdS}text-align:right;font-weight:700;color:${crColor}">${cr}%</td>
-    </tr>`;
+      <td style="${td}font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[i%colors.length]};margin-right:6px"></span>${name}</td>
+      <td style="${td}text-align:right;color:var(--red)">${fmtShort(v.os)}</td>
+      <td style="${td}text-align:right;color:var(--orange)">${fmtShort(v.jt)}</td>
+      <td style="${td}text-align:right;color:var(--green)">${fmtShort(v.bayar)}</td>
+      <td style="${td}text-align:right;font-weight:700;color:${crColor}">${cr}%</td></tr>`;
   }).join('');
-
-  // Bar chart CR by salesman
-  destroyChart('chartCRSalesman');
-  const ctx = document.getElementById('chartCRSalesman').getContext('2d');
-  const crVals = sorted.map(([,v]) => v.jt > 0 ? parseFloat((v.bayar/v.jt*100).toFixed(1)) : 0);
-  const crColors = crVals.map(v => v >= 80 ? 'rgba(22,163,74,0.8)' : v >= 50 ? 'rgba(202,138,4,0.8)' : v > 0 ? 'rgba(220,38,38,0.8)' : 'rgba(200,200,200,0.5)');
-  charts['chartCRSalesman'] = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: sorted.map(([n])=>n), datasets: [{ data: crVals, backgroundColor: crColors, borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+ctx.parsed.y+'%' } } },
-      scales: {
-        x: { grid:{display:false}, ticks:{font:{size:10}} },
-        y: { max: 100, grid:{color:'#e0ece4'}, ticks:{ callback: v=>v+'%', font:{size:10} } }
-      }
-    }
-  });
 }
 
-function renderByDepo(outstanding, jatuhTempoPeriode, pembayaran) {
-  const byDepo = {};
-  outstanding.forEach(r => {
-    const d = r.depo || 'Tidak Diketahui';
-    if (!byDepo[d]) byDepo[d] = { outstanding:0, jt:0, bayar:0 };
-    byDepo[d].outstanding += r.total;
-  });
-  jatuhTempoPeriode.forEach(r => {
-    const d = r.depo || 'Tidak Diketahui';
-    if (!byDepo[d]) byDepo[d] = { outstanding:0, jt:0, bayar:0 };
-    byDepo[d].jt += r.total;
-  });
-  pembayaran.forEach(r => {
-    const d = r.depo || 'Tidak Diketahui';
-    if (!byDepo[d]) byDepo[d] = { outstanding:0, jt:0, bayar:0 };
-    byDepo[d].bayar += r.total;
-  });
+// ==================== TABEL JATUH TEMPO ====================
+function switchChannelTab(ch,el){
+  activeChannelTab=ch;
+  document.querySelectorAll('.channel-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTableJatuhTempo(getPiutangJatuhTempoPeriode(),ch);
+}
 
-  const sorted = Object.entries(byDepo).sort((a,b)=>b[1].outstanding-a[1].outstanding);
-  const tdS = 'padding:9px 10px;border-bottom:1px solid var(--border);';
-  const depoColors = ['rgba(26,107,60,0.8)','rgba(147,51,234,0.8)','rgba(8,145,178,0.8)','rgba(234,112,16,0.8)','rgba(220,38,38,0.8)'];
+function renderTableJatuhTempo(jtPeriode,chFilter){
+  let data=chFilter==='ALL'?jtPeriode:jtPeriode.filter(r=>r.channel===chFilter);
+  const grouped={};
+  data.forEach(r=>{
+    const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+    if(!grouped[k]) grouped[k]={...r,total:0};
+    grouped[k].total+=r.total;
+    if(r.isJatuhTempo) grouped[k].isJatuhTempo=true;
+  });
+  const rows=Object.values(grouped).sort((a,b)=>a.isJatuhTempo===b.isJatuhTempo?b.total-a.total:a.isJatuhTempo?-1:1);
+  const count=rows.length;
+  document.getElementById('jatuhTempoCount').textContent=count;
+  const hariSet=getHariDiRange();
+  const hariLabel=hariSet.size>0&&hariSet.size<7?[...hariSet].map(h=>['Min','Sen','Sel','Rab','Kam','Jum','Sab'][h]).join(', '):'Semua Hari';
+  const sub=document.getElementById('subJatuhTempo');
+  if(sub) sub.textContent='Filter JT: '+hariLabel+' · '+count+' nota';
+  const tbody=document.getElementById('tableJatuhTempo');
+  if(!rows.length){ tbody.innerHTML='<tr><td colspan="10" class="empty-state">Tidak ada piutang jatuh tempo</td></tr>'; document.getElementById('jatuhTempoInfo').textContent='0 nota'; document.getElementById('jatuhTempoTotals').textContent=''; return; }
+  const chBadge=ch=>ch==='AGEN'?'<span class="badge badge-agen">Agen</span>':'<span class="badge badge-grosir">Grosir</span>';
+  const aC=d=>d>90?'var(--red)':d>60?'var(--orange)':d>30?'var(--yellow)':'var(--green)';
+  tbody.innerHTML=rows.map((r,i)=>`<tr>
+    <td style="color:var(--text3)">${i+1}</td>
+    <td style="font-family:monospace;font-size:11px">${r.kodeOutlet||'—'}</td>
+    <td style="font-weight:600">${r.namaOutlet}</td><td>${chBadge(r.channel)}</td><td>${r.salesman}</td>
+    <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(r.total)}</td>
+    <td>${fmtDate(r.tglNota)}</td>
+    <td style="color:${r.isJatuhTempo?'var(--red)':'var(--text)'}">${fmtDate(r.tglTempo)}</td>
+    <td class="right"><span style="font-weight:600;color:${aC(r.aging)}">${r.aging} hari</span></td>
+    <td><span class="badge ${r.isJatuhTempo?'badge-tempo':'badge-jatuh'}">${r.isJatuhTempo?'⚠ Lewat':'● Akan JT'}</span></td>
+  </tr>`).join('');
+  const total=rows.reduce((s,r)=>s+r.total,0);
+  document.getElementById('jatuhTempoInfo').textContent=`${count} nota`;
+  document.getElementById('jatuhTempoTotals').innerHTML=`Total: <span style="color:var(--orange);font-weight:700">${fmtFull(total)}</span>`;
+}
 
-  document.getElementById('tableByDepo').innerHTML = sorted.map(([name, v], i) => {
-    const cr = v.jt > 0 ? (v.bayar/v.jt*100).toFixed(1) : 0;
-    const crColor = cr >= 80 ? 'var(--green)' : cr >= 50 ? 'var(--yellow)' : cr > 0 ? 'var(--red)' : 'var(--text3)';
-    return `<tr onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-      <td style="${tdS}font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${depoColors[i%depoColors.length]};margin-right:6px"></span>${name}</td>
-      <td style="${tdS}text-align:right;color:var(--red)">${fmtShort(v.outstanding)}</td>
-      <td style="${tdS}text-align:right;color:var(--orange)">${fmtShort(v.jt)}</td>
-      <td style="${tdS}text-align:right;color:var(--green)">${fmtShort(v.bayar)}</td>
-      <td style="${tdS}text-align:right;font-weight:700;color:${crColor}">${cr}%</td>
-    </tr>`;
+// ==================== 7 HARI KE DEPAN ====================
+function renderTable7Hari(outstanding){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const hariNames=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const next7Days=[];
+  for(let i=0;i<=7;i++){ const d=new Date(today); d.setDate(d.getDate()+i); next7Days.push(d); }
+  const byDay={};
+  next7Days.forEach(tglHari=>{
+    const dk=dateKey(tglHari); const dow=tglHari.getDay();
+    allData.filter(r=>r.keterangan==='TOP'&&r.status==='OUTSTANDING'&&r.tglTempo&&r.tglTempo.getDay()===dow).forEach(r=>{
+      if(!byDay[dk]) byDay[dk]={tglHari,dow,total:0,outlets:new Set(),notaKeys:new Set(),rows:[]};
+      const nk=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
+      byDay[dk].outlets.add(r.kodeOutlet||r.namaOutlet); byDay[dk].notaKeys.add(nk);
+      const ex=byDay[dk].rows.find(x=>x.key===nk);
+      if(ex) ex.total+=r.total; else byDay[dk].rows.push({key:nk,kodeOutlet:r.kodeOutlet,namaOutlet:r.namaOutlet,channel:r.channel,salesman:r.salesman,tglNota:r.tglNota,tglTempo:r.tglTempo,aging:r.aging,total:r.total});
+      byDay[dk].total+=r.total;
+    });
+  });
+  const sorted=Object.entries(byDay).filter(([,d])=>d.total>0).sort((a,b)=>a[0].localeCompare(b[0]));
+  const tbody=document.getElementById('tbody7Hari');
+  if(!sorted.length){ tbody.innerHTML='<tr><td colspan="5" class="empty-state">Tidak ada piutang 7 hari ke depan</td></tr>'; renderChart7HariBar([],[],[]); return; }
+  tbody.innerHTML=sorted.map(([dk,d])=>{
+    const sh=Math.floor((d.tglHari-today)/86400000);
+    const lbl=sh===0?'Hari ini':sh===1?'Besok':sh+' hari lagi';
+    const bg=sh===0?'rgba(220,38,38,0.06)':sh===1?'rgba(234,112,16,0.06)':sh<=3?'rgba(202,138,4,0.04)':'transparent';
+    const lc=sh===0?'var(--red)':sh===1?'var(--orange)':'var(--yellow)';
+    return `<tr class="row-7hari" style="background:${bg}" onclick="openDrillDown('${dk}')">
+      <td><div style="font-weight:600">${hariNames[d.dow]}, ${d.tglHari.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</div>
+      <span style="font-size:9px;padding:1px 7px;border-radius:20px;font-weight:700;background:${bg};color:${lc}">${lbl}</span></td>
+      <td class="right" style="font-weight:700;color:var(--orange)">${fmtFull(d.total)}</td>
+      <td class="right;font-weight:600">${d.outlets.size}</td>
+      <td class="right;font-weight:600">${d.notaKeys.size}</td>
+      <td style="text-align:center;color:var(--text3);font-size:16px">›</td></tr>`;
   }).join('');
+  window._7hariData=Object.fromEntries(sorted);
+  const lbls=sorted.map(([,d])=>{ const sh=Math.floor((d.tglHari-today)/86400000); return hariNames[d.dow]+(sh===0?' (Hari ini)':sh===1?' (Besok)':''); });
+  renderChart7HariBar(lbls,sorted.map(([,d])=>d.total),sorted);
+}
 
-  // Bar chart CR by depo
-  destroyChart('chartCRDepo');
-  const ctx = document.getElementById('chartCRDepo').getContext('2d');
-  const crVals = sorted.map(([,v]) => v.jt > 0 ? parseFloat((v.bayar/v.jt*100).toFixed(1)) : 0);
-  charts['chartCRDepo'] = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: sorted.map(([n])=>n), datasets: [{ data: crVals, backgroundColor: depoColors.slice(0,sorted.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>' '+ctx.parsed.y+'%' } } },
-      scales: {
-        x: { grid:{display:false}, ticks:{font:{size:10}} },
-        y: { max: 100, grid:{color:'#e0ece4'}, ticks:{ callback: v=>v+'%', font:{size:10} } }
-      }
-    }
-  });
+function renderChart7HariBar(labels,vals,sorted){
+  destroyChart('chart7HariBar');
+  if(!labels.length) return;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const colors=(sorted||[]).map(([,d])=>{ const s=Math.floor((d.tglHari-today)/86400000); return s===0?'rgba(220,38,38,0.8)':s===1?'rgba(234,112,16,0.8)':s<=3?'rgba(202,138,4,0.75)':'rgba(26,107,60,0.7)'; });
+  const ctx=document.getElementById('chart7HariBar').getContext('2d');
+  charts['chart7HariBar']=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtFull(ctx.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}}}}});
+}
+
+function openDrillDown(dk){
+  const d=window._7hariData?.[dk]; if(!d) return;
+  const hariNames=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const today=new Date(); today.setHours(0,0,0,0);
+  const sh=Math.floor((d.tglHari-today)/86400000);
+  const info=sh===0?' · Hari ini':sh===1?' · Besok':` · ${sh} hari lagi`;
+  document.getElementById('drillDownTitle').textContent=`Detail — ${hariNames[d.dow]}, ${d.tglHari.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}`;
+  document.getElementById('drillDownSub').textContent=`${d.rows.length} nota · ${d.outlets.size} outlet · Total: ${fmtFull(d.total)}${info}`;
+  document.getElementById('drillDownInfo').textContent=`${d.rows.length} nota outstanding`;
+  document.getElementById('drillDownTotal').textContent='Total: '+fmtFull(d.total);
+  const chBadge=ch=>ch==='AGEN'?'<span class="badge badge-agen">Agen</span>':'<span class="badge badge-grosir">Grosir</span>';
+  const td='padding:9px 10px;border-bottom:1px solid var(--border);';
+  document.getElementById('drillDownBody').innerHTML=d.rows.sort((a,b)=>b.total-a.total).map((r,i)=>`<tr onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+    <td style="${td}color:var(--text3)">${i+1}</td>
+    <td style="${td}font-family:monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis">${r.kodeOutlet||'—'}</td>
+    <td style="${td}font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.namaOutlet}</td>
+    <td style="${td}">${chBadge(r.channel)}</td>
+    <td style="${td}overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.salesman}</td>
+    <td style="${td}text-align:right;font-weight:700;color:var(--orange)">${fmtFull(r.total)}</td>
+    <td style="${td}white-space:nowrap">${fmtDate(r.tglNota)}</td>
+    <td style="${td}text-align:right;font-weight:600;color:var(--accent)">${r.aging} hari</td>
+  </tr>`).join('');
+  document.getElementById('drillDownModal').style.display='flex';
+}
+function closeDrillDown(){ document.getElementById('drillDownModal').style.display='none'; }
+
+// ==================== TOP OUTLET ====================
+function renderTopOutlet(outstanding){
+  const byOutlet={};
+  outstanding.forEach(r=>{ const k=r.kodeOutlet||r.namaOutlet; if(!byOutlet[k]) byOutlet[k]={nama:r.namaOutlet,total:0,aging:0,channel:r.channel}; byOutlet[k].total+=r.total; if(r.aging>byOutlet[k].aging) byOutlet[k].aging=r.aging; });
+  const sorted=Object.values(byOutlet).sort((a,b)=>b.total-a.total).slice(0,10);
+  const maxVal=sorted[0]?.total||1;
+  const rBg=['#fef9c3','#f1f5f1','#fef3c7'];
+  const rClr=['#ca8a04','#4a7260','#d97706'];
+  document.getElementById('topOutletList').innerHTML=sorted.length?sorted.map((o,i)=>`
+    <div class="top-item">
+      <div class="top-rank ${i<3?'':'rn'}" style="${i<3?`background:${rBg[i]};color:${rClr[i]}`:''}">${i+1}</div>
+      <div class="top-info"><div class="top-name">${o.nama}</div><div class="top-sub">${o.channel} · ${o.aging} hari</div>
+      <div class="bar-progress"><div class="bar-fill" style="width:${(o.total/maxVal*100).toFixed(1)}%"></div></div></div>
+      <div class="top-right"><div class="top-val">${fmtShort(o.total)}</div></div>
+    </div>`).join(''):'<div class="empty-state">Tidak ada data</div>';
+}
+
+// ==================== COMBINED CHART ====================
+function renderChartCombined(){
+  destroyChart('chartCombined');
+  const byDay={penjualan:{},piutang:{},penagihan:{}};
+  // Penjualan by tanggal (CASH+TOP)
+  allData.filter(r=>['CASH','TOP'].includes(r.keterangan)&&r.tanggal).forEach(r=>{ const dk=dateKey(r.tanggal); byDay.penjualan[dk]=(byDay.penjualan[dk]||0)+r.total; });
+  // Piutang baru by tglNota (TOP outstanding)
+  allData.filter(r=>r.keterangan==='TOP'&&r.status==='OUTSTANDING'&&r.tglNota).forEach(r=>{ const dk=dateKey(r.tglNota); byDay.piutang[dk]=(byDay.piutang[dk]||0)+r.total; });
+  // Penagihan by tanggal (TAGIHAN)
+  allData.filter(r=>r.keterangan==='TAGIHAN'&&r.tanggal).forEach(r=>{ const dk=dateKey(r.tanggal); byDay.penagihan[dk]=(byDay.penagihan[dk]||0)+r.total; });
+  const allDates=[...new Set([...Object.keys(byDay.penjualan),...Object.keys(byDay.piutang),...Object.keys(byDay.penagihan)])].sort().slice(-30);
+  const labels=allDates.map(dk=>new Date(dk).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
+  const ctx=document.getElementById('chartCombined').getContext('2d');
+  charts['chartCombined']=new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {label:'Penjualan',data:allDates.map(dk=>byDay.penjualan[dk]||0),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.06)',tension:.35,fill:true,pointRadius:2,pointBackgroundColor:'#2563eb'},
+    {label:'Piutang Baru',data:allDates.map(dk=>byDay.piutang[dk]||0),borderColor:'#dc2626',backgroundColor:'rgba(220,38,38,0.06)',tension:.35,fill:true,pointRadius:2,pointBackgroundColor:'#dc2626'},
+    {label:'Penagihan',data:allDates.map(dk=>byDay.penagihan[dk]||0),borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,0.06)',tension:.35,fill:true,pointRadius:2,pointBackgroundColor:'#16a34a'},
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:11}}},tooltip:{callbacks:{label:ctx=>' '+fmtShort(ctx.parsed.y)}}},scales:{x:{grid:{color:'#e0ece4'},ticks:{font:{size:10}}},y:{grid:{color:'#e0ece4'},ticks:{callback:v=>fmtShort(v),font:{size:10}}}}}});
+}
+
+// ==================== SUBTITLE ====================
+function updateSubtitle(outstanding,pembayaran){
+  const {from,to}=getFilter();
+  const fmtD=v=>v?new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):null;
+  const totalAR=outstanding.reduce((s,r)=>s+r.total,0);
+  const totalByr=pembayaran.reduce((s,r)=>s+r.total,0);
+  const hariSet=getHariDiRange();
+  let hariInfo='';
+  if(hariSet.size>0&&hariSet.size<7){ const hn=['Min','Sen','Sel','Rab','Kam','Jum','Sab']; hariInfo=' · JT: '+[...hariSet].map(h=>hn[h]).join(','); }
+  const per=(from||to)?((fmtD(from)||'...')+(from!==to?' – '+(fmtD(to)||'...'):'')+ ' · '):'Semua · ';
+  document.getElementById('subtitlePeriod').textContent=per+'Outstanding: '+fmtShort(totalAR)+' · Bayar: '+fmtShort(totalByr)+hariInfo;
 }
 
 // ==================== WHATSAPP ====================
-function buildWAMessage() {
-  // Pesan berdasarkan tabel jatuh tempo periode (selaras KPI Card 2)
-  const data = getPiutangJatuhTempoPeriode();
-  const from = document.getElementById('filterFrom').value;
-  const to   = document.getElementById('filterTo').value;
-  const fmtD = v => v ? new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+function buildWAMessage(){
+  const data=getPiutangJatuhTempoPeriode();
+  const {from,to}=getFilter();
+  const fmtD=v=>v?new Date(v).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  const grouped={};
+  data.forEach(r=>{ const k=(r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):''); if(!grouped[k]) grouped[k]={nama:r.namaOutlet,salesman:r.salesman,total:0,aging:r.aging,tglTempo:r.tglTempo,isJatuhTempo:r.isJatuhTempo}; grouped[k].total+=r.total; });
+  const rows=Object.values(grouped).sort((a,b)=>a.isJatuhTempo===b.isJatuhTempo?b.total-a.total:a.isJatuhTempo?-1:1);
+  const totalNominal=rows.reduce((s,r)=>s+r.total,0);
+  const tglHariIni=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  let msg=`🔔 *REMINDER PENAGIHAN PIUTANG*
+🏢 HS AO Surabaya
+📅 ${tglHariIni}
+`;
+  msg+=`━━━━━━━━━━━━━━━━━━━━━━
 
-  // Group by nota
-  const grouped = {};
-  data.forEach(r => {
-    const k = (r.kodeOutlet||r.namaOutlet)+'||'+(r.tglNota?dateKey(r.tglNota):'');
-    if (!grouped[k]) grouped[k] = { nama:r.namaOutlet, salesman:r.salesman, total:0, aging:r.aging, tglTempo:r.tglTempo, isJatuhTempo:r.isJatuhTempo };
-    grouped[k].total += r.total;
-    if (r.aging > grouped[k].aging) grouped[k].aging = r.aging;
-    if (r.isJatuhTempo) grouped[k].isJatuhTempo = true;
-  });
-
-  const rows = Object.values(grouped).sort((a,b) => {
-    if (a.isJatuhTempo && !b.isJatuhTempo) return -1;
-    if (!a.isJatuhTempo && b.isJatuhTempo) return 1;
-    return b.total - a.total;
-  });
-
-  const totalNominal = rows.reduce((s,r)=>s+r.total,0);
-  const periodeStr   = from === to ? fmtD(from) : fmtD(from) + ' – ' + fmtD(to);
-  const tglHariIni   = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-
-  let msg = `🔔 *REMINDER PENAGIHAN PIUTANG*\n`;
-  msg += `🏢 HS AO Surabaya\n`;
-  msg += `📅 ${tglHariIni} | Periode JT: ${periodeStr}\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-  const lewat = rows.filter(r=>r.isJatuhTempo);
-  const akan  = rows.filter(r=>!r.isJatuhTempo);
-
-  if (lewat.length) {
-    msg += `🔴 *SUDAH LEWAT TEMPO (${lewat.length} nota)*\n`;
-    lewat.forEach((o,i) => {
-      msg += `${i+1}. *${o.nama}*\n`;
-      msg += `   PIC: ${o.salesman} | +${o.aging} hari | *${fmtFull(o.total)}*\n`;
-    });
-    msg += `\n`;
-  }
-
-  if (akan.length) {
-    msg += `⚠️ *AKAN JATUH TEMPO (${akan.length} nota)*\n`;
-    akan.forEach((o,i) => {
-      const tgl = fmtDate(o.tglTempo);
-      msg += `${i+1}. *${o.nama}*\n`;
-      msg += `   PIC: ${o.salesman} | Tempo: ${tgl} | *${fmtFull(o.total)}*\n`;
-    });
-    msg += `\n`;
-  }
-
-  msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `💰 *Total tagihan: ${fmtFull(totalNominal)}*\n`;
-  msg += `📊 ${rows.length} nota · ${new Set(rows.map(r=>r.nama)).size} outlet\n`;
-  msg += `\n_Pesan otomatis dari Finance HS AO Surabaya_`;
-
+`;
+  const lewat=rows.filter(r=>r.isJatuhTempo), akan=rows.filter(r=>!r.isJatuhTempo);
+  if(lewat.length){ msg+=`🔴 *LEWAT TEMPO (${lewat.length} nota)*
+`; lewat.forEach((o,i)=>{ msg+=`${i+1}. *${o.nama}*
+   PIC: ${o.salesman} | +${o.aging} hari | *${fmtFull(o.total)}*
+`; }); msg+='
+'; }
+  if(akan.length){ msg+=`⚠️ *AKAN JT (${akan.length} nota)*
+`; akan.forEach((o,i)=>{ msg+=`${i+1}. *${o.nama}*
+   PIC: ${o.salesman} | Tempo: ${fmtDate(o.tglTempo)} | *${fmtFull(o.total)}*
+`; }); msg+='
+'; }
+  msg+=`━━━━━━━━━━━━━━━━━━━━━━
+💰 *Total: ${fmtFull(totalNominal)}*
+_Pesan otomatis dari Dashboard HS AO Surabaya_`;
   return msg;
 }
+function openWAModal(){ const msg=buildWAMessage(); document.getElementById('waPreviewText').textContent=msg; document.getElementById('waModalSubtitle').textContent=document.getElementById('jatuhTempoCount').textContent+' nota'; const btn=document.getElementById('waBtnCopy'); btn.innerHTML='<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan'; btn.classList.remove('copied'); document.getElementById('waModalOverlay').classList.add('active'); }
+function copyWAMessage(){ const msg=buildWAMessage(); const btn=document.getElementById('waBtnCopy'); navigator.clipboard.writeText(msg).then(()=>{ btn.innerHTML='✓ Tersalin!'; btn.classList.add('copied'); setTimeout(()=>{ btn.innerHTML='Copy Pesan'; btn.classList.remove('copied'); },2500); }).catch(()=>{ const ta=document.createElement('textarea'); ta.value=msg; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); btn.innerHTML='✓ Tersalin!'; btn.classList.add('copied'); setTimeout(()=>{ btn.innerHTML='Copy Pesan'; btn.classList.remove('copied'); },2500); }); }
+function openWAWeb(){ window.open('https://web.whatsapp.com/send?text='+encodeURIComponent(buildWAMessage()),'_blank'); }
+function closeWAModal(){ document.getElementById('waModalOverlay').classList.remove('active'); }
 
-function openWAModal() {
-  const msg = buildWAMessage();
-  document.getElementById('waPreviewText').textContent = msg;
-  const count = document.getElementById('jatuhTempoCount').textContent;
-  document.getElementById('waModalSubtitle').textContent = count + ' nota dalam periode ini';
-  const btn = document.getElementById('waBtnCopy');
-  btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
-  btn.classList.remove('copied');
-  document.getElementById('waModalOverlay').classList.add('active');
-}
-
-function copyWAMessage() {
-  const msg = buildWAMessage();
-  const btn = document.getElementById('waBtnCopy');
-  navigator.clipboard.writeText(msg).then(() => {
-    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Tersalin!`;
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Pesan`;
-      btn.classList.remove('copied');
-    }, 2500);
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = msg; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    btn.innerHTML = `✓ Tersalin!`; btn.classList.add('copied');
-    setTimeout(() => { btn.innerHTML = `Copy Pesan`; btn.classList.remove('copied'); }, 2500);
-  });
-}
-
-function openWAWeb() {
-  const msg = buildWAMessage();
-  window.open('https://web.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
-}
-
-function closeWAModal() {
-  document.getElementById('waModalOverlay').classList.remove('active');
-}
 // ==================== EVENT LISTENERS ====================
-['filterFrom','filterTo','filterChannel','filterSalesman','filterStatus'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => renderAll());
+['filterFrom','filterTo','filterChannel','filterSalesman','filterStatus'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('change',()=>renderAll());
 });
+
+async function exportData(){
+  const btn=document.getElementById('exportBtn');
+  btn.style.pointerEvents='none';
+  try{
+    const res=await fetch(CSV_URL+'&t='+Date.now());
+    let csv=await res.text();
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const link=document.createElement('a');
+    link.href=URL.createObjectURL(blob);
+    link.download=`piutang_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  }catch(e){ alert('Gagal export: '+e.message); }
+  finally{ btn.style.pointerEvents='auto'; }
+}
+
+function setDefaultDates(){
+  if(!allData.length) return;
+  const dates=allData.map(r=>r.tanggal).filter(Boolean);
+  if(!dates.length) return;
+  const max=new Date(Math.max(...dates));
+  const maxKey=dateKey(max);
+  if(!document.getElementById('filterFrom').value) document.getElementById('filterFrom').value=maxKey;
+  if(!document.getElementById('filterTo').value)   document.getElementById('filterTo').value=maxKey;
+}
 
 loadData();
 </script>
