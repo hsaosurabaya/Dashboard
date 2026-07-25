@@ -37,6 +37,7 @@
   --cash: #16a34a;
   --top: #ea7010;
   --tagihan: #dc2626;
+  --retur: #be185d;
 
   /* sidebar gradient */
   --sidebar-grad-top: #0a2e1a;
@@ -156,6 +157,7 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
 .badge-cash { background: rgba(22,163,74,.1); color: var(--green); }
 .badge-top { background: rgba(234,112,16,.1); color: var(--orange); }
 .badge-tagihan { background: rgba(220,38,38,.1); color: var(--red); }
+.badge-retur { background: rgba(190,24,93,.1); color: var(--retur); }
 
 /* TOP LIST */
 .top-list { display: flex; flex-direction: column; gap: 8px; }
@@ -532,7 +534,7 @@ function openModal(type) {
   const infoDiv = document.getElementById('modalInfo');
   
   const data = getFilteredData();
-  const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP');
+  const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP' || r.keterangan === 'RETUR');
   const dataCOH = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TAGIHAN');
   
   if (type === 'penjualan') {
@@ -550,7 +552,7 @@ function openModal(type) {
           ${channels.map(ch => `<tr><td><strong>${ch}</strong></td><td>${fmtFull(byChannel[ch] || 0)}</td><td>${total > 0 ? ((byChannel[ch]||0)/total*100).toFixed(1) : 0}%</td></tr>`).join('')}
         </tbody>
       </table>`;
-    infoDiv.innerHTML = `📊 Berdasarkan filter yang dipilih (CASH + TOP)`;
+    infoDiv.innerHTML = `📊 Berdasarkan filter yang dipilih (CASH + TOP, dikurangi RETUR)`;
   }
   else if (type === 'margin') {
     title.innerHTML = '📊 Detail Margin per Channel';
@@ -682,7 +684,7 @@ function setChartPeriode(periode, btn) {
 
 function getChartData() {
   let data = getFilteredData();
-  const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP');
+  const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP' || r.keterangan === 'RETUR');
   
   if (chartPeriode === '7days') {
     const today = new Date();
@@ -718,6 +720,14 @@ async function loadData() {
     });
 
     allData = parsed.data.map(row => {
+      const keterangan = (row['KETERANGAN'] || '').toString().trim().toUpperCase();
+      const isRetur = keterangan === 'RETUR';
+      // RETUR di master data tersimpan sebagai angka positif, tapi harus
+      // mengurangi penjualan/qty/margin — jadi dibalik jadi negatif di sini
+      // supaya semua penjumlahan di dashboard otomatis kepotong oleh retur.
+      const qtyRaw = parseNum(row['QTY JUAL']);
+      const totalRaw = parseNum(row['TOTAL']);
+      const marginRaw = parseNum(row['MARGIN']);
       return {
         tanggal: parseDate(row['TANGGAL'] || ''),
         channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
@@ -728,10 +738,10 @@ async function loadData() {
         namaBarang: (row['NAMA BARANG'] || '').toString().trim(),
         hargaJual: parseNum(row['HARGA JUAL']),
         hargaPabrik: parseNum(row['HARGA PABRIK']),
-        qtyJual: parseNum(row['QTY JUAL']),
-        total: parseNum(row['TOTAL']),
-        margin: parseNum(row['MARGIN']),
-        keterangan: (row['KETERANGAN'] || '').toString().trim().toUpperCase(),
+        qtyJual: isRetur ? -Math.abs(qtyRaw) : qtyRaw,
+        total: isRetur ? -Math.abs(totalRaw) : totalRaw,
+        margin: isRetur ? -Math.abs(marginRaw) : marginRaw,
+        keterangan,
         depo: (row['DEPO'] || '').toString().trim().toUpperCase(),
       };
     }).filter(r => r.tanggal && r.namaBarang && r.qtyJual !== 0);
@@ -787,7 +797,7 @@ function getFilteredData() {
 // ==================== RENDER FUNCTIONS ====================
 function renderDashboard() {
   const data = getFilteredData();
-  const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP');
+  const dataPenjualan = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TOP' || r.keterangan === 'RETUR');
   const dataCOH = data.filter(r => r.keterangan === 'CASH' || r.keterangan === 'TAGIHAN');
   
   const dates = dataPenjualan.length ? dataPenjualan.map(r => r.tanggal).filter(Boolean) : [];
@@ -1023,7 +1033,7 @@ function renderChartPayDonut(cashT, topT, tagihanT) {
 function renderTableTransaksi(data) {
   const recent = [...data].sort((a,b) => b.tanggal - a.tanggal).slice(0,20);
   const chClass = { GROSIR:'grosir', RETAIL:'retail', AGEN:'agen' };
-  const payClass = { CASH:'cash', TOP:'top', TAGIHAN:'tagihan' };
+  const payClass = { CASH:'cash', TOP:'top', TAGIHAN:'tagihan', RETUR:'retur' };
   document.getElementById('tableTransaksi').innerHTML = recent.map(r => `
     <tr><td style="color:var(--text2);font-size:11px">${fmtDate(r.tanggal)}</td><td><span class="badge badge-${chClass[r.channel]||'grosir'}">${r.channel}</span></td><td style="font-weight:500">${r.salesman}</td><td style="color:var(--text2)">${r.namaOutlet||'—'}</td><td>${r.namaBarang}</td><td style="font-family:'JetBrains Mono',monospace;text-align:right">${r.qtyJual}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--accent);text-align:right">${fmtShort(r.total)}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--green);text-align:right">${fmtShort(r.margin)}</td><td><span class="badge badge-${payClass[r.keterangan]||'cash'}">${r.keterangan||'—'}</span></td></tr>
   `).join('');
