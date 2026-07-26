@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outlet — Depo Surabaya</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --bg: #f2f7f4; --bg2: #e8f0eb; --surface: #ffffff; --surface2: #f4faf6; --surface3: #edf5ef;
+  --border: #e0ece4; --border2: #c8dece; --text: #0d2115; --text2: #4a7260; --text3: #89aa96;
+  --accent: #1a6b3c; --accent2: #0f4d2b; --green: #16a34a; --orange: #ea7010; --purple: #9333ea;
+  --cyan: #0891b2; --red: #dc2626; --yellow: #ca8a04;
+  --grosir: #185fa5; --retail: #16a34a; --agen: #9333ea;
+  --cash: #16a34a; --top: #ea7010; --tagihan: #dc2626; --retur: #be185d;
+  --sidebar-grad-top: #0a2e1a; --sidebar-grad-mid: #1a6b3c; --sidebar-grad-bot: #27ae60;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* SIDEBAR */
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 250px; background: linear-gradient(175deg, var(--sidebar-grad-top) 0%, var(--sidebar-grad-mid) 50%, var(--sidebar-grad-bot) 100%); z-index: 100; display: flex; flex-direction: column; box-shadow: 4px 0 20px rgba(10,46,26,0.25); overflow-y: auto; }
+.sidebar-logo { padding:20px 10px 25px; display:flex; justify-content:center; align-items:center; }
+.sidebar-brand-logo { width:220px; height:auto; display:block; margin:auto; filter:drop-shadow(0 10px 20px rgba(0,0,0,.25)); }
+.sidebar-section { padding-top:10px; }
+.sidebar-section-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: .1em; padding: 0 8px; margin-bottom: 4px; }
+.sidebar-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.65); cursor: pointer; transition: all .15s; margin-bottom: 1px; text-decoration: none; }
+.sidebar-item:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.95); }
+.sidebar-item.active { background: rgba(255,255,255,0.18); color: #ffffff; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); }
+.sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.sidebar-shortcuts { margin-top: auto; padding: 12px 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+.shortcut-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.75); cursor: pointer; margin-bottom: 2px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); }
+.shortcut-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+#ov360Nav { display: none; padding-top: 14px; padding-bottom: 6px; }
+.ov-subnav-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.6); cursor: pointer; margin-bottom: 1px; }
+.ov-subnav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* MAIN */
+.main { margin-left: 250px; min-height: 100vh; width: calc(100% - 250px); }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 80; box-shadow: 0 1px 0 var(--border), 0 2px 12px rgba(10,46,26,0.06); flex-wrap: wrap; gap: 10px; }
+.topbar-left h1 { font-size: 17px; font-weight: 700; }
+.topbar-left p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.breadcrumb { font-size: 13px; font-weight: 600; color: var(--text2); }
+.breadcrumb b { color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.search-box { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; min-width: 260px; }
+.search-box input { border: none; background: transparent; outline: none; font-family: inherit; font-size: 12px; color: var(--text); width: 100%; }
+.search-box svg { flex-shrink: 0; color: var(--text3); }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 28px 7px 10px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a7260' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+.filter-select:hover { border-color: var(--border2); }
+.date-range-box { display:flex; align-items:center; gap:6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 12px; }
+.date-range-box input[type=date] { border:none; background:transparent; font-family:inherit; font-size:12px; color:var(--text); outline:none; }
+.refresh-btn { background: var(--accent); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 600; padding: 7px 14px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+.refresh-btn.loading svg { animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.content { padding: 20px 24px 40px; }
+
+/* ===== LIST VIEW ===== */
+.kpi-strip { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.kpi-mini { flex: 1; min-width: 160px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(10,46,26,0.06); }
+.kpi-mini .label { font-size: 11px; color: var(--text2); font-weight: 500; margin-bottom: 4px; }
+.kpi-mini .value { font-size: 17px; font-weight: 800; color: var(--text); font-family: 'Sora', sans-serif; }
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 1px 3px rgba(10,46,26,0.05); overflow: hidden; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { position: sticky; top: 0; background: var(--surface2); color: var(--text2); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding: 10px 12px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+thead th:hover { color: var(--accent); }
+tbody tr.outlet-row { cursor: pointer; transition: background .1s; }
+tbody tr.outlet-row:hover { background: var(--surface3); }
+tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.outlet-name { font-weight: 700; color: var(--text); }
+.outlet-kode { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.chip { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; display: inline-block; }
+.chip-grosir { background: rgba(24,95,165,.1); color: var(--grosir); }
+.chip-retail { background: rgba(22,163,74,.1); color: var(--retail); }
+.chip-agen { background: rgba(147,51,234,.1); color: var(--agen); }
+.chip-na { background: var(--surface3); color: var(--text3); }
+.muted { color: var(--text3); }
+.view-btn { background: var(--surface3); border: 1px solid var(--border); color: var(--accent); font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+.view-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 12px; }
+.result-count { font-size: 11px; color: var(--text3); padding: 10px 16px; }
+
+/* ===== PROFILE (OUTLET 360) VIEW ===== */
+.hidden-view { display: none; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(10,46,26,0.05); }
+.card-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--text2); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.ov-stack > * + * { margin-top: 14px; }
+
+/* header card */
+.ov-header { display: grid; grid-template-columns: 170px 1fr 210px 150px; gap: 18px; align-items: stretch; }
+.ov-photo { width: 100%; height: 100%; min-height: 130px; border-radius: 10px; object-fit: cover; background: var(--surface2); }
+.ov-photo-empty { width: 100%; height: 130px; border-radius: 10px; background: var(--surface2); border: 1px dashed var(--border2); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text3); font-size: 10px; gap: 6px; text-align: center; padding: 6px; }
+.ov-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.ov-name-row h2 { font-size: 19px; font-weight: 800; font-family: 'Sora', sans-serif; }
+.badge-status { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: rgba(22,163,74,.12); color: var(--green); }
+.ov-meta { font-size: 12px; color: var(--text2); line-height: 1.9; }
+.ov-meta b { color: var(--text); font-weight: 700; }
+.ov-scorebox { display: flex; gap: 10px; margin-top: 12px; }
+.ov-score-card { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; text-align: center; }
+.ov-score-card.placeholder { opacity: .55; }
+.ov-score-card .lbl { font-size: 10px; color: var(--text2); font-weight: 600; margin-bottom: 4px; }
+.ov-score-card .val { font-size: 18px; font-weight: 800; color: var(--accent); font-family: 'Sora', sans-serif; }
+.ov-contact-list .info-row { display: flex; gap: 8px; padding: 5px 0; font-size: 12px; align-items: baseline; }
+.ov-contact-list .icon { width: 14px; color: var(--text3); flex-shrink: 0; }
+.ov-contact-list .k { color: var(--text2); min-width: 78px; }
+.ov-contact-list .v { font-weight: 700; }
+.ov-contact-list .v.empty { color: var(--text3); font-weight: 500; font-style: italic; }
+.ov-qr-box { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.ov-qr-img { width: 84px; height: 84px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); }
+.ov-qr-empty { width: 84px; height: 84px; border-radius: 8px; border: 1px dashed var(--border2); background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text3); text-align: center; padding: 4px; }
+.ov-btn { width: 100%; font-size: 11px; font-weight: 700; padding: 7px 8px; border-radius: 7px; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 5px; border: none; text-decoration: none; }
+.ov-btn-wa { background: #16a34a; color: #fff; }
+.ov-btn-wa.disabled { background: var(--surface3); color: var(--text3); pointer-events: none; }
+.ov-btn-maps { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+/* grid helpers */
+.ov-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ov-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.ov-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.ov-kpi-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.ov-kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(10,46,26,0.06); }
+.ov-kpi-card .lbl { font-size: 10px; color: var(--text2); font-weight: 600; margin-bottom: 5px; display:flex; align-items:center; gap:4px; }
+.ov-kpi-card .val { font-size: 16px; font-weight: 800; font-family: 'Sora', sans-serif; }
+.ov-kpi-card .sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.ov-kpi-card .sub.up { color: var(--green); }
+.ov-kpi-card .sub.down { color: var(--red); }
+
+#outletMap2 { height: 190px; border-radius: 10px; }
+.map-empty { height: 190px; border-radius: 10px; background: var(--surface2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--text3); font-size: 11px; text-align: center; padding: 16px; }
+.loc-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; font-size: 11px; }
+.loc-meta div .l { color: var(--text2); font-size: 9px; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+.loc-meta div .v { font-weight: 700; font-size: 12px; }
+
+.ai-box { background: var(--surface2); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text2); line-height: 1.7; min-height: 140px; }
+.ai-box.placeholder { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text3); font-style: italic; }
+.ai-link { font-size: 11px; font-weight: 700; color: var(--accent); background: none; border: none; cursor: pointer; font-family: inherit; }
+.ai-link[disabled] { color: var(--text3); cursor: not-allowed; }
+
+.chart-canvas-wrap { position: relative; width: 100%; height: 190px; }
+.chart-canvas-wrap.sm { height: 150px; }
+
+.donut-wrap { display: flex; align-items: center; gap: 14px; }
+.donut-legend { flex: 1; font-size: 11px; }
+.donut-legend-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; justify-content: space-between; }
+.donut-legend-row .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.donut-legend-name { display:flex; align-items:center; gap:6px; }
+
+.profile-table-wrap { overflow-x: auto; }
+.profile-table-wrap table { font-size: 11.5px; }
+.badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+.badge-cash { background: rgba(22,163,74,.1); color: var(--cash); }
+.badge-top { background: rgba(234,112,16,.1); color: var(--top); }
+.badge-tagihan { background: rgba(220,38,38,.1); color: var(--tagihan); }
+.badge-retur { background: rgba(190,24,93,.1); color: var(--retur); }
+.badge-lunas { background: rgba(22,163,74,.1); color: var(--green); }
+.badge-terlambat { background: rgba(220,38,38,.1); color: var(--red); }
+
+.heatmap-table { font-size: 10px; border-collapse: separate; border-spacing: 3px; }
+.heatmap-table th { font-size: 9px; color: var(--text2); font-weight: 700; padding: 2px 4px; position: static; background: none; border: none; }
+.heatmap-table td.hm-day { font-size: 9px; color: var(--text2); font-weight: 700; padding-right: 6px; border: none; }
+.heatmap-cell { width: 24px; height: 18px; border-radius: 4px; background: var(--surface2); }
+.heatmap-legend { display: flex; align-items: center; gap: 6px; font-size: 9px; color: var(--text3); margin-top: 8px; justify-content: flex-end; }
+.heatmap-legend-scale { display: flex; gap: 2px; }
+.heatmap-legend-scale div { width: 12px; height: 8px; border-radius: 2px; }
+
+.placeholder-card { border: 1px dashed var(--border2); border-radius: 10px; padding: 18px; text-align: center; color: var(--text3); font-size: 11.5px; background: var(--surface2); line-height: 1.6; }
+
+.gauge-wrap { display: flex; flex-direction: column; align-items: center; }
+.gauge-ring { width: 96px; height: 96px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; background: conic-gradient(var(--border2) 0deg 360deg); margin-bottom: 8px; }
+.gauge-ring .inner { width: 76px; height: 76px; border-radius: 50%; background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.gauge-ring .inner .n { font-size: 18px; font-weight: 800; color: var(--text3); font-family: 'Sora', sans-serif; }
+.gauge-ring .inner .s { font-size: 8px; color: var(--text3); }
+.score-bar-row { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 6px; }
+.score-bar-row .lbl { width: 65px; color: var(--text2); flex-shrink: 0; }
+.score-bar-track { flex: 1; height: 5px; border-radius: 3px; background: var(--surface3); overflow: hidden; }
+.score-bar-fill { height: 100%; background: var(--border2); border-radius: 3px; }
+
+.rekomendasi-item { display: flex; gap: 8px; font-size: 11px; padding: 6px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.rekomendasi-item:last-child { border-bottom: none; }
+.rekomendasi-num { width: 16px; height: 16px; border-radius: 50%; background: var(--surface3); color: var(--text3); font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+.timeline-track { display: flex; align-items: center; position: relative; padding: 20px 10px; }
+.timeline-track::before { content: ''; position: absolute; left: 20px; right: 20px; top: 50%; height: 2px; background: var(--border); }
+.timeline-pt { flex: 1; text-align: center; position: relative; z-index: 1; }
+.timeline-pt .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin: 0 auto 6px; }
+.timeline-pt.placeholder .dot { background: var(--border2); }
+.timeline-pt .lbl { font-size: 10px; font-weight: 700; color: var(--text); }
+.timeline-pt .dt { font-size: 9px; color: var(--text3); margin-top: 2px; }
+
+.doc-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.doc-card { background: var(--surface2); border: 1px dashed var(--border2); border-radius: 10px; padding: 14px 8px; text-align: center; font-size: 10px; color: var(--text2); font-weight: 600; }
+.doc-card .ic { font-size: 20px; margin-bottom: 6px; }
+.doc-card .n { color: var(--text3); font-weight: 500; margin-top: 2px; }
+
+.loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 12px; }
+.loading-overlay.hidden { display: none; }
+.loading-ring { width: 36px; height: 36px; border: 3px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+.loading-text { font-size: 12px; color: var(--text2); }
+
+@media (max-width: 1200px) { .ov-header { grid-template-columns: 1fr; } .ov-kpi-6 { grid-template-columns: repeat(3,1fr); } .ov-grid-3, .ov-grid-4 { grid-template-columns: repeat(2,1fr); } .doc-grid { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 900px) {
+  .sidebar { width: 60px; }
+  .sidebar-brand-logo{width:110px; }
+  .sidebar-logo .logo-title, .sidebar-item span, .sidebar-section-label, .shortcut-btn span, .ov-subnav-item span { display: none; }
+  .sidebar-item, .ov-subnav-item { justify-content: center; }
+  .main { margin-left: 60px; width: calc(100% - 60px); }
+  .ov-grid-2, .ov-grid-3, .ov-grid-4 { grid-template-columns: 1fr; }
+  .ov-kpi-6 { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <div class="loading-text">Memuat data outlet...</div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <img src="assets/logo-hs-bonek.png" alt="HS BONEK" class="sidebar-brand-logo">
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu Utama</div>
+    <a href="index.html" class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Summary</span>
+    </a>
+    <a href="penjualan.html" class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>Penjualan</span>
+    </a>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      <span>Produk (SKU)</span>
+    </div>
+    <div class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span>Salesman</span>
+    </div>
+    <a href="outlet.html" class="sidebar-item active" id="menuOutlet">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <span>Outlet</span>
+    </a>
+    <a href="piutang.html" class="sidebar-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Piutang</span>
+    </a>
+  </div>
+
+  <!-- sub-nav muncul cuma pas lagi lihat CV outlet -->
+  <div class="sidebar-section" id="ov360Nav">
+    <div class="sidebar-section-label">Outlet 360</div>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-profil')">👤 <span>Profil</span></a>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-penjualan')">💹 <span>Penjualan</span></a>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-piutang')">💰 <span>Piutang</span></a>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-produk')">📦 <span>Produk</span></a>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-lokasi')">📍 <span>Lokasi</span></a>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-ai')">🤖 <span>AI Insight</span></a>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-timeline')">🕒 <span>Timeline</span></a>
+    <a class="ov-subnav-item" onclick="scrollToSec('sec-dokumen')">📄 <span>Dokumen</span></a>
+  </div>
+
+  <div class="sidebar-shortcuts">
+    <a href="index.html" class="shortcut-btn">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+      <span>Input Penjualan</span>
+    </a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left" id="listTopbarLeft">
+      <h1>Outlet</h1>
+      <p id="subtitlePeriod">Memuat data...</p>
+    </div>
+    <div class="topbar-left hidden-view" id="profileTopbarLeft">
+      <div class="breadcrumb">Outlet / <b id="bcOutletName">-</b></div>
+    </div>
+    <div class="topbar-right" id="listViewControls">
+      <div class="filter-group">
+        <div class="search-box">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="searchBox" placeholder="Cari nama outlet / salesman / kecamatan...">
+        </div>
+        <select class="filter-select" id="filterChannel">
+          <option value="">Semua Channel</option>
+          <option value="GROSIR">Grosir</option>
+          <option value="RETAIL">Retail</option>
+          <option value="AGEN">Agen</option>
+        </select>
+        <select class="filter-select" id="filterDepo">
+          <option value="">Semua Depo</option>
+        </select>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div class="topbar-right hidden-view" id="profileViewControls">
+      <div class="date-range-box">
+        📅 <input type="date" id="pFrom"> – <input type="date" id="pTo">
+      </div>
+      <button class="refresh-btn" onclick="showListView()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border)">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Kembali
+      </button>
+      <button class="refresh-btn" onclick="loadData().then(()=>showProfile(currentKode))">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Refresh Data
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- ============ LIST VIEW ============ -->
+    <div id="listView">
+      <div class="kpi-strip">
+        <div class="kpi-mini"><div class="label">Total Outlet</div><div class="value" id="kpiTotalOutlet">0</div></div>
+        <div class="kpi-mini"><div class="label">Outlet Aktif (30 hari)</div><div class="value" id="kpiOutletAktif">0</div></div>
+        <div class="kpi-mini"><div class="label">Total Penjualan (semua periode)</div><div class="value" id="kpiTotalPenjualan">Rp 0</div></div>
+        <div class="kpi-mini"><div class="label">Data Profil Terhubung</div><div class="value" id="kpiProfilTerhubung">0 / 0</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort="namaOutlet">Nama Outlet</th>
+                <th data-sort="kecamatan">Kecamatan</th>
+                <th data-sort="depo">Depo</th>
+                <th data-sort="channel">Channel</th>
+                <th data-sort="salesman">Salesman</th>
+                <th data-sort="totalPenjualan" style="text-align:right">Total Penjualan</th>
+                <th data-sort="lastTx">Transaksi Terakhir</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="outletTableBody"></tbody>
+          </table>
+        </div>
+        <div class="result-count" id="resultCount"></div>
+      </div>
+    </div>
+
+    <!-- ============ PROFILE (OUTLET 360) VIEW ============ -->
+    <div id="profileView" class="hidden-view ov-stack">
+
+      <!-- HEADER -->
+      <div class="card" id="sec-profil">
+        <div class="ov-header">
+          <div id="ovPhotoWrap">
+            <div class="ov-photo-empty">📷<br>Foto outlet<br>belum diunggah</div>
+          </div>
+
+          <div>
+            <div class="ov-name-row">
+              <h2 id="hOutletName">-</h2>
+              <span class="badge-status" id="hStatusBadge">AKTIF</span>
+            </div>
+            <div class="ov-meta">
+              Kode Outlet : <b id="hKode">-</b><br>
+              Channel : <b id="hChannel">-</b>
+            </div>
+            <div class="ov-scorebox">
+              <div class="ov-score-card placeholder">
+                <div class="lbl">Grade</div>
+                <div class="val">-</div>
+              </div>
+              <div class="ov-score-card placeholder">
+                <div class="lbl">Health Score</div>
+                <div class="val">-<span style="font-size:10px;color:var(--text3)">/100</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ov-contact-list">
+            <div class="info-row"><span class="icon">👤</span><span class="k">Pemilik</span><span class="v" id="pOwner">-</span></div>
+            <div class="info-row"><span class="icon">📇</span><span class="k">PIC / Kontak</span><span class="v" id="pPic">-</span></div>
+            <div class="info-row"><span class="icon">📞</span><span class="k">No. HP</span><span class="v" id="pKontak">-</span></div>
+            <div class="info-row"><span class="icon">🧑‍💼</span><span class="k">Salesman</span><span class="v" id="pSalesman">-</span></div>
+            <div class="info-row"><span class="icon">🏬</span><span class="k">Depo</span><span class="v" id="pDepo">-</span></div>
+            <div class="info-row"><span class="icon">📅</span><span class="k">Hari Kunjungan</span><span class="v empty" id="pHariKunjungan">-</span></div>
+          </div>
+
+          <div class="ov-qr-box" id="qrWrap">
+            <div class="ov-qr-empty">QR lokasi<br>belum tersedia</div>
+            <div style="font-size:9px;color:var(--text3)">Scan untuk lihat di map</div>
+            <a class="ov-btn ov-btn-wa disabled" id="btnWa" href="#">💬 Chat WhatsApp</a>
+            <a class="ov-btn ov-btn-maps" id="btnMaps" href="#" target="_blank">📍 Buka Google Maps</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOKASI + AI -->
+      <div class="ov-grid-2">
+        <div class="card" id="sec-lokasi">
+          <div class="card-title">📍 Lokasi Outlet</div>
+          <div id="mapWrap"></div>
+          <div class="loc-meta">
+            <div><div class="l">Latitude</div><div class="v" id="mLat">-</div></div>
+            <div><div class="l">Longitude</div><div class="v" id="mLng">-</div></div>
+            <div><div class="l">Jarak ke Depo</div><div class="v" id="mJarak">-</div></div>
+            <div><div class="l">Radius Distribusi</div><div class="v" id="mRadius">-</div></div>
+          </div>
+        </div>
+        <div class="card" id="sec-ai">
+          <div class="card-title">🤖 Ringkasan AI (AI Business Analyst)</div>
+          <div class="ai-box placeholder">
+            Ringkasan otomatis dari AI belum aktif untuk outlet ini.<br>Sambungkan API insight untuk mengaktifkan fitur ini.
+          </div>
+          <div style="text-align:right;margin-top:8px">
+            <button class="ai-link" disabled>Lihat Insight Lengkap →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 6 -->
+      <div class="ov-kpi-6" id="sec-penjualan">
+        <div class="ov-kpi-card"><div class="lbl">Omzet YTD</div><div class="val" id="kOmzetYtd">Rp 0</div><div class="sub" id="kOmzetYtdSub">-</div></div>
+        <div class="ov-kpi-card"><div class="lbl">Omzet Bulan Ini</div><div class="val" id="kOmzetBulan">Rp 0</div><div class="sub" id="kOmzetBulanSub">-</div></div>
+        <div class="ov-kpi-card"><div class="lbl">Growth (MoM)</div><div class="val" id="kGrowth">-</div><div class="sub" id="kGrowthSub">-</div></div>
+        <div class="ov-kpi-card"><div class="lbl">Piutang Outstanding</div><div class="val muted" id="kPiutang">-</div><div class="sub" id="kPiutangSub">Data belum tersambung</div></div>
+        <div class="ov-kpi-card"><div class="lbl">Hari Sejak Order Terakhir</div><div class="val" id="kHariTerakhir">-</div><div class="sub" id="kHariTerakhirSub">-</div></div>
+        <div class="ov-kpi-card"><div class="lbl">Frekuensi Order</div><div class="val" id="kFrekuensi">-</div><div class="sub">rata-rata / bulan</div></div>
+      </div>
+
+      <!-- 3 CHARTS -->
+      <div class="ov-grid-3">
+        <div class="card">
+          <div class="card-title">📈 Trend Penjualan (Omzet)</div>
+          <div class="chart-canvas-wrap"><canvas id="chartOmzet"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 Trend Qty Terjual (Case)</div>
+          <div class="chart-canvas-wrap"><canvas id="chartQty"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📉 Growth % (MoM)</div>
+          <div class="chart-canvas-wrap"><canvas id="chartGrowth"></canvas></div>
+        </div>
+      </div>
+
+      <!-- KOMPOSISI + TOP5 + HEATMAP -->
+      <div class="ov-grid-3" id="sec-produk">
+        <div class="card">
+          <div class="card-title">🥯 Komposisi Penjualan (Omzet)</div>
+          <div class="donut-wrap">
+            <div class="chart-canvas-wrap sm" style="width:110px;flex-shrink:0"><canvas id="chartDonut"></canvas></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🏆 Top 5 SKU</div>
+          <div class="profile-table-wrap">
+            <table>
+              <thead><tr><th>SKU</th><th style="text-align:right">Qty</th><th style="text-align:right">Omzet</th><th style="text-align:right">Margin</th></tr></thead>
+              <tbody id="top5Body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔥 Pola Order (Heatmap)</div>
+          <div id="heatmapWrap" style="overflow-x:auto"></div>
+          <div class="heatmap-legend">
+            Rendah <div class="heatmap-legend-scale">
+              <div style="background:var(--surface3)"></div>
+              <div style="background:#bfe3cd"></div>
+              <div style="background:#7bc99a"></div>
+              <div style="background:var(--accent)"></div>
+            </div> Tinggi
+          </div>
+        </div>
+      </div>
+
+      <!-- RIWAYAT + PIUTANG -->
+      <div class="ov-grid-2" id="sec-piutang">
+        <div class="card">
+          <div class="card-title">🧾 Riwayat Penjualan Terakhir</div>
+          <div class="profile-table-wrap">
+            <table>
+              <thead><tr><th>Tgl</th><th>SKU</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th><th>Status</th></tr></thead>
+              <tbody id="riwayatBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">💰 Piutang Outlet</div>
+          <div class="placeholder-card">
+            Data piutang per-invoice (jatuh tempo, sisa tagihan, aging, status LUNAS/TERLAMBAT) belum terhubung ke profil ini.<br>
+            Sambungkan sheet piutang untuk menampilkannya di sini.
+          </div>
+        </div>
+      </div>
+
+      <!-- TREND PIUTANG + AKTIVITAS + HEALTH + REKOMENDASI -->
+      <div class="ov-grid-4">
+        <div class="card">
+          <div class="card-title">💹 Trend Piutang Outstanding</div>
+          <div class="placeholder-card" style="min-height:150px;display:flex;align-items:center;justify-content:center">
+            Data piutang belum tersedia.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🧑‍💼 Aktivitas Salesman</div>
+          <div style="font-size:11px;line-height:2.1">
+            <div>Kunjungan Terakhir <b style="float:right;color:var(--text3);font-style:italic">Belum ada data</b></div>
+            <div>Order Terakhir <b style="float:right" id="actOrderTerakhir">-</b></div>
+            <div>Rata-rata Interval Kunjungan <b style="float:right;color:var(--text3);font-style:italic">Belum ada data</b></div>
+            <div>Rata-rata Interval Order <b style="float:right" id="actIntervalOrder">-</b></div>
+            <div>Total Kunjungan (Bulan ini) <b style="float:right;color:var(--text3);font-style:italic">Belum ada data</b></div>
+            <div>Total Order (Bulan ini) <b style="float:right" id="actTotalOrderBulan">-</b></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">💚 Health Score Outlet</div>
+          <div class="gauge-wrap">
+            <div class="gauge-ring"><div class="inner"><div class="n">-</div><div class="s">/100</div></div></div>
+            <div style="width:100%">
+              <div class="score-bar-row"><span class="lbl">Penjualan</span><div class="score-bar-track"><div class="score-bar-fill" style="width:0%"></div></div></div>
+              <div class="score-bar-row"><span class="lbl">Pembayaran</span><div class="score-bar-track"><div class="score-bar-fill" style="width:0%"></div></div></div>
+              <div class="score-bar-row"><span class="lbl">Growth</span><div class="score-bar-track"><div class="score-bar-fill" style="width:0%"></div></div></div>
+              <div class="score-bar-row"><span class="lbl">Loyalitas</span><div class="score-bar-track"><div class="score-bar-fill" style="width:0%"></div></div></div>
+              <div class="score-bar-row"><span class="lbl">Coverage</span><div class="score-bar-track"><div class="score-bar-fill" style="width:0%"></div></div></div>
+            </div>
+            <div style="font-size:9px;color:var(--text3);margin-top:6px;text-align:center">Formula scoring belum diaktifkan</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🤖 AI Rekomendasi Aksi</div>
+          <div class="placeholder-card" style="min-height:150px;display:flex;align-items:center;justify-content:center">
+            Rekomendasi otomatis belum aktif.<br>Sambungkan API AI untuk mengaktifkan.
+          </div>
+        </div>
+      </div>
+
+      <!-- TIMELINE + DOKUMEN -->
+      <div class="ov-grid-2">
+        <div class="card" id="sec-timeline">
+          <div class="card-title">🕒 Timeline Outlet</div>
+          <div class="timeline-track" id="timelineTrack"></div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:4px">Milestone lain (naik grade, piutang macet, dll) akan muncul otomatis setelah data terkait tersambung.</div>
+        </div>
+        <div class="card" id="sec-dokumen">
+          <div class="card-title">📄 Dokumen Outlet</div>
+          <div class="doc-grid">
+            <div class="doc-card"><div class="ic">🖼️</div>Foto Outlet<div class="n">0 file</div></div>
+            <div class="doc-card"><div class="ic">🧾</div>NPWP<div class="n">0 file</div></div>
+            <div class="doc-card"><div class="ic">🪪</div>KTP Pemilik<div class="n">0 file</div></div>
+            <div class="doc-card"><div class="ic">📃</div>Perjanjian Kerja Sama<div class="n">0 file</div></div>
+            <div class="doc-card"><div class="ic">🗂️</div>Foto Rak Display<div class="n">0 file</div></div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px">Fitur unggah dokumen butuh penyimpanan file terpisah — belum aktif di dashboard statis ini.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== KONFIGURASI SUMBER DATA ====================
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=0&single=true&output=csv";
+
+// TODO: isi link publish-to-web CSV master outlet.
+// Kolom yang diharapkan: KODE OUTLET, OWNER, PIC, KONTAK, ALAMAT, KECAMATAN, LATITUDE, LONGITUDE, JARAK_DEPO_KM, RADIUS_KM, HARI_KUNJUNGAN
+const CSV_URL_OUTLET = "";
+
+let allData = [];
+let outletMaster = {};
+let outletRows = [];
+let sortState = { key: 'totalPenjualan', dir: 'desc' };
+let currentKode = null;
+let charts = {};
+const payClass = { CASH:'cash', TOP:'top', TAGIHAN:'tagihan', RETUR:'retur' };
+const MONTH_LABEL = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const DAY_LABEL = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+
+function fmt(n) { return "Rp " + Math.round(n).toLocaleString('id-ID'); }
+function fmtShort(n) {
+  const abs = Math.abs(n);
+  if (abs >= 1e9) return (n/1e9).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (abs >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'jt';
+  if (abs >= 1e3) return (n/1e3).toFixed(0) + 'rb';
+  return n.toString();
+}
+function parseNum(s) {
+  if (!s || s === '') return 0;
+  let cleaned = s.toString().replace(/,/g, '');
+  let result = parseFloat(cleaned);
+  return isNaN(result) ? 0 : result;
+}
+function parseDate(s) {
+  if (!s) return null;
+  const months = {jan:0,feb:1,mar:2,apr:3,mei:4,may:4,jun:5,jul:6,agu:7,aug:7,sep:8,okt:9,oct:9,nov:10,des:11,dec:11};
+  const parts = s.trim().split(/[\s\-\/]+/);
+  if (parts.length === 3) {
+    let d, m, y;
+    if (isNaN(parts[1])) { d=parseInt(parts[0]); m=months[parts[1].toLowerCase().slice(0,3)]; y=parseInt(parts[2]); }
+    else if (isNaN(parts[0])) { m=months[parts[0].toLowerCase().slice(0,3)]; d=parseInt(parts[1]); y=parseInt(parts[2]); }
+    else { y=parseInt(parts[0]); m=parseInt(parts[1])-1; d=parseInt(parts[2]); }
+    if (!isNaN(d) && m!==undefined && !isNaN(y)) return new Date(y,m,d);
+  }
+  const dt = new Date(s);
+  return isNaN(dt) ? null : dt;
+}
+function fmtDate(d) { return d ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) : '-'; }
+function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function isoDow(d) { return (d.getDay() + 6) % 7; } // 0=Sen ... 6=Min
+
+async function loadOutletMaster() {
+  outletMaster = {};
+  if (!CSV_URL_OUTLET) return;
+  try {
+    const res = await fetch(CSV_URL_OUTLET + '&t=' + Date.now());
+    let txt = await res.text();
+    if (txt.charCodeAt(0) === 0xFEFF) txt = txt.slice(1);
+    const parsed = Papa.parse(txt, { header: true, skipEmptyLines: true, transformHeader: h => h.trim().toUpperCase() });
+    parsed.data.forEach(row => {
+      const kode = (row['KODE OUTLET'] || '').toString().trim();
+      if (!kode) return;
+      outletMaster[kode] = {
+        owner: (row['OWNER'] || '').toString().trim(),
+        pic: (row['PIC'] || '').toString().trim(),
+        kontak: (row['KONTAK'] || '').toString().trim(),
+        alamat: (row['ALAMAT'] || '').toString().trim(),
+        kecamatan: (row['KECAMATAN'] || '').toString().trim(),
+        lat: parseFloat(row['LATITUDE']),
+        lng: parseFloat(row['LONGITUDE']),
+        jarakDepo: (row['JARAK_DEPO_KM'] || '').toString().trim(),
+        radius: (row['RADIUS_KM'] || '').toString().trim(),
+        hariKunjungan: (row['HARI_KUNJUNGAN'] || '').toString().trim(),
+      };
+    });
+  } catch (e) {
+    console.warn('Gagal load master outlet:', e);
+  }
+}
+
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  if (btn) btn.classList.add('loading');
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  try {
+    await loadOutletMaster();
+    const salesRes = await fetch(CSV_URL + '&t=' + Date.now());
+    let csvText = await salesRes.text();
+    if (csvText.charCodeAt(0) === 0xFEFF) csvText = csvText.slice(1);
+    const parsed = Papa.parse(csvText, {
+      header: true, skipEmptyLines: true,
+      transformHeader: h => h.trim().replace(/^[^a-zA-Z]+/, '').toUpperCase()
+    });
+    allData = parsed.data.map(row => {
+      const keterangan = (row['KETERANGAN'] || '').toString().trim().toUpperCase();
+      const isRetur = keterangan === 'RETUR';
+      const qtyRaw = parseNum(row['QTY JUAL']);
+      const totalRaw = parseNum(row['TOTAL']);
+      const marginRaw = parseNum(row['MARGIN']);
+      return {
+        tanggal: parseDate(row['TANGGAL'] || ''),
+        channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
+        salesman: (row['SALESMAN'] || '').toString().toUpperCase().trim().replace(/\s+/g, ' '),
+        kodeOutlet: (row['KODE OUTLET'] || '').toString().trim(),
+        namaOutlet: (row['NAMA OUTLET'] || '').toString().trim().replace(/\s+/g, ' '),
+        namaBarang: (row['NAMA BARANG'] || '').toString().trim().replace(/\s+/g, ' '),
+        qtyJual: isRetur ? -Math.abs(qtyRaw) : qtyRaw,
+        total: isRetur ? -Math.abs(totalRaw) : totalRaw,
+        margin: isRetur ? -Math.abs(marginRaw) : marginRaw,
+        keterangan,
+        depo: (row['DEPO'] || '').toString().trim().toUpperCase().replace(/\s+/g, ' '),
+      };
+    }).filter(r => r.tanggal && r.namaOutlet && r.qtyJual !== 0);
+
+    buildOutletRows();
+    populateFilters();
+    renderList();
+    document.getElementById('subtitlePeriod').textContent = `Terakhir update: ${new Date().toLocaleString('id-ID')}`;
+  } catch (e) {
+    console.error(e);
+    document.getElementById('subtitlePeriod').textContent = 'Gagal memuat data.';
+  } finally {
+    if (btn) btn.classList.remove('loading');
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+}
+
+function buildOutletRows() {
+  const map = {};
+  allData.forEach(r => {
+    const key = r.kodeOutlet || r.namaOutlet;
+    if (!map[key]) {
+      map[key] = { kodeOutlet: r.kodeOutlet, namaOutlet: r.namaOutlet, depo: r.depo, channelCount: {}, salesmanCount: {}, totalPenjualan: 0, lastTx: null };
+    }
+    const o = map[key];
+    o.totalPenjualan += r.total;
+    o.channelCount[r.channel] = (o.channelCount[r.channel] || 0) + 1;
+    o.salesmanCount[r.salesman] = (o.salesmanCount[r.salesman] || 0) + 1;
+    if (!o.lastTx || r.tanggal > o.lastTx) o.lastTx = r.tanggal;
+  });
+  outletRows = Object.values(map).map(o => {
+    const topChannel = Object.entries(o.channelCount).sort((a,b)=>b[1]-a[1])[0];
+    const topSalesman = Object.entries(o.salesmanCount).sort((a,b)=>b[1]-a[1])[0];
+    const master = outletMaster[o.kodeOutlet] || null;
+    return { ...o, channel: topChannel ? topChannel[0] : '', salesman: topSalesman ? topSalesman[0] : '', kecamatan: master ? master.kecamatan : '', owner: master ? master.owner : '', kontak: master ? master.kontak : '' };
+  });
+}
+
+function populateFilters() {
+  const depoSet = [...new Set(allData.map(r => r.depo))].filter(Boolean).sort();
+  const sel = document.getElementById('filterDepo');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Semua Depo</option>' + depoSet.map(d => `<option>${d}</option>`).join('');
+  sel.value = current;
+}
+
+function chipClass(ch) {
+  if (ch === 'GROSIR') return 'chip-grosir';
+  if (ch === 'RETAIL') return 'chip-retail';
+  if (ch === 'AGEN') return 'chip-agen';
+  return 'chip-na';
+}
+
+function renderList() {
+  const search = document.getElementById('searchBox').value.trim().toUpperCase();
+  const ch = document.getElementById('filterChannel').value;
+  const dp = document.getElementById('filterDepo').value;
+  let rows = outletRows.filter(o => {
+    if (ch && o.channel !== ch) return false;
+    if (dp && o.depo !== dp) return false;
+    if (search && !(o.namaOutlet.toUpperCase().includes(search) || o.kodeOutlet.toUpperCase().includes(search) || o.salesman.toUpperCase().includes(search) || (o.kecamatan||'').toUpperCase().includes(search))) return false;
+    return true;
+  });
+  rows.sort((a, b) => {
+    let va = a[sortState.key], vb = b[sortState.key];
+    if (va instanceof Date || vb instanceof Date) { va = va ? va.getTime() : 0; vb = vb ? vb.getTime() : 0; }
+    if (typeof va === 'string') { va = va || ''; vb = vb || ''; return sortState.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va); }
+    return sortState.dir === 'asc' ? va - vb : vb - va;
+  });
+  const tbody = document.getElementById('outletTableBody');
+  tbody.innerHTML = rows.length === 0
+    ? `<tr><td colspan="8"><div class="empty-state">Tidak ada outlet yang cocok dengan pencarian/filter.</div></td></tr>`
+    : rows.map(o => `
+      <tr class="outlet-row" onclick="showProfile('${o.kodeOutlet.replace(/'/g,"\\'")}')">
+        <td><div class="outlet-name">${o.namaOutlet}</div><div class="outlet-kode">${o.kodeOutlet || '-'}</div></td>
+        <td class="${o.kecamatan ? '' : 'muted'}">${o.kecamatan || '-'}</td>
+        <td>${o.depo || '-'}</td>
+        <td><span class="chip ${chipClass(o.channel)}">${o.channel || '-'}</span></td>
+        <td>${o.salesman || '-'}</td>
+        <td style="text-align:right;font-weight:700">${fmt(o.totalPenjualan)}</td>
+        <td>${fmtDate(o.lastTx)}</td>
+        <td><button class="view-btn" onclick="event.stopPropagation();showProfile('${o.kodeOutlet.replace(/'/g,"\\'")}')">Lihat CV →</button></td>
+      </tr>`).join('');
+  document.getElementById('resultCount').textContent = `Menampilkan ${rows.length} dari ${outletRows.length} outlet`;
+  document.getElementById('kpiTotalOutlet').textContent = outletRows.length.toLocaleString('id-ID');
+  const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  document.getElementById('kpiOutletAktif').textContent = outletRows.filter(o => o.lastTx && o.lastTx >= thirtyDaysAgo).length.toLocaleString('id-ID');
+  document.getElementById('kpiTotalPenjualan').textContent = fmt(outletRows.reduce((s,o)=>s+o.totalPenjualan,0));
+  const connected = outletRows.filter(o => outletMaster[o.kodeOutlet]).length;
+  document.getElementById('kpiProfilTerhubung').textContent = `${connected} / ${outletRows.length}`;
+}
+
+document.querySelectorAll('thead th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    if (sortState.key === key) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+    else { sortState.key = key; sortState.dir = 'desc'; }
+    renderList();
+  });
+});
+document.getElementById('searchBox').addEventListener('input', renderList);
+document.getElementById('filterChannel').addEventListener('change', renderList);
+document.getElementById('filterDepo').addEventListener('change', renderList);
+
+// ==================== VIEW SWITCHING ====================
+function showListView() {
+  document.getElementById('profileView').classList.add('hidden-view');
+  document.getElementById('listView').classList.remove('hidden-view');
+  document.getElementById('listViewControls').classList.remove('hidden-view');
+  document.getElementById('listViewControls').style.display = 'flex';
+  document.getElementById('profileViewControls').classList.add('hidden-view');
+  document.getElementById('listTopbarLeft').classList.remove('hidden-view');
+  document.getElementById('profileTopbarLeft').classList.add('hidden-view');
+  document.getElementById('ov360Nav').style.display = 'none';
+  currentKode = null;
+  history.replaceState(null, '', location.pathname);
+}
+
+function scrollToSec(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showProfile(kodeOutlet) {
+  const rows = allData.filter(r => r.kodeOutlet === kodeOutlet);
+  if (rows.length === 0) return;
+  currentKode = kodeOutlet;
+
+  document.getElementById('listView').classList.add('hidden-view');
+  document.getElementById('listViewControls').style.display = 'none';
+  document.getElementById('listViewControls').classList.add('hidden-view');
+  document.getElementById('profileViewControls').classList.remove('hidden-view');
+  document.getElementById('profileView').classList.remove('hidden-view');
+  document.getElementById('listTopbarLeft').classList.add('hidden-view');
+  document.getElementById('profileTopbarLeft').classList.remove('hidden-view');
+  document.getElementById('ov360Nav').style.display = 'block';
+  history.replaceState(null, '', '?kode=' + encodeURIComponent(kodeOutlet));
+  window.scrollTo(0, 0);
+
+  const dates = rows.map(r=>r.tanggal);
+  const minD = new Date(Math.min(...dates)), maxD = new Date(Math.max(...dates));
+  document.getElementById('pFrom').value = minD.toISOString().slice(0,10);
+  document.getElementById('pTo').value = maxD.toISOString().slice(0,10);
+  document.getElementById('pFrom').onchange = () => renderProfile(kodeOutlet);
+  document.getElementById('pTo').onchange = () => renderProfile(kodeOutlet);
+
+  renderProfile(kodeOutlet);
+}
+
+function renderProfile(kodeOutlet) {
+  const from = document.getElementById('pFrom').value;
+  const to = document.getElementById('pTo').value;
+  const salesRows = allData.filter(r => r.kodeOutlet === kodeOutlet && (!from || r.tanggal >= new Date(from)) && (!to || r.tanggal <= new Date(to+'T23:59:59')));
+  if (salesRows.length === 0) return;
+
+  const master = outletMaster[kodeOutlet] || null;
+  const namaOutlet = salesRows[0].namaOutlet;
+  const depoCount = {}, channelCount = {}, salesmanCount = {};
+  let totalPenjualan = 0, totalQty = 0, totalMargin = 0, firstTx = null, lastTx = null;
+  salesRows.forEach(r => {
+    totalPenjualan += r.total; totalQty += r.qtyJual; totalMargin += r.margin;
+    depoCount[r.depo] = (depoCount[r.depo]||0)+1;
+    channelCount[r.channel] = (channelCount[r.channel]||0)+1;
+    salesmanCount[r.salesman] = (salesmanCount[r.salesman]||0)+1;
+    if (!firstTx || r.tanggal < firstTx) firstTx = r.tanggal;
+    if (!lastTx || r.tanggal > lastTx) lastTx = r.tanggal;
+  });
+  const topDepo = Object.entries(depoCount).sort((a,b)=>b[1]-a[1])[0];
+  const topChannel = Object.entries(channelCount).sort((a,b)=>b[1]-a[1])[0];
+  const topSalesman = Object.entries(salesmanCount).sort((a,b)=>b[1]-a[1])[0];
+
+  document.title = namaOutlet + ' — Profil Outlet';
+  document.getElementById('bcOutletName').textContent = namaOutlet;
+  document.getElementById('hOutletName').textContent = namaOutlet;
+  document.getElementById('hKode').textContent = kodeOutlet || '-';
+  document.getElementById('hChannel').textContent = topChannel ? topChannel[0] : '-';
+
+  document.getElementById('pOwner').textContent = master?.owner || '-';
+  document.getElementById('pOwner').className = 'v' + (master?.owner ? '' : ' empty');
+  document.getElementById('pPic').textContent = master?.pic || '-';
+  document.getElementById('pPic').className = 'v' + (master?.pic ? '' : ' empty');
+  document.getElementById('pKontak').textContent = master?.kontak || '-';
+  document.getElementById('pKontak').className = 'v' + (master?.kontak ? '' : ' empty');
+  document.getElementById('pSalesman').textContent = topSalesman ? topSalesman[0] : '-';
+  document.getElementById('pDepo').textContent = topDepo ? topDepo[0] : '-';
+  document.getElementById('pHariKunjungan').textContent = master?.hariKunjungan || '-';
+
+  // QR + WA + Maps
+  const qrWrap = document.getElementById('qrWrap');
+  const btnWa = document.getElementById('btnWa');
+  const btnMaps = document.getElementById('btnMaps');
+  if (master && !isNaN(master.lat) && !isNaN(master.lng)) {
+    const geo = `geo:${master.lat},${master.lng}`;
+    qrWrap.querySelector('.ov-qr-empty')?.remove();
+    if (!qrWrap.querySelector('.ov-qr-img')) {
+      const img = document.createElement('img');
+      img.className = 'ov-qr-img';
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(geo)}`;
+      qrWrap.insertBefore(img, qrWrap.firstChild);
+    }
+    btnMaps.href = `https://www.google.com/maps?q=${master.lat},${master.lng}`;
+  } else if (!qrWrap.querySelector('.ov-qr-empty')) {
+    qrWrap.querySelector('.ov-qr-img')?.remove();
+    const div = document.createElement('div');
+    div.className = 'ov-qr-empty';
+    div.innerHTML = 'QR lokasi<br>belum tersedia';
+    qrWrap.insertBefore(div, qrWrap.firstChild);
+    btnMaps.removeAttribute('href');
+  }
+  if (master && master.kontak) {
+    const phone = master.kontak.replace(/[^0-9]/g,'').replace(/^0/,'62');
+    btnWa.href = `https://wa.me/${phone}`;
+    btnWa.classList.remove('disabled');
+  } else {
+    btnWa.classList.add('disabled');
+  }
+
+  // Lokasi
+  const mapWrap = document.getElementById('mapWrap');
+  if (master && !isNaN(master.lat) && !isNaN(master.lng)) {
+    mapWrap.innerHTML = '<div id="outletMap2"></div>';
+    const map = L.map('outletMap2').setView([master.lat, master.lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    L.marker([master.lat, master.lng]).addTo(map).bindPopup(`<b>${namaOutlet}</b>`).openPopup();
+    document.getElementById('mLat').textContent = master.lat.toFixed(4);
+    document.getElementById('mLng').textContent = master.lng.toFixed(4);
+  } else {
+    mapWrap.innerHTML = `<div class="map-empty">📍 Koordinat lokasi belum tersedia.<br>Sambungkan data master outlet untuk menampilkan peta.</div>`;
+    document.getElementById('mLat').textContent = '-';
+    document.getElementById('mLng').textContent = '-';
+  }
+  document.getElementById('mJarak').textContent = master?.jarakDepo ? master.jarakDepo + ' km' : '-';
+  document.getElementById('mRadius').textContent = master?.radius ? master.radius + ' km' : '-';
+
+  // KPI
+  const now = lastTx;
+  const ytdStart = new Date(now.getFullYear(), 0, 1);
+  const omzetYtd = salesRows.filter(r=>r.tanggal>=ytdStart).reduce((s,r)=>s+r.total,0);
+  const thisMonthKey = monthKey(now);
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const lastMonthKey = monthKey(lastMonthDate);
+  const omzetBulanIni = salesRows.filter(r=>monthKey(r.tanggal)===thisMonthKey).reduce((s,r)=>s+r.total,0);
+  const omzetBulanLalu = salesRows.filter(r=>monthKey(r.tanggal)===lastMonthKey).reduce((s,r)=>s+r.total,0);
+  const growthMoM = omzetBulanLalu > 0 ? ((omzetBulanIni-omzetBulanLalu)/omzetBulanLalu*100) : null;
+
+  document.getElementById('kOmzetYtd').textContent = fmt(omzetYtd);
+  document.getElementById('kOmzetYtdSub').textContent = `${now.getFullYear()}`;
+  document.getElementById('kOmzetBulan').textContent = fmt(omzetBulanIni);
+  document.getElementById('kOmzetBulanSub').textContent = omzetBulanLalu > 0 ? `vs bulan lalu ${fmt(omzetBulanLalu)}` : 'Tidak ada data bulan lalu';
+  const kGrowthEl = document.getElementById('kGrowth');
+  const kGrowthSubEl = document.getElementById('kGrowthSub');
+  if (growthMoM === null) { kGrowthEl.textContent = '-'; kGrowthSubEl.textContent = 'Data bulan lalu tidak cukup'; }
+  else { kGrowthEl.textContent = (growthMoM>=0?'+':'') + growthMoM.toFixed(1) + '%'; kGrowthSubEl.textContent = 'month-over-month'; kGrowthSubEl.className = 'sub ' + (growthMoM>=0?'up':'down'); }
+
+  const hariSejak = Math.floor((new Date() - lastTx) / 86400000);
+  document.getElementById('kHariTerakhir').textContent = hariSejak + ' hari';
+  document.getElementById('kHariTerakhirSub').textContent = fmtDate(lastTx);
+
+  const monthsSpan = Math.max(1, (lastTx.getFullYear()-firstTx.getFullYear())*12 + (lastTx.getMonth()-firstTx.getMonth()) + 1);
+  const distinctDates = new Set(salesRows.map(r=>r.tanggal.toDateString())).size;
+  document.getElementById('kFrekuensi').textContent = (distinctDates / monthsSpan).toFixed(1) + 'x';
+
+  document.getElementById('actOrderTerakhir').textContent = fmtDate(lastTx);
+  document.getElementById('actTotalOrderBulan').textContent = salesRows.filter(r=>monthKey(r.tanggal)===thisMonthKey).length + 'x';
+  const sortedDates = [...new Set(salesRows.map(r=>r.tanggal.getTime()))].sort((a,b)=>a-b);
+  let totalGap = 0, gapCount = 0;
+  for (let i=1;i<sortedDates.length;i++){ totalGap += (sortedDates[i]-sortedDates[i-1])/86400000; gapCount++; }
+  document.getElementById('actIntervalOrder').textContent = gapCount>0 ? Math.round(totalGap/gapCount) + ' hari' : '-';
+
+  // charts: omzet trend, qty trend, growth %
+  const trendMap = {}, qtyMap = {};
+  salesRows.forEach(r => { const mk = monthKey(r.tanggal); trendMap[mk] = (trendMap[mk]||0)+r.total; qtyMap[mk] = (qtyMap[mk]||0)+r.qtyJual; });
+  const months = Object.keys(trendMap).sort();
+  const trendLabels = months.map(m => { const [y,mo] = m.split('-'); return MONTH_LABEL[mo-1]; });
+  const trendValues = months.map(m => trendMap[m]);
+  const qtyValues = months.map(m => qtyMap[m]);
+  const growthValues = months.map((m,i) => i===0 ? null : (trendValues[i-1]>0 ? ((trendValues[i]-trendValues[i-1])/trendValues[i-1]*100) : null));
+
+  ['chartOmzet','chartQty','chartGrowth','chartDonut'].forEach(id => { if (charts[id]) { charts[id].destroy(); delete charts[id]; } });
+
+  charts.chartOmzet = new Chart(document.getElementById('chartOmzet'), {
+    type: 'line',
+    data: { labels: trendLabels, datasets: [{ label:'Omzet', data: trendValues, borderColor:'#1a6b3c', backgroundColor:'rgba(26,107,60,0.1)', fill:true, tension:.3, pointRadius:3 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}}, scales:{y:{ticks:{callback:v=>fmtShort(v)}}} }
+  });
+  charts.chartQty = new Chart(document.getElementById('chartQty'), {
+    type: 'bar',
+    data: { labels: trendLabels, datasets: [{ label:'Qty', data: qtyValues, backgroundColor:'#7bc99a', borderRadius:4 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>v.toLocaleString('id-ID')}}} }
+  });
+  charts.chartGrowth = new Chart(document.getElementById('chartGrowth'), {
+    type: 'line',
+    data: { labels: trendLabels, datasets: [{ label:'Growth %', data: growthValues, borderColor:'#ea7010', backgroundColor:'rgba(234,112,16,0.1)', fill:true, tension:.3, pointRadius:3, spanGaps:true }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.parsed.y!=null?ctx.parsed.y.toFixed(1)+'%':'-'}}}, scales:{y:{ticks:{callback:v=>v+'%'}}} }
+  });
+
+  // komposisi donut
+  const prodMap = {};
+  salesRows.forEach(r => { if (!prodMap[r.namaBarang]) prodMap[r.namaBarang] = { qty:0, total:0, margin:0 }; prodMap[r.namaBarang].qty += r.qtyJual; prodMap[r.namaBarang].total += r.total; prodMap[r.namaBarang].margin += r.margin; });
+  const prodSorted = Object.entries(prodMap).sort((a,b)=>b[1].total-a[1].total);
+  const top4 = prodSorted.slice(0,4);
+  const sisaTotal = prodSorted.slice(4).reduce((s,[,v])=>s+v.total,0);
+  const donutLabels = [...top4.map(([n])=>n), 'Lainnya'];
+  const donutValues = [...top4.map(([,v])=>v.total), sisaTotal];
+  const donutColors = ['#1a6b3c','#9333ea','#0891b2','#ea7010','#c8dece'];
+  charts.chartDonut = new Chart(document.getElementById('chartDonut'), {
+    type:'doughnut',
+    data:{ labels:donutLabels, datasets:[{ data:donutValues, backgroundColor:donutColors, borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed)}}} }
+  });
+  document.getElementById('donutLegend').innerHTML = donutLabels.map((n,i) => {
+    const pct = totalPenjualan!==0 ? (donutValues[i]/totalPenjualan*100) : 0;
+    return `<div class="donut-legend-row"><span class="donut-legend-name"><span class="dot" style="background:${donutColors[i]}"></span>${n}</span><b>${pct.toFixed(0)}%</b></div>`;
+  }).join('');
+
+  // top 5 SKU
+  const top5 = prodSorted.slice(0,5);
+  document.getElementById('top5Body').innerHTML = top5.map(([nama,v]) => `
+    <tr><td>${nama}</td><td style="text-align:right">${v.qty.toLocaleString('id-ID')}</td><td style="text-align:right">${fmt(v.total)}</td><td style="text-align:right">${v.total!==0?(v.margin/v.total*100).toFixed(1)+'%':'-'}</td></tr>
+  `).join('') || '<tr><td colspan="4" class="empty-state">Belum ada data.</td></tr>';
+
+  // heatmap pola order (hari x bulan)
+  const hmMap = {}; // key `${dow}-${mk}` -> count
+  let hmMax = 0;
+  salesRows.forEach(r => {
+    const dow = isoDow(r.tanggal), mk = monthKey(r.tanggal);
+    const key = dow+'-'+mk;
+    hmMap[key] = (hmMap[key]||0)+1;
+    if (hmMap[key] > hmMax) hmMax = hmMap[key];
+  });
+  const hmMonths = months; // sudah urut
+  let hmHtml = '<table class="heatmap-table"><thead><tr><th></th>' + hmMonths.map(m=>`<th>${MONTH_LABEL[m.split('-')[1]-1]}</th>`).join('') + '</tr></thead><tbody>';
+  for (let d=0; d<7; d++) {
+    hmHtml += `<tr><td class="hm-day">${DAY_LABEL[d]}</td>` + hmMonths.map(m => {
+      const c = hmMap[d+'-'+m] || 0;
+      const ratio = hmMax>0 ? c/hmMax : 0;
+      let bg = 'var(--surface2)';
+      if (ratio > 0.66) bg = 'var(--accent)'; else if (ratio > 0.33) bg = '#7bc99a'; else if (ratio > 0) bg = '#bfe3cd';
+      return `<td><div class="heatmap-cell" style="background:${bg}" title="${c}x"></div></td>`;
+    }).join('') + '</tr>';
+  }
+  hmHtml += '</tbody></table>';
+  document.getElementById('heatmapWrap').innerHTML = hmHtml;
+
+  // riwayat transaksi
+  const riwayat = [...salesRows].sort((a,b)=>b.tanggal-a.tanggal).slice(0,100);
+  document.getElementById('riwayatBody').innerHTML = riwayat.map(r => `
+    <tr><td>${fmtDate(r.tanggal)}</td><td>${r.namaBarang}</td><td style="text-align:right">${r.qtyJual.toLocaleString('id-ID')}</td><td style="text-align:right">${fmt(r.total)}</td><td><span class="badge badge-${payClass[r.keterangan]||'cash'}">${r.keterangan}</span></td></tr>
+  `).join('') || '<tr><td colspan="5" class="empty-state">Belum ada riwayat.</td></tr>';
+
+  // timeline (cuma yang beneran ada datanya)
+  document.getElementById('timelineTrack').innerHTML = `
+    <div class="timeline-pt"><div class="dot"></div><div class="lbl">Order Pertama</div><div class="dt">${fmtDate(firstTx)}</div></div>
+    <div class="timeline-pt placeholder"><div class="dot"></div><div class="lbl" style="color:var(--text3)">Naik Grade</div><div class="dt">Belum ada data</div></div>
+    <div class="timeline-pt placeholder"><div class="dot"></div><div class="lbl" style="color:var(--text3)">Piutang Macet</div><div class="dt">Belum ada data</div></div>
+    <div class="timeline-pt"><div class="dot"></div><div class="lbl">Order Terbaru</div><div class="dt">${fmtDate(lastTx)}</div></div>
+  `;
+}
+
+async function init() {
+  await loadData();
+  const kode = new URLSearchParams(location.search).get('kode');
+  if (kode) showProfile(kode);
+}
+init();
+</script>
+</body>
+</html>
