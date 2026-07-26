@@ -322,6 +322,9 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
         <select class="filter-select" id="filterOutlet">
           <option value="">Semua Outlet</option>
         </select>
+        <select class="filter-select" id="filterDepo">
+          <option value="">Semua Depo</option>
+        </select>
       </div>
       <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
@@ -730,19 +733,19 @@ async function loadData() {
       const marginRaw = parseNum(row['MARGIN']);
       return {
         tanggal: parseDate(row['TANGGAL'] || ''),
-        channel: (row['CHANNEL'] || '').toString().toUpperCase().trim(),
-        salesman: (row['SALESMAN'] || '').toString().trim(),
-        jobtitle: (row['JOBTITTLE'] || '').toString().trim().toUpperCase(),
+        channel: (row['CHANNEL'] || '').toString().toUpperCase().trim().replace(/\s+/g, ' '),
+        salesman: (row['SALESMAN'] || '').toString().toUpperCase().trim().replace(/\s+/g, ' '),
+        jobtitle: (row['JOBTITTLE'] || '').toString().trim().toUpperCase().replace(/\s+/g, ' '),
         kodeOutlet: (row['KODE OUTLET'] || '').toString().trim(),
-        namaOutlet: (row['NAMA OUTLET'] || '').toString().trim(),
-        namaBarang: (row['NAMA BARANG'] || '').toString().trim(),
+        namaOutlet: (row['NAMA OUTLET'] || '').toString().trim().replace(/\s+/g, ' '),
+        namaBarang: (row['NAMA BARANG'] || '').toString().trim().replace(/\s+/g, ' '),
         hargaJual: parseNum(row['HARGA JUAL']),
         hargaPabrik: parseNum(row['HARGA PABRIK']),
         qtyJual: isRetur ? -Math.abs(qtyRaw) : qtyRaw,
         total: isRetur ? -Math.abs(totalRaw) : totalRaw,
         margin: isRetur ? -Math.abs(marginRaw) : marginRaw,
         keterangan,
-        depo: (row['DEPO'] || '').toString().trim().toUpperCase(),
+        depo: (row['DEPO'] || '').toString().trim().toUpperCase().replace(/\s+/g, ' '),
       };
     }).filter(r => r.tanggal && r.namaBarang && r.qtyJual !== 0);
 
@@ -770,10 +773,13 @@ function setDefaultDates() {
 function populateFilters() {
   const salesSet = [...new Set(allData.map(r => r.salesman))].sort();
   const outletSet = [...new Set(allData.map(r => r.namaOutlet))].sort();
+  const depoSet = [...new Set(allData.map(r => r.depo))].filter(Boolean).sort();
   const selS = document.getElementById('filterSalesman');
   const selO = document.getElementById('filterOutlet');
+  const selD = document.getElementById('filterDepo');
   selS.innerHTML = '<option value="">Semua Salesman</option>' + salesSet.map(s => `<option>${s}</option>`).join('');
   selO.innerHTML = '<option value="">Semua Outlet</option>' + outletSet.map(o => `<option>${o}</option>`).join('');
+  selD.innerHTML = '<option value="">Semua Depo</option>' + depoSet.map(d => `<option>${d}</option>`).join('');
 }
 
 function getFilteredData() {
@@ -782,6 +788,7 @@ function getFilteredData() {
   const ch = document.getElementById('filterChannel').value;
   const sm = document.getElementById('filterSalesman').value;
   const ot = document.getElementById('filterOutlet').value;
+  const dp = document.getElementById('filterDepo').value;
   return allData.filter(r => {
     if (!r.tanggal) return false;
     const dk = dateKey(r.tanggal);
@@ -790,6 +797,7 @@ function getFilteredData() {
     if (ch && r.channel !== ch) return false;
     if (sm && r.salesman !== sm) return false;
     if (ot && r.namaOutlet !== ot) return false;
+    if (dp && r.depo !== dp) return false;
     return true;
   });
 }
@@ -1067,7 +1075,7 @@ function renderChartTrend(data) {
 }
 
 // Event listeners
-['filterFrom','filterTo','filterChannel','filterSalesman','filterOutlet'].forEach(id => {
+['filterFrom','filterTo','filterChannel','filterSalesman','filterOutlet','filterDepo'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => { renderDashboard(); renderChartHarian(); });
 });
 
