@@ -102,6 +102,14 @@ a { color: inherit; text-decoration: none; }
 .date-filter { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; display: flex; align-items: center; gap: 6px; transition: border-color .15s; }
 .date-filter:hover { border-color: var(--border2); }
 .date-filter input[type=date] { background: transparent; border: none; color: var(--text); font-size: 12px; font-family: inherit; outline: none; }
+.multi-select { position: relative; }
+.multi-select-btn { min-width: 110px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.multi-select-panel { position: absolute; top: calc(100% + 4px); left: 0; z-index: 50; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px; min-width: 200px; max-height: 260px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.multi-select-actions { display: flex; justify-content: space-between; padding: 2px 6px 6px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
+.multi-select-actions button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 11px; padding: 0; }
+.multi-select-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--text); cursor: pointer; }
+.multi-select-item:hover { background: rgba(255,255,255,.06); }
+.multi-select-item input { cursor: pointer; accent-color: var(--accent); }
 .refresh-btn { background: var(--accent); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 600; padding: 7px 14px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: all .15s; box-shadow: 0 2px 8px rgba(26,107,60,0.35); }
 .refresh-btn:hover { background: var(--accent2); box-shadow: 0 4px 12px rgba(26,107,60,0.45); }
 .refresh-btn.loading svg { animation: spin .7s linear infinite; }
@@ -322,9 +330,10 @@ tbody td { padding: 8px 12px; color: var(--text); white-space: nowrap; }
         <select class="filter-select" id="filterOutlet">
           <option value="">Semua Outlet</option>
         </select>
-        <select class="filter-select" id="filterDepo">
-          <option value="">Semua Depo</option>
-        </select>
+        <div class="multi-select" id="depoMultiSelect">
+          <button type="button" class="filter-select multi-select-btn" id="depoMultiBtn">Semua Depo</button>
+          <div class="multi-select-panel" id="depoMultiPanel" hidden></div>
+        </div>
       </div>
       <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
@@ -770,16 +779,74 @@ function setDefaultDates() {
   document.getElementById('filterTo').value = lastDate;
 }
 
+let selectedDepos = new Set();
+
+function updateDepoBtnLabel() {
+  const btn = document.getElementById('depoMultiBtn');
+  if (selectedDepos.size === 0) btn.textContent = 'Semua Depo';
+  else if (selectedDepos.size === 1) btn.textContent = [...selectedDepos][0];
+  else btn.textContent = `${selectedDepos.size} Depo dipilih`;
+}
+
+function renderDepoPanel(depoSet) {
+  const panel = document.getElementById('depoMultiPanel');
+  const items = depoSet.map(d => `
+    <label class="multi-select-item">
+      <input type="checkbox" value="${d}" ${selectedDepos.has(d) ? 'checked' : ''}>
+      <span>${d}</span>
+    </label>`).join('');
+  panel.innerHTML = `
+    <div class="multi-select-actions">
+      <button type="button" id="depoSelectAll">Pilih Semua</button>
+      <button type="button" id="depoClearAll">Kosongkan</button>
+    </div>
+    ${items}`;
+  panel.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) selectedDepos.add(cb.value);
+      else selectedDepos.delete(cb.value);
+      updateDepoBtnLabel();
+      renderDashboard();
+      renderChartHarian();
+    });
+  });
+  document.getElementById('depoSelectAll').addEventListener('click', () => {
+    depoSet.forEach(d => selectedDepos.add(d));
+    renderDepoPanel(depoSet);
+    updateDepoBtnLabel();
+    renderDashboard();
+    renderChartHarian();
+  });
+  document.getElementById('depoClearAll').addEventListener('click', () => {
+    selectedDepos.clear();
+    renderDepoPanel(depoSet);
+    updateDepoBtnLabel();
+    renderDashboard();
+    renderChartHarian();
+  });
+}
+
+document.getElementById('depoMultiBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('depoMultiPanel').hidden = !document.getElementById('depoMultiPanel').hidden;
+});
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('depoMultiSelect');
+  if (!wrap.contains(e.target)) document.getElementById('depoMultiPanel').hidden = true;
+});
+
 function populateFilters() {
   const salesSet = [...new Set(allData.map(r => r.salesman))].sort();
   const outletSet = [...new Set(allData.map(r => r.namaOutlet))].sort();
   const depoSet = [...new Set(allData.map(r => r.depo))].filter(Boolean).sort();
   const selS = document.getElementById('filterSalesman');
   const selO = document.getElementById('filterOutlet');
-  const selD = document.getElementById('filterDepo');
   selS.innerHTML = '<option value="">Semua Salesman</option>' + salesSet.map(s => `<option>${s}</option>`).join('');
   selO.innerHTML = '<option value="">Semua Outlet</option>' + outletSet.map(o => `<option>${o}</option>`).join('');
-  selD.innerHTML = '<option value="">Semua Depo</option>' + depoSet.map(d => `<option>${d}</option>`).join('');
+  // buang pilihan depo yang udah gak ada di data baru
+  selectedDepos = new Set([...selectedDepos].filter(d => depoSet.includes(d)));
+  renderDepoPanel(depoSet);
+  updateDepoBtnLabel();
 }
 
 function getFilteredData() {
@@ -788,7 +855,6 @@ function getFilteredData() {
   const ch = document.getElementById('filterChannel').value;
   const sm = document.getElementById('filterSalesman').value;
   const ot = document.getElementById('filterOutlet').value;
-  const dp = document.getElementById('filterDepo').value;
   return allData.filter(r => {
     if (!r.tanggal) return false;
     const dk = dateKey(r.tanggal);
@@ -797,7 +863,7 @@ function getFilteredData() {
     if (ch && r.channel !== ch) return false;
     if (sm && r.salesman !== sm) return false;
     if (ot && r.namaOutlet !== ot) return false;
-    if (dp && r.depo !== dp) return false;
+    if (selectedDepos.size > 0 && !selectedDepos.has(r.depo)) return false;
     return true;
   });
 }
@@ -1075,7 +1141,7 @@ function renderChartTrend(data) {
 }
 
 // Event listeners
-['filterFrom','filterTo','filterChannel','filterSalesman','filterOutlet','filterDepo'].forEach(id => {
+['filterFrom','filterTo','filterChannel','filterSalesman','filterOutlet'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => { renderDashboard(); renderChartHarian(); });
 });
 
