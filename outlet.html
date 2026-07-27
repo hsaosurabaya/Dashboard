@@ -629,7 +629,8 @@ function isoDow(d) { return (d.getDay() + 6) % 7; } // 0=Sen ... 6=Min
 // yang baca koma sebagai pemisah ribuan). Cari posisi desimal yang bikin nilainya
 // masuk akal buat koordinat Indonesia (lat 0-12, long 90-145).
 function fixCoord(raw, isLng) {
-  let v = parseFloat(raw);
+  const cleaned = (raw ?? '').toString().replace(/,/g, '');
+  let v = parseFloat(cleaned);
   if (isNaN(v)) return NaN;
   const min = isLng ? 90 : 0;
   const max = isLng ? 145 : 12;
