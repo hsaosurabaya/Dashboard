@@ -577,7 +577,7 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=0&single=true&output=csv";
 
 // TODO: isi link publish-to-web CSV master outlet (sheet rute/kunjungan kamu).
-// Kolom yang dipakai: Kode Outlet, Hari Kunjungan, Kecamatan, Alamat, Outlet Latitude, Outlet Longitude, Depo Latitude, Depo Longitude
+// Kolom yang dipakai: Kode Outlet, Hari Kunjungan, Kecamatan, Alamat, Outlet Latitude, Outlet Longitude, Depo Latitude, Depo Longitude, FOTO URL
 // Kolom Owner/PIC/Kontak opsional (boleh kosong dulu) — header yang dicari: OWNER (atau PEMILIK), PIC, KONTAK (atau NO HP)
 const CSV_URL_OUTLET = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=1288067517&single=true&output=csv";
 
@@ -624,6 +624,24 @@ function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).pad
 function isoDow(d) { return (d.getDay() + 6) % 7; } // 0=Sen ... 6=Min
 
 // jarak garis lurus antar 2 koordinat (km) pakai rumus Haversine
+// perbaiki otomatis lat/long yang titik desimalnya "hilang" (kejadian umum kalau
+// data di-copy dari Excel berformat koma-desimal terus di-paste ke Google Sheets
+// yang baca koma sebagai pemisah ribuan). Cari posisi desimal yang bikin nilainya
+// masuk akal buat koordinat Indonesia (lat 0-12, long 90-145).
+function fixCoord(raw, isLng) {
+  let v = parseFloat(raw);
+  if (isNaN(v)) return NaN;
+  const min = isLng ? 90 : 0;
+  const max = isLng ? 145 : 12;
+  const absV = Math.abs(v);
+  if (absV >= min && absV <= max) return v; // udah bener, gak usah diapa-apain
+  for (let k = 1; k <= 8; k++) {
+    const scaled = absV / Math.pow(10, k);
+    if (scaled >= min && scaled <= max) return (v < 0 ? -1 : 1) * scaled;
+  }
+  return v; // gak ketemu posisi yang masuk akal, biarin apa adanya
+}
+
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2-lat1) * Math.PI/180;
@@ -643,10 +661,10 @@ async function loadOutletMaster() {
     parsed.data.forEach(row => {
       const kode = (row['KODE OUTLET'] || '').toString().trim();
       if (!kode) return;
-      const lat = parseFloat(row['OUTLET LATITUDE'] ?? row['LATITUDE']);
-      const lng = parseFloat(row['OUTLET LONGITUDE'] ?? row['LONGITUDE']);
-      const depoLat = parseFloat(row['DEPO LATITUDE']);
-      const depoLng = parseFloat(row['DEPO LONGITUDE']);
+      const lat = fixCoord(row['OUTLET LATITUDE'] ?? row['LATITUDE'], false);
+      const lng = fixCoord(row['OUTLET LONGITUDE'] ?? row['LONGITUDE'], true);
+      const depoLat = fixCoord(row['DEPO LATITUDE'], false);
+      const depoLng = fixCoord(row['DEPO LONGITUDE'], true);
       const jarakDepoKm = (!isNaN(lat) && !isNaN(lng) && !isNaN(depoLat) && !isNaN(depoLng))
         ? haversineKm(lat, lng, depoLat, depoLng) : null;
       outletMaster[kode] = {
@@ -658,6 +676,7 @@ async function loadOutletMaster() {
         lat, lng,
         jarakDepoKm,
         hariKunjungan: (row['HARI KUNJUNGAN'] || '').toString().trim(),
+        fotoUrl: (row['FOTO URL'] || row['FOTO'] || '').toString().trim(),
       };
     });
   } catch (e) {
@@ -874,6 +893,13 @@ function renderProfile(kodeOutlet) {
   const topSalesman = Object.entries(salesmanCount).sort((a,b)=>b[1]-a[1])[0];
 
   document.title = namaOutlet + ' — Profil Outlet';
+
+  const photoWrap = document.getElementById('ovPhotoWrap');
+  if (master && master.fotoUrl) {
+    photoWrap.innerHTML = `<img class="ov-photo" src="${master.fotoUrl}" alt="Foto ${namaOutlet}" onerror="this.parentElement.innerHTML='<div class=&quot;ov-photo-empty&quot;>📷<br>Link foto gagal dimuat<br>cek URL di sheet</div>'">`;
+  } else {
+    photoWrap.innerHTML = '<div class="ov-photo-empty">📷<br>Foto outlet<br>belum diunggah</div>';
+  }
   document.getElementById('bcOutletName').textContent = namaOutlet;
   document.getElementById('hOutletName').textContent = namaOutlet;
   document.getElementById('hKode').textContent = kodeOutlet || '-';
