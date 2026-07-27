@@ -162,6 +162,7 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
 .badge-retur { background: rgba(190,24,93,.1); color: var(--retur); }
 .badge-lunas { background: rgba(22,163,74,.1); color: var(--green); }
 .badge-terlambat { background: rgba(220,38,38,.1); color: var(--red); }
+.badge-outstanding { background: rgba(202,138,4,.12); color: var(--yellow); }
 
 .heatmap-table { font-size: 10px; border-collapse: separate; border-spacing: 3px; }
 .heatmap-table th { font-size: 9px; color: var(--text2); font-weight: 700; padding: 2px 4px; position: static; background: none; border: none; }
@@ -433,7 +434,7 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
         <div class="ov-kpi-card"><div class="lbl">Omzet YTD</div><div class="val" id="kOmzetYtd">Rp 0</div><div class="sub" id="kOmzetYtdSub">-</div></div>
         <div class="ov-kpi-card"><div class="lbl">Omzet Bulan Ini</div><div class="val" id="kOmzetBulan">Rp 0</div><div class="sub" id="kOmzetBulanSub">-</div></div>
         <div class="ov-kpi-card"><div class="lbl">Growth (MoM)</div><div class="val" id="kGrowth">-</div><div class="sub" id="kGrowthSub">-</div></div>
-        <div class="ov-kpi-card"><div class="lbl">Piutang Outstanding</div><div class="val muted" id="kPiutang">-</div><div class="sub" id="kPiutangSub">Data belum tersambung</div></div>
+        <div class="ov-kpi-card"><div class="lbl">Piutang Outstanding</div><div class="val" id="kPiutang">Rp 0</div><div class="sub" id="kPiutangSub">-</div></div>
         <div class="ov-kpi-card"><div class="lbl">Hari Sejak Order Terakhir</div><div class="val" id="kHariTerakhir">-</div><div class="sub" id="kHariTerakhirSub">-</div></div>
         <div class="ov-kpi-card"><div class="lbl">Frekuensi Order</div><div class="val" id="kFrekuensi">-</div><div class="sub">rata-rata / bulan</div></div>
       </div>
@@ -499,9 +500,11 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
         </div>
         <div class="card">
           <div class="card-title">💰 Piutang Outlet</div>
-          <div class="placeholder-card">
-            Data piutang per-invoice (jatuh tempo, sisa tagihan, aging, status LUNAS/TERLAMBAT) belum terhubung ke profil ini.<br>
-            Sambungkan sheet piutang untuk menampilkannya di sini.
+          <div class="profile-table-wrap">
+            <table>
+              <thead><tr><th>No Invoice</th><th>Tgl Invoice</th><th>Tgl Tempo</th><th style="text-align:right">Nilai</th><th style="text-align:right">Terbayar</th><th style="text-align:right">Sisa</th><th>Aging</th><th>Status</th></tr></thead>
+              <tbody id="piutangBody"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -510,9 +513,7 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
       <div class="ov-grid-4">
         <div class="card">
           <div class="card-title">💹 Trend Piutang Outstanding</div>
-          <div class="placeholder-card" style="min-height:150px;display:flex;align-items:center;justify-content:center">
-            Data piutang belum tersedia.
-          </div>
+          <div class="chart-canvas-wrap sm"><canvas id="chartPiutang"></canvas></div>
         </div>
         <div class="card">
           <div class="card-title">🧑‍💼 Aktivitas Salesman</div>
@@ -577,7 +578,7 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6m
 
 // TODO: isi link publish-to-web CSV master outlet.
 // Kolom yang diharapkan: KODE OUTLET, OWNER, PIC, KONTAK, ALAMAT, KECAMATAN, LATITUDE, LONGITUDE, JARAK_DEPO_KM, RADIUS_KM, HARI_KUNJUNGAN
-const CSV_URL_OUTLET = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=1288067517&single=true&output=csv";
+const CSV_URL_OUTLET = "";
 
 let allData = [];
 let outletMaster = {};
@@ -681,6 +682,13 @@ async function loadData() {
         margin: isRetur ? -Math.abs(marginRaw) : marginRaw,
         keterangan,
         depo: (row['DEPO'] || '').toString().trim().toUpperCase().replace(/\s+/g, ' '),
+        tanggalTempo: parseDate(row['TANGGAL TEMPO'] || ''),
+        tanggalNotaAwal: parseDate(row['TANGGAL NOTA AWAL'] || ''),
+        noInvoice: (row['KEY'] || '').toString().trim(),
+        terbayar: parseNum(row['TERBAYAR']),
+        sisaAR: parseNum(row['SISA AR']),
+        statusAR: (row['STATUS'] || '').toString().trim().toUpperCase(),
+        rute: (row['RUTE'] || '').toString().trim(),
       };
     }).filter(r => r.tanggal && r.namaOutlet && r.qtyJual !== 0);
 
@@ -958,7 +966,47 @@ function renderProfile(kodeOutlet) {
   const qtyValues = months.map(m => qtyMap[m]);
   const growthValues = months.map((m,i) => i===0 ? null : (trendValues[i-1]>0 ? ((trendValues[i]-trendValues[i-1])/trendValues[i-1]*100) : null));
 
-  ['chartOmzet','chartQty','chartGrowth','chartDonut'].forEach(id => { if (charts[id]) { charts[id].destroy(); delete charts[id]; } });
+  ['chartOmzet','chartQty','chartGrowth','chartDonut','chartPiutang'].forEach(id => { if (charts[id]) { charts[id].destroy(); delete charts[id]; } });
+
+  // ==================== PIUTANG (dari baris KETERANGAN=TOP, kolom STATUS/SISA AR) ====================
+  // Piutang itu saldo berjalan, jadi dihitung dari SEMUA data outlet ini (all-time), bukan cuma periode yang lagi difilter.
+  const piutangRows = allData.filter(r => r.kodeOutlet === kodeOutlet && r.keterangan === 'TOP');
+  const outstandingRows = piutangRows.filter(r => r.statusAR === 'OUTSTANDING');
+  const totalOutstanding = outstandingRows.reduce((s,r)=>s+r.sisaAR,0);
+  const todayRef = new Date();
+  document.getElementById('kPiutang').textContent = fmt(totalOutstanding);
+  document.getElementById('kPiutangSub').textContent = outstandingRows.length > 0 ? `${outstandingRows.length} invoice outstanding` : 'Tidak ada piutang outstanding';
+
+  const piutangSorted = [...piutangRows].sort((a,b)=>(b.tanggalNotaAwal||0)-(a.tanggalNotaAwal||0));
+  document.getElementById('piutangBody').innerHTML = piutangSorted.map(r => {
+    const isOutstanding = r.statusAR === 'OUTSTANDING';
+    let agingLabel = '-';
+    if (isOutstanding && r.tanggalTempo) {
+      const diffDays = Math.floor((todayRef - r.tanggalTempo) / 86400000);
+      agingLabel = diffDays > 0 ? `${diffDays} hr` : '-';
+    }
+    const statusClass = isOutstanding ? 'badge-outstanding' : 'badge-lunas';
+    const statusLabel = r.statusAR || 'LUNAS';
+    return `<tr>
+      <td>${r.noInvoice || '-'}</td>
+      <td>${fmtDate(r.tanggalNotaAwal)}</td>
+      <td>${fmtDate(r.tanggalTempo)}</td>
+      <td style="text-align:right">${fmt(r.total)}</td>
+      <td style="text-align:right">${fmt(r.terbayar)}</td>
+      <td style="text-align:right">${fmt(r.sisaAR)}</td>
+      <td>${agingLabel}</td>
+      <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="empty-state">Belum ada transaksi TOP (piutang) untuk outlet ini.</td></tr>';
+
+  const piutangTrendMap = {};
+  outstandingRows.forEach(r => { if (!r.tanggalNotaAwal) return; const mk = monthKey(r.tanggalNotaAwal); piutangTrendMap[mk] = (piutangTrendMap[mk]||0)+r.sisaAR; });
+  const piutangMonths = Object.keys(piutangTrendMap).sort();
+  charts.chartPiutang = new Chart(document.getElementById('chartPiutang'), {
+    type: 'line',
+    data: { labels: piutangMonths.map(m=>MONTH_LABEL[m.split('-')[1]-1]), datasets: [{ label:'Outstanding', data: piutangMonths.map(m=>piutangTrendMap[m]), borderColor:'#ca8a04', backgroundColor:'rgba(202,138,4,0.1)', fill:true, tension:.3, pointRadius:3 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}}, scales:{y:{ticks:{callback:v=>fmtShort(v)}}} }
+  });
 
   charts.chartOmzet = new Chart(document.getElementById('chartOmzet'), {
     type: 'line',
