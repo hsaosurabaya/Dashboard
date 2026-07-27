@@ -636,11 +636,11 @@ function fixCoord(raw, isLng) {
   const max = isLng ? 145 : 12;
   const absV = Math.abs(v);
   if (absV >= min && absV <= max) return v; // udah bener, gak usah diapa-apain
-  for (let k = 1; k <= 8; k++) {
+  for (let k = 1; k <= 12; k++) {
     const scaled = absV / Math.pow(10, k);
     if (scaled >= min && scaled <= max) return (v < 0 ? -1 : 1) * scaled;
   }
-  return v; // gak ketemu posisi yang masuk akal, biarin apa adanya
+  return NaN; // gak ketemu posisi desimal yang masuk akal, jangan dipaksa dipakai
 }
 
 function haversineKm(lat1, lon1, lat2, lon2) {
