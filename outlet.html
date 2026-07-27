@@ -415,7 +415,7 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
             <div><div class="l">Latitude</div><div class="v" id="mLat">-</div></div>
             <div><div class="l">Longitude</div><div class="v" id="mLng">-</div></div>
             <div><div class="l">Jarak ke Depo</div><div class="v" id="mJarak">-</div></div>
-            <div><div class="l">Radius Distribusi</div><div class="v" id="mRadius">-</div></div>
+            <div><div class="l">Kecamatan</div><div class="v" id="mKecamatan">-</div></div>
           </div>
         </div>
         <div class="card" id="sec-ai">
@@ -576,8 +576,9 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
 // ==================== KONFIGURASI SUMBER DATA ====================
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=0&single=true&output=csv";
 
-// TODO: isi link publish-to-web CSV master outlet.
-// Kolom yang diharapkan: KODE OUTLET, OWNER, PIC, KONTAK, ALAMAT, KECAMATAN, LATITUDE, LONGITUDE, JARAK_DEPO_KM, RADIUS_KM, HARI_KUNJUNGAN
+// TODO: isi link publish-to-web CSV master outlet (sheet rute/kunjungan kamu).
+// Kolom yang dipakai: Kode Outlet, Hari Kunjungan, Kecamatan, Alamat, Latitude, Longitude, Depo Latitude, Depo Longitude
+// Kolom Owner/PIC/Kontak opsional (boleh kosong dulu) — header yang dicari: OWNER (atau PEMILIK), PIC, KONTAK (atau NO HP)
 const CSV_URL_OUTLET = "";
 
 let allData = [];
@@ -622,6 +623,15 @@ function fmtDate(d) { return d ? d.toLocaleDateString('id-ID', {day:'2-digit', m
 function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
 function isoDow(d) { return (d.getDay() + 6) % 7; } // 0=Sen ... 6=Min
 
+// jarak garis lurus antar 2 koordinat (km) pakai rumus Haversine
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLon = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 async function loadOutletMaster() {
   outletMaster = {};
   if (!CSV_URL_OUTLET) return;
@@ -633,17 +643,21 @@ async function loadOutletMaster() {
     parsed.data.forEach(row => {
       const kode = (row['KODE OUTLET'] || '').toString().trim();
       if (!kode) return;
+      const lat = parseFloat(row['LATITUDE']);
+      const lng = parseFloat(row['LONGITUDE']);
+      const depoLat = parseFloat(row['DEPO LATITUDE']);
+      const depoLng = parseFloat(row['DEPO LONGITUDE']);
+      const jarakDepoKm = (!isNaN(lat) && !isNaN(lng) && !isNaN(depoLat) && !isNaN(depoLng))
+        ? haversineKm(lat, lng, depoLat, depoLng) : null;
       outletMaster[kode] = {
-        owner: (row['OWNER'] || '').toString().trim(),
+        owner: (row['OWNER'] || row['PEMILIK'] || '').toString().trim(),
         pic: (row['PIC'] || '').toString().trim(),
-        kontak: (row['KONTAK'] || '').toString().trim(),
+        kontak: (row['KONTAK'] || row['NO HP'] || '').toString().trim(),
         alamat: (row['ALAMAT'] || '').toString().trim(),
         kecamatan: (row['KECAMATAN'] || '').toString().trim(),
-        lat: parseFloat(row['LATITUDE']),
-        lng: parseFloat(row['LONGITUDE']),
-        jarakDepo: (row['JARAK_DEPO_KM'] || '').toString().trim(),
-        radius: (row['RADIUS_KM'] || '').toString().trim(),
-        hariKunjungan: (row['HARI_KUNJUNGAN'] || '').toString().trim(),
+        lat, lng,
+        jarakDepoKm,
+        hariKunjungan: (row['HARI KUNJUNGAN'] || '').toString().trim(),
       };
     });
   } catch (e) {
@@ -919,8 +933,8 @@ function renderProfile(kodeOutlet) {
     document.getElementById('mLat').textContent = '-';
     document.getElementById('mLng').textContent = '-';
   }
-  document.getElementById('mJarak').textContent = master?.jarakDepo ? master.jarakDepo + ' km' : '-';
-  document.getElementById('mRadius').textContent = master?.radius ? master.radius + ' km' : '-';
+  document.getElementById('mJarak').textContent = (master?.jarakDepoKm != null) ? master.jarakDepoKm.toFixed(1) + ' km' : '-';
+  document.getElementById('mKecamatan').textContent = master?.kecamatan || '-';
 
   // KPI
   const now = lastTx;
