@@ -577,9 +577,9 @@ tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-spa
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=0&single=true&output=csv";
 
 // TODO: isi link publish-to-web CSV master outlet (sheet rute/kunjungan kamu).
-// Kolom yang dipakai: Kode Outlet, Hari Kunjungan, Kecamatan, Alamat, Latitude, Longitude, Depo Latitude, Depo Longitude
+// Kolom yang dipakai: Kode Outlet, Hari Kunjungan, Kecamatan, Alamat, Outlet Latitude, Outlet Longitude, Depo Latitude, Depo Longitude
 // Kolom Owner/PIC/Kontak opsional (boleh kosong dulu) — header yang dicari: OWNER (atau PEMILIK), PIC, KONTAK (atau NO HP)
-const CSV_URL_OUTLET = "";
+const CSV_URL_OUTLET = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXgxsBwafIim6mjgctT54ENJWdlFPxH8SCEL6-NL2idln4gDpsHy3f-LpJ04eOijpHDUCmzAmW5qwn/pub?gid=1288067517&single=true&output=csv";
 
 let allData = [];
 let outletMaster = {};
@@ -643,8 +643,8 @@ async function loadOutletMaster() {
     parsed.data.forEach(row => {
       const kode = (row['KODE OUTLET'] || '').toString().trim();
       if (!kode) return;
-      const lat = parseFloat(row['LATITUDE']);
-      const lng = parseFloat(row['LONGITUDE']);
+      const lat = parseFloat(row['OUTLET LATITUDE'] ?? row['LATITUDE']);
+      const lng = parseFloat(row['OUTLET LONGITUDE'] ?? row['LONGITUDE']);
       const depoLat = parseFloat(row['DEPO LATITUDE']);
       const depoLng = parseFloat(row['DEPO LONGITUDE']);
       const jarakDepoKm = (!isNaN(lat) && !isNaN(lng) && !isNaN(depoLat) && !isNaN(depoLng))
